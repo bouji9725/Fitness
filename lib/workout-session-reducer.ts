@@ -1,4 +1,4 @@
-import type { WorkoutDay } from "@/types/workout";
+import type { WorkoutDay, Exercise, SetEntry } from "@/types/workout";
 
 export type WorkoutSessionAction =
   | {
@@ -19,9 +19,31 @@ export type WorkoutSessionAction =
       setId: string;
     }
   | {
+      type: "ADD_SET";
+      exerciseId: string;
+    }
+  | {
+      type: "REMOVE_SET";
+      exerciseId: string;
+      setId: string;
+    }
+  | {
+      type: "ADD_EXERCISE";
+      exercise: Exercise;
+    }
+  | {
       type: "RESET_WORKOUT";
       initialWorkout: WorkoutDay;
     };
+
+function createEmptySet(index: number): SetEntry {
+  return {
+    id: `set-${Date.now()}-${index}`,
+    reps: 0,
+    weight: 0,
+    completed: false,
+  };
+}
 
 export function workoutSessionReducer(
   state: WorkoutDay,
@@ -75,6 +97,38 @@ export function workoutSessionReducer(
                 ),
               }
         ),
+      };
+
+    case "ADD_SET":
+      return {
+        ...state,
+        exercises: state.exercises.map((exercise) =>
+          exercise.id !== action.exerciseId
+            ? exercise
+            : {
+                ...exercise,
+                sets: [...exercise.sets, createEmptySet(exercise.sets.length + 1)],
+              }
+        ),
+      };
+
+    case "REMOVE_SET":
+      return {
+        ...state,
+        exercises: state.exercises.map((exercise) =>
+          exercise.id !== action.exerciseId
+            ? exercise
+            : {
+                ...exercise,
+                sets: exercise.sets.filter((set) => set.id !== action.setId),
+              }
+        ),
+      };
+
+    case "ADD_EXERCISE":
+      return {
+        ...state,
+        exercises: [...state.exercises, action.exercise],
       };
 
     case "RESET_WORKOUT":

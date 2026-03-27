@@ -4,6 +4,8 @@ import { useReducer } from "react";
 import type { WorkoutDay } from "@/types/workout";
 import Button from "@/components/ui/Button";
 import ExerciseCard from "./ExerciseCard";
+import AddExerciseForm from "./AddExerciseForm";
+import SessionSummary from "./SessionsSummary";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
 
 type WorkoutSessionProps = {
@@ -15,6 +17,8 @@ export default function WorkoutSession({ workout }: WorkoutSessionProps) {
 
   return (
     <div className="grid gap-6">
+      <SessionSummary workout={sessionState} />
+
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">
@@ -37,6 +41,8 @@ export default function WorkoutSession({ workout }: WorkoutSessionProps) {
           Reset Workout
         </Button>
       </div>
+
+      <AddExerciseForm dispatch={dispatch} />
 
       {sessionState.exercises.map((exercise) => (
         <ExerciseCard

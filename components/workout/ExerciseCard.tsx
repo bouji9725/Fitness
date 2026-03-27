@@ -1,6 +1,7 @@
 import type { Exercise } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
 import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 import {
   calculateExerciseVolume,
   isProgressiveOverload,
@@ -62,8 +63,23 @@ export default function ExerciseCard({
         ))}
       </div>
 
-      <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
-        Total volume: <span className="font-semibold">{totalVolume}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          Total volume: <span className="font-semibold">{totalVolume}</span>
+        </div>
+
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() =>
+            dispatch({
+              type: "ADD_SET",
+              exerciseId: exercise.id,
+            })
+          }
+        >
+          Add Set
+        </Button>
       </div>
     </Card>
   );

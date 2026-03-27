@@ -1,5 +1,6 @@
 import type { SetEntry } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
+import Button from "@/components/ui/Button";
 
 type SetRowProps = {
   exerciseId: string;
@@ -9,7 +10,7 @@ type SetRowProps = {
 
 export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
   return (
-    <div className="grid grid-cols-[1fr_1fr_auto] gap-3 rounded-xl border border-slate-200 p-3">
+    <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-3 rounded-xl border border-slate-200 p-3">
       <input
         type="number"
         min={0}
@@ -57,6 +58,21 @@ export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
           className="h-5 w-5 rounded"
         />
       </div>
+
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() =>
+          dispatch({
+            type: "REMOVE_SET",
+            exerciseId,
+            setId: set.id,
+          })
+        }
+        className="min-h-11 px-3"
+      >
+        Remove
+      </Button>
     </div>
   );
 }
