@@ -1,6 +1,6 @@
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
-import ExerciseCard from "@/components/workout/ExerciseCard";
+import WorkoutSession from "@/components/workout/WorkoutSession";
 import { workoutDays } from "@/lib/mock-data";
 
 type WorkoutDetailsPageProps = {
@@ -29,11 +29,7 @@ export default async function WorkoutDetailsPage({
         description={`Workout date: ${workout.date}`}
       />
 
-      <div className="grid gap-6">
-        {workout.exercises.map((exercise) => (
-          <ExerciseCard key={exercise.id} exercise={exercise} />
-        ))}
-      </div>
+      <WorkoutSession workout={workout} />
     </AppShell>
   );
 }

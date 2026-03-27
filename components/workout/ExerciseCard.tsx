@@ -1,23 +1,31 @@
-import Card from "../ui/Card";
 import type { Exercise } from "@/types/workout";
-import { calculateExerciseVolume, isProgressiveOverload } from "@/lib/calculations";
+import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
+import Card from "@/components/ui/Card";
+import {
+  calculateExerciseVolume,
+  isProgressiveOverload,
+} from "@/lib/calculations";
 import PreviousPerformance from "./PreviousPerformance";
 import OverloadBadge from "./OverloadBadge";
 import SetRow from "./SetRow";
 
 type ExerciseCardProps = {
   exercise: Exercise;
+  dispatch: React.Dispatch<WorkoutSessionAction>;
 };
 
-export default function ExerciseCard({ exercise }: ExerciseCardProps) {
-  const firstSet = exercise.sets[0];
+export default function ExerciseCard({
+  exercise,
+  dispatch,
+}: ExerciseCardProps) {
+  const firstCompletedSet = exercise.sets.find((set) => set.completed);
   const previous = exercise.previousBest;
 
   const improved =
-    previous && firstSet
+    previous && firstCompletedSet
       ? isProgressiveOverload(
-          firstSet.weight,
-          firstSet.reps,
+          firstCompletedSet.weight,
+          firstCompletedSet.reps,
           previous.weight,
           previous.reps
         )
@@ -29,7 +37,9 @@ export default function ExerciseCard({ exercise }: ExerciseCardProps) {
     <Card className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h3 className="text-2xl font-semibold text-slate-900">{exercise.name}</h3>
+          <h3 className="text-2xl font-semibold text-slate-900">
+            {exercise.name}
+          </h3>
           <p className="text-sm text-slate-500">{exercise.muscleGroup}</p>
         </div>
 
@@ -43,7 +53,12 @@ export default function ExerciseCard({ exercise }: ExerciseCardProps) {
 
       <div className="space-y-3">
         {exercise.sets.map((set) => (
-          <SetRow key={set.id} set={set} />
+          <SetRow
+            key={set.id}
+            exerciseId={exercise.id}
+            set={set}
+            dispatch={dispatch}
+          />
         ))}
       </div>
 
