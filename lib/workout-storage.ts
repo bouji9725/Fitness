@@ -39,3 +39,36 @@ export function clearWorkoutSession(workoutId: string): void {
   const key = getWorkoutStorageKey(workoutId);
   localStorage.removeItem(key);
 }
+
+export function loadAllWorkoutSessions(): Array<{
+  workout: WorkoutDay;
+  savedAt: string;
+}> {
+  if (typeof window === "undefined") return [];
+
+  const sessions: Array<{ workout: WorkoutDay; savedAt: string }> = [];
+
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+
+    if (!key || !key.startsWith("fitness-workout-session:")) continue;
+
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        workout: WorkoutDay;
+        savedAt: string;
+      };
+
+      sessions.push(parsed);
+    } catch {
+      continue;
+    }
+  }
+
+  return sessions.sort(
+    (a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
+  );
+}
