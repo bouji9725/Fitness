@@ -1,4 +1,7 @@
-import type { NutritionInputs, NutritionResults } from "@/types/nutrition";
+import type {
+  NutritionInputs,
+  NutritionResults,
+} from "@/types/nutrition";
 
 export function roundToOneDecimal(value: number): number {
   return Math.round(value * 10) / 10;
@@ -38,6 +41,41 @@ export function calculateProteinTarget(
   return fatFreeMassLbs * proteinFactor;
 }
 
+export function calculateCalorieTarget(inputs: NutritionInputs): number {
+  const { tdee, bmr, goal, adjustment, recompDirection } = inputs;
+
+  if (goal === "lose-weight") {
+    return Math.max(bmr, tdee - adjustment);
+  }
+
+  if (goal === "gain-muscle") {
+    return tdee + adjustment;
+  }
+
+  if (goal === "body-recomp") {
+    if (recompDirection === "slight-deficit") {
+      return Math.max(bmr, tdee - adjustment);
+    }
+
+    return tdee + adjustment;
+  }
+
+  return tdee;
+}
+
+export function getFatPercent(inputs: NutritionInputs): number {
+  const { goal, recompDirection } = inputs;
+
+  if (goal === "lose-weight") return 0.2;
+  if (goal === "gain-muscle") return 0.3;
+
+  if (goal === "body-recomp") {
+    return recompDirection === "slight-deficit" ? 0.2 : 0.25;
+  }
+
+  return 0.25;
+}
+
 export function calculateNutritionResults(
   inputs: NutritionInputs
 ): NutritionResults {
@@ -53,10 +91,31 @@ export function calculateNutritionResults(
     proteinFactor
   );
 
+  const calorieTarget = calculateCalorieTarget(inputs);
+  const fatPercent = getFatPercent(inputs);
+
+  const proteinCalories = proteinTargetGrams * 4;
+  const fatCalories = calorieTarget * fatPercent;
+  const fatTargetGrams = fatCalories / 9;
+
+  const remainingCalories = Math.max(
+    0,
+    calorieTarget - proteinCalories - fatCalories
+  );
+  const carbsTargetGrams = remainingCalories / 4;
+  const carbCalories = carbsTargetGrams * 4;
+
   return {
     fatFreeMassKg: roundToOneDecimal(fatFreeMassKg),
     fatFreeMassLbs: roundToOneDecimal(fatFreeMassLbs),
     proteinFactor: roundToOneDecimal(proteinFactor),
     proteinTargetGrams: roundToOneDecimal(proteinTargetGrams),
+    calorieTarget: roundToOneDecimal(calorieTarget),
+    fatPercent: roundToOneDecimal(fatPercent * 100),
+    fatTargetGrams: roundToOneDecimal(fatTargetGrams),
+    carbsTargetGrams: roundToOneDecimal(carbsTargetGrams),
+    proteinCalories: roundToOneDecimal(proteinCalories),
+    fatCalories: roundToOneDecimal(fatCalories),
+    carbCalories: roundToOneDecimal(carbCalories),
   };
 }
