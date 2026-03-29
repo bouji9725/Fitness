@@ -6,6 +6,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/workouts", label: "Workouts" },
+  { href: "/nutrition", label: "Nutrition" },
 ];
 
 type SidebarProps = {
