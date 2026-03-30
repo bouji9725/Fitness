@@ -1,6 +1,8 @@
 import type { UserProfile } from "@/types/profile";
 import type { BodyStatsEntry, InBodyEntry, ProgressPhotoEntry } from "@/types/progress";
+import type { NutritionResults } from "@/types/nutrition";
 
+const NUTRITION_SUMMARY_KEY = "fittrack:nutrition-summary";
 const PROFILE_KEY = "fittrack:user-profile";
 const BODY_STATS_KEY = "fittrack:body-stats";
 const PROGRESS_PHOTOS_KEY = "fittrack:progress-photos";
@@ -75,5 +77,22 @@ export function loadInBodyEntries(): InBodyEntry[] {
     return JSON.parse(raw) as InBodyEntry[];
   } catch {
     return [];
+  }
+}
+export function saveNutritionSummary(summary: NutritionResults): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NUTRITION_SUMMARY_KEY, JSON.stringify(summary));
+}
+
+export function loadNutritionSummary(): NutritionResults | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = localStorage.getItem(NUTRITION_SUMMARY_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as NutritionResults;
+  } catch {
+    return null;
   }
 }

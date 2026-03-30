@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Card from "@/components/ui/Card";
 import { calculateNutritionResults } from "@/lib/nutrition-calculations";
 import NutritionSummaryCard from "./NutritionSummaryCard";
 import ProteinRecommendationCard from "./ProteinRecommendationCard";
 import NutritionPlanCard from "./NutritionPlanCard";
 import type { NutritionGoal, RecompDirection } from "@/types/nutrition";
+import { saveNutritionSummary } from "@/lib/profile-storage";
 
 export default function NutritionCalculator() {
   const [weightKg, setWeightKg] = useState(80);
@@ -29,7 +30,9 @@ export default function NutritionCalculator() {
       recompDirection,
     });
   }, [weightKg, bodyFatPercent, bmr, tdee, goal, adjustment, recompDirection]);
-
+useEffect(() => {
+  saveNutritionSummary(results);
+}, [results]);
   return (
     <div className="grid gap-6">
       <Card className="grid gap-4">
