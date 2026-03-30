@@ -4,9 +4,13 @@ import Link from "next/link";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/profile", label: "Profile" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/workouts", label: "Workouts" },
+  { href: "/progress", label: "Progress" },
   { href: "/nutrition", label: "Nutrition" },
+  
+  
 ];
 
 type SidebarProps = {
