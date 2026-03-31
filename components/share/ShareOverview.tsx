@@ -7,6 +7,8 @@ import ShareWorkoutSummary from "./ShareWorkoutSummary";
 import ShareNutritionSummary from "./ShareNutritionSummary";
 import SharePreviewCard from "./SharePreviewCard";
 import { buildSharePayload } from "@/lib/share-data";
+import ShareActionsCard from "./ShareActionsCard";
+import ShareSummaryCard from "./ShareSummaryCard";
 import {
   loadBodyStats,
   loadInBodyEntries,
@@ -91,19 +93,11 @@ export default function ShareOverview() {
         onToggle={handleToggleSharing}
       />
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <ShareBodyStatsSummary
-          latestBodyStats={payload.latestBodyStats}
-          latestInBody={payload.latestInBody}
-          latestPhoto={payload.latestPhoto}
-        />
-
-        <ShareNutritionSummary nutrition={payload.latestNutritionSummary} />
-      </div>
-
-      <ShareWorkoutSummary workouts={payload.savedWorkouts} />
+      <ShareSummaryCard payload={payload} />
 
       <SharePreviewCard payload={payload} />
+
+      <ShareActionsCard payload={payload} />
     </div>
   );
 }

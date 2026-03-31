@@ -17,7 +17,7 @@ Latest InBody:
 ${payload.latestInBody ? `Weight ${payload.latestInBody.weightKg} kg, Body Fat ${payload.latestInBody.bodyFatPercent}%` : "No InBody entry"}
 
 Latest nutrition:
-${payload.latestNutritionSummary ? `Calories ${payload.latestNutritionSummary.calorieTarget}, Protein ${payload.latestNutritionSummary.proteinTargetGrams}g` : "No nutrition summary"}
+${payload.latestNutritionSummary ? `Calories ${payload.latestNutritionSummary.calorieTarget}, Protein ${payload.latestNutritionSummary.proteinTargetGrams}g. Fat ${payload.latestNutritionSummary.fatTargetGrams}, Carbs ${payload.latestNutritionSummary.carbsTargetGrams}` : "No nutrition summary"}
 
 Saved workouts included: ${payload.savedWorkouts.length}
   `.trim();
