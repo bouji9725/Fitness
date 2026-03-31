@@ -5,7 +5,7 @@ import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import UserProfileCard from "@/components/profile/UserProfileCard";
 import ShareCoachCard from "@/components/profile/ShareCoachCard";
-import { loadUserProfile, saveUserProfile } from "@/lib/profile-storage";
+import { loadUserProfile, saveUserProfile } from "@/lib/data/profile";
 import type { UserProfile } from "@/types/profile";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";

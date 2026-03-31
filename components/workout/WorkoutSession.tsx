@@ -11,7 +11,7 @@ import {
   clearWorkoutSession,
   loadWorkoutSession,
   saveWorkoutSession,
-} from "@/lib/workout-storage";
+} from "@/lib/data/workouts";
 
 type WorkoutSessionProps = {
   workout: WorkoutDay;

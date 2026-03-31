@@ -6,18 +6,20 @@ import ShareBodyStatsSummary from "./ShareBodyStatsSummary";
 import ShareWorkoutSummary from "./ShareWorkoutSummary";
 import ShareNutritionSummary from "./ShareNutritionSummary";
 import SharePreviewCard from "./SharePreviewCard";
-import { buildSharePayload } from "@/lib/share-data";
+import { buildSharePayload } from "@/lib/data/share";
 import ShareActionsCard from "./ShareActionsCard";
 import ShareSummaryCard from "./ShareSummaryCard";
+import {  loadNutritionSummary } from "@/lib/data/nutrition";
+import {loadProgressPhotos,loadBodyStats,
+  loadInBodyEntries, } from "@/lib/data/progress";
+  
 import {
-  loadBodyStats,
-  loadInBodyEntries,
-  loadNutritionSummary,
-  loadProgressPhotos,
+  
+ 
   loadUserProfile,
   saveUserProfile,
-} from "@/lib/profile-storage";
-import { loadAllWorkoutSessions } from "@/lib/workout-storage";
+} from "@/lib/data/profile";
+import { loadAllWorkoutSessions } from "@/lib/data/workouts";
 import type { UserProfile } from "@/types/profile";
 
 export default function ShareOverview() {

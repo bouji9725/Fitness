@@ -1,6 +1,6 @@
 import Card from "@/components/ui/Card";
 import type { WorkoutDay } from "@/types/workout";
-import { calculateExerciseVolume } from "@/lib/calculations";
+import { calculateExerciseVolume } from "@/lib/calculations/workouts";
 
 type SessionSummaryProps = {
   workout: WorkoutDay;

@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import {
   calculateExerciseVolume,
   isProgressiveOverload,
-} from "@/lib/calculations";
+} from "@/lib/calculations/workouts";
 import PreviousPerformance from "./PreviousPerformance";
 import OverloadBadge from "./OverloadBadge";
 import SetRow from "./SetRow";

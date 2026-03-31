@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import StatCard from "@/components/ui/StatCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
-import { loadAllWorkoutSessions } from "@/lib/workout-storage";
-import { getDashboardMetrics } from "@/lib/dashboard-data";
+import { loadAllWorkoutSessions } from "@/lib/data/workouts";
+import { getDashboardMetrics } from "@/lib/data/dashboard";
 
 export default function DashboardOverview() {
   const [hasHydrated, setHasHydrated] = useState(false);

@@ -5,12 +5,12 @@ import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import BodyStatsForm from "@/components/profile/BodyStatsForm";
 import MonthlyComparisonCard from "@/components/progress/MonthlyComparisonCard";
-import { loadBodyStats, saveBodyStats } from "@/lib/profile-storage";
+import { loadBodyStats, saveBodyStats } from "@/lib/data/progress";
 import {
   calculateBodyStatsDifference,
   getLatestBodyStats,
   getPreviousBodyStats,
-} from "@/lib/progress-calculations";
+} from "@/lib/calculations/progress";
 import type { BodyStatsEntry } from "@/types/progress";
 
 export default function ProgressPage() {

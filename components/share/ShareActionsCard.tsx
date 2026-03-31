@@ -8,7 +8,7 @@ import {
   downloadJSON,
   downloadPDFReport,
   formatShareText,
-} from "@/lib/export-utils";
+} from "@/lib/export/share-export";
 
 type ShareActionsCardProps = {
   payload: SharePayload;

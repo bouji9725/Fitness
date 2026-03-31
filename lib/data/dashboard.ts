@@ -1,4 +1,4 @@
-import { calculateExerciseVolume } from "@/lib/calculations";
+import { calculateExerciseVolume } from "@/lib/calculations/workouts";
 import type { WorkoutDay } from "@/types/workout";
 
 type StoredWorkoutSession = {
