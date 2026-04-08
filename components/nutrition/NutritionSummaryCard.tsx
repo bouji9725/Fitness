@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 
 type NutritionSummaryCardProps = {
   weightKg: number;
@@ -15,24 +15,24 @@ export default function NutritionSummaryCard({
 }: NutritionSummaryCardProps) {
   return (
     <Card className="grid gap-3">
-      <h3 className="text-xl font-semibold text-slate-900">
+      <h3 className="text-xl font-semibold ">
         Body Composition Summary
       </h3>
 
-      <div className="grid gap-2 text-sm text-slate-600">
+      <div className="grid gap-2 text-sm ">
         <p>
-          Total Weight: <span className="font-medium text-slate-900">{weightKg} kg</span>
+          Total Weight: <span className="font-medium ">{weightKg} kg</span>
         </p>
         <p>
-          Body Fat: <span className="font-medium text-slate-900">{bodyFatPercent}%</span>
-        </p>
-        <p>
-          Fat-Free Mass:{" "}
-          <span className="font-medium text-slate-900">{fatFreeMassKg} kg</span>
+          Body Fat: <span className="font-medium ">{bodyFatPercent}%</span>
         </p>
         <p>
           Fat-Free Mass:{" "}
-          <span className="font-medium text-slate-900">{fatFreeMassLbs} lbs</span>
+          <span className="font-medium ">{fatFreeMassKg} kg</span>
+        </p>
+        <p>
+          Fat-Free Mass:{" "}
+          <span className="font-medium ">{fatFreeMassLbs} lbs</span>
         </p>
       </div>
     </Card>

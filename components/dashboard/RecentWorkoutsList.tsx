@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 import type { WorkoutDay } from "@/types/workout";
 
 type RecentWorkout = {
@@ -16,14 +16,14 @@ export default function RecentWorkoutsList({
   return (
     <Card>
       <div className="mb-4">
-        <h3 className="text-xl font-semibold text-slate-900">Recent Workouts</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-xl font-semibold ">Recent Workouts</h3>
+        <p className="text-sm ">
           Your latest saved workout sessions
         </p>
       </div>
 
       {items.length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm ">
           No saved workouts yet. Save a session to see it here.
         </p>
       ) : (
@@ -33,9 +33,9 @@ export default function RecentWorkoutsList({
               key={`${item.workout.id}-${item.savedAt}`}
               className="rounded-xl border border-slate-200 p-3"
             >
-              <p className="font-medium text-slate-900">{item.workout.name}</p>
-              <p className="text-sm text-slate-500">{item.workout.date}</p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="font-medium ">{item.workout.name}</p>
+              <p className="text-sm ">{item.workout.date}</p>
+              <p className="mt-1 text-xs ">
                 Saved: {new Date(item.savedAt).toLocaleString()}
               </p>
             </li>

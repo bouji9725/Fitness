@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/ui/StatCard";
@@ -23,7 +23,7 @@ export default function DashboardOverview() {
   if (!hasHydrated) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-slate-500">Loading dashboard insights...</p>
+        <p className="">Loading dashboard insights...</p>
       </div>
     );
   }

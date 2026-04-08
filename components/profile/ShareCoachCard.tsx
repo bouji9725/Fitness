@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 
 type ShareCoachCardProps = {
   enabled: boolean;
@@ -11,9 +11,9 @@ export default function ShareCoachCard({
 }: ShareCoachCardProps) {
   return (
     <Card className="grid gap-3">
-      <h3 className="text-xl font-semibold text-slate-900">Coach Sharing</h3>
+      <h3 className="text-xl font-semibold ">Coach Sharing</h3>
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm ">
         {enabled
           ? `Your progress can be shared with ${coachName ?? "your coach"}.`
           : "Coach sharing is currently disabled."}
