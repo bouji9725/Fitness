@@ -1,11 +1,35 @@
-import type { SelectHTMLAttributes } from "react";
+﻿import type { SelectHTMLAttributes } from "react";
 
-type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
+type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  hasError?: boolean;
+  selectSize?: "sm" | "md" | "lg";
+};
 
-export default function Select({ className = "", ...props }: SelectProps) {
+export default function Select({
+  className = "",
+  hasError = false,
+  selectSize = "md",
+  disabled = false,
+  ...props
+}: SelectProps) {
+  const sizeClasses = {
+    sm: "min-h-9 text-sm",
+    md: "min-h-11 text-sm",
+    lg: "min-h-13 text-base",
+  };
+
+  const stateClasses = hasError
+    ? "border-red-500 focus:border-red-500"
+    : "border-slate-200 focus:border-slate-400";
+
+  const disabledClasses = disabled
+    ? "cursor-not-allowed bg-slate-100 "
+    : "bg-transparent ";
+
   return (
     <select
-      className={`min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-slate-900 outline-none transition focus:border-slate-400 ${className}`}
+      disabled={disabled}
+      className={`w-full rounded-xl border px-3 outline-none transition ${sizeClasses[selectSize]} ${stateClasses} ${disabledClasses} ${className}`}
       {...props}
     />
   );
