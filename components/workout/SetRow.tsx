@@ -1,6 +1,10 @@
+
 import type { SetEntry } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Label from "@/components/ui/Label";
+import { parseNumberInput } from "@/lib/utils/number";
 
 type SetRowProps = {
   exerciseId: string;
@@ -8,71 +12,78 @@ type SetRowProps = {
   dispatch: React.Dispatch<WorkoutSessionAction>;
 };
 
-export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
+export default function SetRow({
+  exerciseId,
+  set,
+  dispatch,
+}: SetRowProps) {
   return (
-    <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-3 rounded-xl border border-slate-200 p-3">
-      <input
-        type="number"
-        min={0}
-        value={set.reps}
-        onChange={(e) =>
-          dispatch({
-            type: "UPDATE_SET_REPS",
-            exerciseId,
-            setId: set.id,
-            reps: Number(e.target.value),
-          })
-        }
-        aria-label="Reps"
-        className="min-h-11 rounded-xl border border-slate-200 px-3"
-      />
-
-      <input
-        type="number"
-        min={0}
-        value={set.weight}
-        onChange={(e) =>
-          dispatch({
-            type: "UPDATE_SET_WEIGHT",
-            exerciseId,
-            setId: set.id,
-            weight: Number(e.target.value),
-          })
-        }
-        aria-label="Weight"
-        className="min-h-11 rounded-xl border border-slate-200 px-3"
-      />
-
-      <div className="flex items-center justify-center">
-        <input
-          type="checkbox"
-          checked={set.completed}
-          onChange={() =>
+    <div className="grid min-w-0 gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">
+      <div className="min-w-0">
+        <Label htmlFor={`${exerciseId}-${set.id}-reps`}>Reps</Label>
+        <Input
+          id={`${exerciseId}-${set.id}-reps`}
+          type="number"
+          min={0}
+          value={set.reps}
+          onChange={(e) =>
             dispatch({
-              type: "TOGGLE_SET_COMPLETED",
+              type: "UPDATE_SET_REPS",
+              exerciseId,
+              setId: set.id,
+              reps: parseNumberInput(e.target.value) ?? 0,
+            })
+          }
+        />
+      </div>
+
+      <div className="min-w-0">
+        <Label htmlFor={`${exerciseId}-${set.id}-weight`}>Weight</Label>
+        <Input
+          id={`${exerciseId}-${set.id}-weight`}
+          type="number"
+          min={0}
+          value={set.weight}
+          onChange={(e) =>
+            dispatch({
+              type: "UPDATE_SET_WEIGHT",
+              exerciseId,
+              setId: set.id,
+              weight: parseNumberInput(e.target.value) ?? 0,
+            })
+          }
+        />
+      </div>
+
+      <div className="flex min-w-0 gap-2 sm:min-w-fit">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() =>
+            dispatch({
+              type: "REMOVE_SET",
               exerciseId,
               setId: set.id,
             })
           }
-          aria-label="Completed set"
-          className="h-5 w-5 rounded"
-        />
+          className="flex-1 sm:flex-none"
+        >
+          Remove
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() =>
+            dispatch({
+              type: "ADD_SET",
+              exerciseId,
+            })
+          }
+          className="flex-1 sm:flex-none"
+        >
+          Add Set
+        </Button>
       </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() =>
-          dispatch({
-            type: "REMOVE_SET",
-            exerciseId,
-            setId: set.id,
-          })
-        }
-        className="min-h-11 px-3"
-      >
-        Remove
-      </Button>
     </div>
   );
 }

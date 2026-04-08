@@ -1,4 +1,4 @@
-type PreviousPerformanceProps = {
+﻿type PreviousPerformanceProps = {
   reps?: number;
   weight?: number;
 };
@@ -8,12 +8,12 @@ export default function PreviousPerformance({
   weight,
 }: PreviousPerformanceProps) {
   if (reps == null || weight == null) {
-    return <p className="text-sm text-slate-500">No previous data</p>;
+    return <p className="text-sm ">No previous data</p>;
   }
 
   return (
-    <p className="text-sm text-slate-500">
-      Previous best: <span className="font-medium text-slate-700">{weight} kg × {reps}</span>
+    <p className="text-sm ">
+      Previous best: <span className="font-medium ">{weight} kg — {reps} reps</span>
     </p>
   );
 }

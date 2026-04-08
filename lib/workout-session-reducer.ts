@@ -19,6 +19,10 @@ export type WorkoutSessionAction =
       setId: string;
     }
   | {
+      type: "TOGGLE_EXERCISE_COMPLETED";
+      exerciseId: string;
+    }
+  | {
       type: "ADD_SET";
       exerciseId: string;
     }
@@ -96,6 +100,16 @@ export function workoutSessionReducer(
                     : { ...set, completed: !set.completed }
                 ),
               }
+        ),
+      };
+
+    case "TOGGLE_EXERCISE_COMPLETED":
+      return {
+        ...state,
+        exercises: state.exercises.map((exercise) =>
+          exercise.id !== action.exerciseId
+            ? exercise
+            : { ...exercise, isCompleted: !exercise.isCompleted }
         ),
       };
 

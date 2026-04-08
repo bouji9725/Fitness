@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Card from "../ui/Card";
 import type { WorkoutDay } from "@/types/workout";
 
@@ -11,9 +11,9 @@ export default function WorkoutDayCard({ workout }: WorkoutDayCardProps) {
     <Card className="transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-xl font-semibold text-slate-900">{workout.name}</h3>
-          <p className="mt-1 text-sm text-slate-500">{workout.date}</p>
-          <p className="mt-3 text-sm text-slate-600">
+          <h3 className="text-xl font-semibold ">{workout.name}</h3>
+          <p className="mt-1 text-sm ">{workout.date}</p>
+          <p className="mt-3 text-sm ">
             {workout.exercises.length} exercise
             {workout.exercises.length > 1 ? "s" : ""}
           </p>

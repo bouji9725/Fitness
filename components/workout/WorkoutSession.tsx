@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { WorkoutDay } from "@/types/workout";
@@ -57,7 +57,7 @@ export default function WorkoutSession({ workout }: WorkoutSessionProps) {
   if (!hasHydrated) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-slate-500">Loading workout session...</p>
+        <p className="">Loading workout session...</p>
       </div>
     );
   }

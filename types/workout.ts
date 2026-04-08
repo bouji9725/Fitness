@@ -16,6 +16,7 @@ export type Exercise = {
   muscleGroup: string;
   sets: SetEntry[];
   previousBest?: PreviousBest;
+  isCompleted?: boolean;
 };
 
 export type WorkoutDay = {

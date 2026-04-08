@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 import type { WorkoutDay } from "@/types/workout";
 import { calculateExerciseVolume } from "@/lib/calculations/workouts";
 
@@ -28,23 +28,23 @@ export default function SessionSummary({ workout }: SessionSummaryProps) {
   return (
     <Card className="grid gap-3 md:grid-cols-4">
       <div>
-        <p className="text-sm text-slate-500">Exercises</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalExercises}</p>
+        <p className="text-sm ">Exercises</p>
+        <p className="text-2xl font-semibold ">{totalExercises}</p>
       </div>
 
       <div>
-        <p className="text-sm text-slate-500">Total Sets</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalSets}</p>
+        <p className="text-sm ">Total Sets</p>
+        <p className="text-2xl font-semibold ">{totalSets}</p>
       </div>
 
       <div>
-        <p className="text-sm text-slate-500">Completed Sets</p>
-        <p className="text-2xl font-semibold text-slate-900">{completedSets}</p>
+        <p className="text-sm ">Completed Sets</p>
+        <p className="text-2xl font-semibold ">{completedSets}</p>
       </div>
 
       <div>
-        <p className="text-sm text-slate-500">Total Volume</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalVolume}</p>
+        <p className="text-sm ">Total Volume</p>
+        <p className="text-2xl font-semibold ">{totalVolume}</p>
       </div>
     </Card>
   );
