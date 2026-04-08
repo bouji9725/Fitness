@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -32,10 +32,10 @@ export default function ShareActionsCard({ payload }: ShareActionsCardProps) {
   return (
     <Card className="grid gap-4">
       <div>
-        <h3 className="text-xl font-semibold text-slate-900">
+        <h3 className="text-xl font-semibold ">
           Export & Share
         </h3>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm ">
           Share your progress outside the app
         </p>
       </div>

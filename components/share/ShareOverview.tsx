@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import SharePermissionCard from "./SharePermissionCard";
@@ -82,7 +82,7 @@ export default function ShareOverview() {
   if (!profile) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-slate-500">Loading share settings...</p>
+        <p className="">Loading share settings...</p>
       </div>
     );
   }

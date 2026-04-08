@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 import type { BodyStatsEntry, InBodyEntry, ProgressPhotoEntry } from "@/types/progress";
 
 type ShareBodyStatsSummaryProps = {
@@ -15,16 +15,16 @@ export default function ShareBodyStatsSummary({
   return (
     <Card className="grid gap-4">
       <div>
-        <h3 className="text-xl font-semibold text-slate-900">Body Progress</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-xl font-semibold ">Body Progress</h3>
+        <p className="text-sm ">
           Latest body stats, photo, and composition data
         </p>
       </div>
 
-      <div className="grid gap-3 text-sm text-slate-600">
+      <div className="grid gap-3 text-sm ">
         {latestBodyStats ? (
           <div className="rounded-xl border border-slate-200 p-3">
-            <p className="font-medium text-slate-900">Latest Body Stats</p>
+            <p className="font-medium ">Latest Body Stats</p>
             <p>Date: {latestBodyStats.date}</p>
             <p>Weight: {latestBodyStats.weightKg} kg</p>
             <p>Body Fat: {latestBodyStats.bodyFatPercent}%</p>
@@ -38,7 +38,7 @@ export default function ShareBodyStatsSummary({
 
         {latestInBody ? (
           <div className="rounded-xl border border-slate-200 p-3">
-            <p className="font-medium text-slate-900">Latest InBody</p>
+            <p className="font-medium ">Latest InBody</p>
             <p>Date: {latestInBody.date}</p>
             <p>Weight: {latestInBody.weightKg} kg</p>
             <p>Body Fat: {latestInBody.bodyFatPercent}%</p>
@@ -49,7 +49,7 @@ export default function ShareBodyStatsSummary({
 
         {latestPhoto ? (
           <div className="rounded-xl border border-slate-200 p-3">
-            <p className="font-medium text-slate-900">Latest Progress Photo</p>
+            <p className="font-medium ">Latest Progress Photo</p>
             <p>Date: {latestPhoto.date}</p>
             <p>{latestPhoto.label || "Progress photo"}</p>
           </div>

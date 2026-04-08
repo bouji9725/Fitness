@@ -1,4 +1,4 @@
-import Card from "@/components/ui/Card";
+﻿import Card from "@/components/ui/Card";
 import type { SharePayload } from "@/types/share";
 
 type SharePreviewCardProps = {
@@ -25,13 +25,13 @@ Saved workouts included: ${payload.savedWorkouts.length}
   return (
     <Card className="grid gap-4">
       <div>
-        <h3 className="text-xl font-semibold text-slate-900">Share Preview</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-xl font-semibold ">Share Preview</h3>
+        <p className="text-sm ">
           Preview of what would be shared with your coach
         </p>
       </div>
 
-      <pre className="overflow-auto rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+      <pre className="overflow-auto rounded-xl bg-transparent p-4 text-sm ">
         {previewText}
       </pre>
     </Card>
