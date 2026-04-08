@@ -10,18 +10,44 @@ export type PreviousBest = {
   weight: number;
 };
 
-export type Exercise = {
+export type ExerciseTemplate = {
   id: string;
   name: string;
   muscleGroup: string;
-  sets: SetEntry[];
   previousBest?: PreviousBest;
+  defaultSets: SetEntry[];
+};
+
+export type WorkoutTemplate = {
+  id: string;
+  name: string;
+  exercises: ExerciseTemplate[];
+};
+
+export type SessionExercise = {
+  id: string;
+  templateExerciseId?: string;
+  name: string;
+  muscleGroup: string;
+  previousBest?: PreviousBest;
+  sets: SetEntry[];
   isCompleted?: boolean;
 };
 
-export type WorkoutDay = {
+export type WorkoutSessionStatus = "draft" | "completed";
+
+export type WorkoutSession = {
   id: string;
-  name: string;
-  date: string;
-  exercises: Exercise[];
+  templateId: string;
+  templateName: string;
+  performedAt: string;
+  status: WorkoutSessionStatus;
+  exercises: SessionExercise[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkoutSessionRecord = {
+  session: WorkoutSession;
+  savedAt: string;
 };

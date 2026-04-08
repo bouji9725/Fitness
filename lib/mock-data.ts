@@ -1,10 +1,9 @@
-import type { WorkoutDay } from "@/types/workout";
+import type { WorkoutTemplate } from "@/types/workout";
 
-export const workoutDays: WorkoutDay[] = [
+export const workoutTemplates: WorkoutTemplate[] = [
   {
     id: "push-day",
     name: "Push Day",
-    date: "2026-03-28",
     exercises: [
       {
         id: "bench-press",
@@ -14,7 +13,7 @@ export const workoutDays: WorkoutDay[] = [
           reps: 8,
           weight: 80,
         },
-        sets: [
+        defaultSets: [
           { id: "set-1", reps: 8, weight: 80, completed: false },
           { id: "set-2", reps: 8, weight: 80, completed: false },
           { id: "set-3", reps: 8, weight: 80, completed: false },
@@ -28,7 +27,7 @@ export const workoutDays: WorkoutDay[] = [
           reps: 10,
           weight: 24,
         },
-        sets: [
+        defaultSets: [
           { id: "set-1", reps: 10, weight: 24, completed: false },
           { id: "set-2", reps: 10, weight: 24, completed: false },
           { id: "set-3", reps: 10, weight: 24, completed: false },
@@ -39,7 +38,6 @@ export const workoutDays: WorkoutDay[] = [
   {
     id: "pull-day",
     name: "Pull Day",
-    date: "2026-03-29",
     exercises: [
       {
         id: "barbell-row",
@@ -49,7 +47,7 @@ export const workoutDays: WorkoutDay[] = [
           reps: 8,
           weight: 70,
         },
-        sets: [
+        defaultSets: [
           { id: "set-1", reps: 8, weight: 70, completed: false },
           { id: "set-2", reps: 8, weight: 70, completed: false },
           { id: "set-3", reps: 8, weight: 70, completed: false },
@@ -60,7 +58,6 @@ export const workoutDays: WorkoutDay[] = [
   {
     id: "legs-day",
     name: "Leg Day",
-    date: "2026-03-30",
     exercises: [
       {
         id: "squat",
@@ -70,7 +67,7 @@ export const workoutDays: WorkoutDay[] = [
           reps: 6,
           weight: 100,
         },
-        sets: [
+        defaultSets: [
           { id: "set-1", reps: 6, weight: 100, completed: false },
           { id: "set-2", reps: 6, weight: 100, completed: false },
           { id: "set-3", reps: 6, weight: 100, completed: false },

@@ -1,67 +1,87 @@
-import type { WorkoutDay } from "@/types/workout";
+import type { WorkoutSession, WorkoutSessionRecord } from "@/types/workout";
 
-function getWorkoutStorageKey(workoutId: string) {
-  return `fitness-workout-session:${workoutId}`;
+const SESSION_KEY_PREFIX = "fitness-workout-session:";
+const ACTIVE_TEMPLATE_SESSION_KEY_PREFIX = "fitness-active-session:";
+
+function getSessionStorageKey(sessionId: string) {
+  return `${SESSION_KEY_PREFIX}${sessionId}`;
 }
 
-export function saveWorkoutSession(workout: WorkoutDay): void {
+function getActiveTemplateSessionKey(templateId: string) {
+  return `${ACTIVE_TEMPLATE_SESSION_KEY_PREFIX}${templateId}`;
+}
+
+export function saveWorkoutSession(session: WorkoutSession): void {
   if (typeof window === "undefined") return;
 
-  const key = getWorkoutStorageKey(workout.id);
-  const payload = {
-    workout,
+  const payload: WorkoutSessionRecord = {
+    session,
     savedAt: new Date().toISOString(),
   };
 
-  localStorage.setItem(key, JSON.stringify(payload));
+  localStorage.setItem(getSessionStorageKey(session.id), JSON.stringify(payload));
+  localStorage.setItem(getActiveTemplateSessionKey(session.templateId), session.id);
 }
 
 export function loadWorkoutSession(
-  workoutId: string
-): { workout: WorkoutDay; savedAt: string } | null {
+  sessionId: string
+): WorkoutSessionRecord | null {
   if (typeof window === "undefined") return null;
 
-  const key = getWorkoutStorageKey(workoutId);
-  const raw = localStorage.getItem(key);
-
+  const raw = localStorage.getItem(getSessionStorageKey(sessionId));
   if (!raw) return null;
 
   try {
-    return JSON.parse(raw) as { workout: WorkoutDay; savedAt: string };
+    return JSON.parse(raw) as WorkoutSessionRecord;
   } catch {
     return null;
   }
 }
 
-export function clearWorkoutSession(workoutId: string): void {
-  if (typeof window === "undefined") return;
+export function loadActiveWorkoutSessionForTemplate(
+  templateId: string
+): WorkoutSessionRecord | null {
+  if (typeof window === "undefined") return null;
 
-  const key = getWorkoutStorageKey(workoutId);
-  localStorage.removeItem(key);
+  const activeSessionId = localStorage.getItem(
+    getActiveTemplateSessionKey(templateId)
+  );
+
+  if (!activeSessionId) return null;
+
+  return loadWorkoutSession(activeSessionId);
 }
 
-export function loadAllWorkoutSessions(): Array<{
-  workout: WorkoutDay;
-  savedAt: string;
-}> {
+export function clearWorkoutSession(sessionId: string, templateId?: string): void {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem(getSessionStorageKey(sessionId));
+
+  if (templateId) {
+    const activeSessionId = localStorage.getItem(
+      getActiveTemplateSessionKey(templateId)
+    );
+
+    if (activeSessionId === sessionId) {
+      localStorage.removeItem(getActiveTemplateSessionKey(templateId));
+    }
+  }
+}
+
+export function loadAllWorkoutSessions(): WorkoutSessionRecord[] {
   if (typeof window === "undefined") return [];
 
-  const sessions: Array<{ workout: WorkoutDay; savedAt: string }> = [];
+  const sessions: WorkoutSessionRecord[] = [];
 
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
-
-    if (!key || !key.startsWith("fitness-workout-session:")) continue;
+    if (!key || !key.startsWith(SESSION_KEY_PREFIX)) continue;
 
     const raw = localStorage.getItem(key);
     if (!raw) continue;
 
     try {
-      const parsed = JSON.parse(raw) as {
-        workout: WorkoutDay;
-        savedAt: string;
-      };
-
+      const parsed = JSON.parse(raw) as WorkoutSessionRecord;
       sessions.push(parsed);
     } catch {
       continue;
@@ -69,6 +89,7 @@ export function loadAllWorkoutSessions(): Array<{
   }
 
   return sessions.sort(
-    (a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
+    (a, b) =>
+      new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
   );
 }

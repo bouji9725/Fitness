@@ -20,7 +20,7 @@ import { parseNumberInput } from "@/lib/utils/number";
 import { loadNutritionSummary } from "@/lib/data/nutrition";
 import { calculateNutritionResults } from "@/lib/calculations/nutrition";
 import { getLatestBodyStats } from "@/lib/calculations/progress";
-import { P } from "@/components/ui/Fonts";
+
 
 function mapProfileGoalToNutritionGoal(goal?: UserProfile["goal"]): NutritionGoal {
     if (goal === "lose-fat") return "lose-weight";

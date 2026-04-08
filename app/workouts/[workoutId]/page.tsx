@@ -1,7 +1,7 @@
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import WorkoutSession from "@/components/workout/WorkoutSession";
-import { workoutDays } from "@/lib/mock-data";
+import { workoutTemplates } from "@/lib/mock-data";
 
 type WorkoutDetailsPageProps = {
   params: Promise<{ workoutId: string }>;
@@ -12,24 +12,30 @@ export default async function WorkoutDetailsPage({
 }: WorkoutDetailsPageProps) {
   const { workoutId } = await params;
 
-  const workout = workoutDays.find((day) => day.id === workoutId);
+  const template = workoutTemplates.find((item) => item.id === workoutId);
 
-  if (!workout) {
+  if (!template) {
     return (
       <AppShell>
-        <PageHeader title="Workout not found" />
+        <div className="space-y-4">
+          <PageHeader
+            title="Workout not found"
+            subtitle="The requested workout template does not exist."
+          />
+        </div>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <PageHeader
-        title={workout.name}
-        description={`Workout date: ${workout.date}`}
-      />
-
-      <WorkoutSession workout={workout} />
+      <div className="space-y-6">
+        <PageHeader
+          title={template.name}
+          subtitle="Start or continue your workout session."
+        />
+        <WorkoutSession template={template} />
+      </div>
     </AppShell>
   );
 }

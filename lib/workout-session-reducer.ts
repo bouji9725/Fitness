@@ -1,4 +1,5 @@
-import type { WorkoutDay, Exercise, SetEntry } from "@/types/workout";
+import type { SessionExercise, SetEntry, WorkoutSession } from "@/types/workout";
+import { touchWorkoutSession } from "@/lib/services/workout-session-service";
 
 export type WorkoutSessionAction =
   | {
@@ -33,16 +34,16 @@ export type WorkoutSessionAction =
     }
   | {
       type: "ADD_EXERCISE";
-      exercise: Exercise;
+      exercise: SessionExercise;
     }
   | {
       type: "RESET_WORKOUT";
-      initialWorkout: WorkoutDay;
+      initialWorkout: WorkoutSession;
     };
 
-function createEmptySet(index: number): SetEntry {
+function createEmptySet(): SetEntry {
   return {
-    id: `set-${Date.now()}-${index}`,
+    id: `set-${crypto.randomUUID()}`,
     reps: 0,
     weight: 0,
     completed: false,
@@ -50,12 +51,12 @@ function createEmptySet(index: number): SetEntry {
 }
 
 export function workoutSessionReducer(
-  state: WorkoutDay,
+  state: WorkoutSession,
   action: WorkoutSessionAction
-): WorkoutDay {
+): WorkoutSession {
   switch (action.type) {
     case "UPDATE_SET_REPS":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
           exercise.id !== action.exerciseId
@@ -67,10 +68,10 @@ export function workoutSessionReducer(
                 ),
               }
         ),
-      };
+      });
 
     case "UPDATE_SET_WEIGHT":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
           exercise.id !== action.exerciseId
@@ -84,10 +85,10 @@ export function workoutSessionReducer(
                 ),
               }
         ),
-      };
+      });
 
     case "TOGGLE_SET_COMPLETED":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
           exercise.id !== action.exerciseId
@@ -101,33 +102,36 @@ export function workoutSessionReducer(
                 ),
               }
         ),
-      };
+      });
 
     case "TOGGLE_EXERCISE_COMPLETED":
-      return {
-        ...state,
-        exercises: state.exercises.map((exercise) =>
-          exercise.id !== action.exerciseId
-            ? exercise
-            : { ...exercise, isCompleted: !exercise.isCompleted }
-        ),
-      };
-
-    case "ADD_SET":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
           exercise.id !== action.exerciseId
             ? exercise
             : {
                 ...exercise,
-                sets: [...exercise.sets, createEmptySet(exercise.sets.length + 1)],
+                isCompleted: !exercise.isCompleted,
               }
         ),
-      };
+      });
+
+    case "ADD_SET":
+      return touchWorkoutSession({
+        ...state,
+        exercises: state.exercises.map((exercise) =>
+          exercise.id !== action.exerciseId
+            ? exercise
+            : {
+                ...exercise,
+                sets: [...exercise.sets, createEmptySet()],
+              }
+        ),
+      });
 
     case "REMOVE_SET":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
           exercise.id !== action.exerciseId
@@ -137,13 +141,13 @@ export function workoutSessionReducer(
                 sets: exercise.sets.filter((set) => set.id !== action.setId),
               }
         ),
-      };
+      });
 
     case "ADD_EXERCISE":
-      return {
+      return touchWorkoutSession({
         ...state,
         exercises: [...state.exercises, action.exercise],
-      };
+      });
 
     case "RESET_WORKOUT":
       return action.initialWorkout;

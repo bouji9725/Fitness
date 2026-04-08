@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import type { Exercise } from "@/types/workout";
+import type { SessionExercise } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -21,7 +21,7 @@ export default function AddExerciseForm({
   function handleAddExercise() {
     if (!name.trim() || !muscleGroup.trim()) return;
 
-    const newExercise: Exercise = {
+    const newExercise: SessionExercise = {
       id: `${name.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
       name: name.trim(),
       muscleGroup: muscleGroup.trim(),

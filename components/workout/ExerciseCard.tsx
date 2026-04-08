@@ -1,4 +1,4 @@
-﻿import type { Exercise } from "@/types/workout";
+﻿import type { SessionExercise } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -11,7 +11,7 @@ import OverloadBadge from "./OverloadBadge";
 import SetRow from "./SetRow";
 
 type ExerciseCardProps = {
-  exercise: Exercise;
+  exercise: SessionExercise;
   dispatch: React.Dispatch<WorkoutSessionAction>;
 };
 

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import type { WorkoutDay } from "@/types/workout";
+import type { SessionExercise, WorkoutSession as WorkoutSessionType, WorkoutTemplate } from "@/types/workout";
 import ExerciseCard from "./ExerciseCard";
 import AddExerciseForm from "./AddExerciseForm";
 import SessionSummary from "./SessionsSummary";
@@ -9,79 +9,109 @@ import SaveWorkoutBar from "./SaveWorkoutBar";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
 import {
   clearWorkoutSession,
-  loadWorkoutSession,
+  loadActiveWorkoutSessionForTemplate,
   saveWorkoutSession,
 } from "@/lib/data/workouts";
+import {
+  createWorkoutSessionFromTemplate,
+  resetWorkoutSessionFromTemplate,
+} from "@/lib/services/workout-session-service";
 
 type WorkoutSessionProps = {
-  workout: WorkoutDay;
+  template: WorkoutTemplate;
 };
 
-export default function WorkoutSession({ workout }: WorkoutSessionProps) {
-  const [sessionState, dispatch] = useReducer(workoutSessionReducer, workout);
+export default function WorkoutSession({ template }: WorkoutSessionProps) {
+  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
+  const [sessionState, dispatch] = useReducer(
+    workoutSessionReducer,
+    baseSession ?? createWorkoutSessionFromTemplate(template)
+  );
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = loadWorkoutSession(workout.id);
+    const saved = loadActiveWorkoutSessionForTemplate(template.id);
 
     if (saved) {
+      setBaseSession(saved.session);
       dispatch({
         type: "RESET_WORKOUT",
-        initialWorkout: saved.workout,
+        initialWorkout: saved.session,
       });
       setLastSavedAt(saved.savedAt);
+    } else {
+      const freshSession = createWorkoutSessionFromTemplate(template);
+      setBaseSession(freshSession);
+      dispatch({
+        type: "RESET_WORKOUT",
+        initialWorkout: freshSession,
+      });
+      setLastSavedAt(null);
     }
 
     setHasHydrated(true);
-  }, [workout.id]);
+  }, [template]);
 
   const isDirty = useMemo(() => {
-    return JSON.stringify(sessionState) !== JSON.stringify(workout);
-  }, [sessionState, workout]);
+    if (!baseSession) return false;
+    return JSON.stringify(sessionState) !== JSON.stringify(baseSession);
+  }, [sessionState, baseSession]);
 
   function handleSaveWorkout() {
     saveWorkoutSession(sessionState);
+    setBaseSession(sessionState);
     setLastSavedAt(new Date().toISOString());
   }
 
   function handleResetWorkout() {
-    clearWorkoutSession(workout.id);
+    if (!sessionState) return;
+
+    clearWorkoutSession(sessionState.id, template.id);
+
+    const resetSession = resetWorkoutSessionFromTemplate(sessionState, template);
+
+    setBaseSession(resetSession);
     dispatch({
       type: "RESET_WORKOUT",
-      initialWorkout: workout,
+      initialWorkout: resetSession,
     });
     setLastSavedAt(null);
   }
 
+  function handleAddExercise(exercise: SessionExercise) {
+    dispatch({
+      type: "ADD_EXERCISE",
+      exercise,
+    });
+  }
+
   if (!hasHydrated) {
-    return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="">Loading workout session...</p>
-      </div>
-    );
+    return <div>Loading workout session...</div>;
   }
 
   return (
-    <div className="grid gap-6">
-      <SaveWorkoutBar
-        onSave={handleSaveWorkout}
-        onReset={handleResetWorkout}
-        isDirty={isDirty}
-        lastSavedAt={lastSavedAt}
-      />
-
+    <div className="space-y-6">
       <SessionSummary workout={sessionState} />
 
-      <AddExerciseForm dispatch={dispatch} />
+      <div className="space-y-4">
+        {sessionState.exercises.map((exercise) => (
+          <ExerciseCard
+            key={exercise.id}
+            exercise={exercise}
+            dispatch={dispatch}
+          />
+        ))}
+      </div>
 
-      {sessionState.exercises.map((exercise) => (
-        <ExerciseCard
-          key={exercise.id}
-          exercise={exercise}
-          dispatch={dispatch}
-        />
-      ))}
+      <AddExerciseForm onAddExercise={handleAddExercise} />
+
+      <SaveWorkoutBar
+        isDirty={isDirty}
+        lastSavedAt={lastSavedAt}
+        onSave={handleSaveWorkout}
+        onReset={handleResetWorkout}
+      />
     </div>
   );
 }
