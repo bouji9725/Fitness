@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type TopbarProps = {
   onMenuToggle: () => void;
@@ -6,13 +6,13 @@ type TopbarProps = {
 
 export default function Topbar({ onMenuToggle }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-slate-200 bg-transparent px-4 backdrop-blur md:px-6">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onMenuToggle}
           aria-label="Open navigation menu"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-100 lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-400 bg-slate-500 text-slate-900 shadow-sm transition hover:bg-slate-700 lg:hidden"
         >
           <svg
             aria-hidden="true"
@@ -30,12 +30,12 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
         </button>
 
         <div>
-          <p className="text-sm text-slate-500">Welcome back</p>
-          <h2 className="text-lg font-semibold text-slate-900">Coach Dashboard</h2>
+          <p className="text-sm ">User Name</p>
+          <h2 className="text-lg font-semibold ">Fitness Tracking</h2>
         </div>
       </div>
 
-      <div className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700">
+      <div className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium ">
         Abdel
       </div>
     </header>

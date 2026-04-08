@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, type ReactNode } from "react";
 import Sidebar from "./Sidebar";
@@ -31,7 +31,25 @@ export default function AppShell({ children }: AppShellProps) {
   }, [isMobileSidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="relative isolate min-h-screen overflow-x-hidden bg-black">
+      {/* Fixed background */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 bg-[url('/Abs.jpg')] bg-contain md:bg-cover bg-center bg-no-repeat"
+        aria-hidden="true"
+      />
+
+      {/* Dark overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 bg-black/45"
+        aria-hidden="true"
+      />
+
+      {/* Soft blur */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 backdrop-blur-[1px]"
+        aria-hidden="true"
+      />
+
       <div className="flex min-h-screen">
         <Sidebar
           isMobileOpen={isMobileSidebarOpen}
@@ -46,3 +64,6 @@ export default function AppShell({ children }: AppShellProps) {
     </div>
   );
 }
+
+
+
