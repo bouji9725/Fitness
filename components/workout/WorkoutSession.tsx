@@ -1,10 +1,14 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
-import type { SessionExercise, WorkoutSession as WorkoutSessionType, WorkoutTemplate } from "@/types/workout";
+import type {
+  SessionExercise,
+  WorkoutSession as WorkoutSessionType,
+  WorkoutTemplate,
+} from "@/types/workout";
 import ExerciseCard from "./ExerciseCard";
 import AddExerciseForm from "./AddExerciseForm";
-import SessionSummary from "./SessionsSummary";
+import SessionSummary from "./SessionSummary";
 import SaveWorkoutBar from "./SaveWorkoutBar";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
 import {
@@ -23,10 +27,12 @@ type WorkoutSessionProps = {
 
 export default function WorkoutSession({ template }: WorkoutSessionProps) {
   const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
+
   const [sessionState, dispatch] = useReducer(
     workoutSessionReducer,
-    baseSession ?? createWorkoutSessionFromTemplate(template)
+    createWorkoutSessionFromTemplate(template)
   );
+
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
@@ -65,8 +71,6 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
   }
 
   function handleResetWorkout() {
-    if (!sessionState) return;
-
     clearWorkoutSession(sessionState.id, template.id);
 
     const resetSession = resetWorkoutSessionFromTemplate(sessionState, template);
@@ -87,7 +91,11 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
   }
 
   if (!hasHydrated) {
-    return <div>Loading workout session...</div>;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+        Loading workout session...
+      </div>
+    );
   }
 
   return (

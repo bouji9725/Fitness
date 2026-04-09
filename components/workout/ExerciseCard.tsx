@@ -36,56 +36,53 @@ export default function ExerciseCard({
 
   return (
     <Card className="space-y-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <h3 className="text-2xl font-semibold ">
-            {exercise.name}
-          </h3>
-          <p className="text-sm ">{exercise.muscleGroup}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-slate-900">
+              {exercise.name}
+            </h3>
+            <OverloadBadge improved={improved} />
+          </div>
+
+          <p className="text-sm text-slate-500">{exercise.muscleGroup}</p>
         </div>
 
-        <OverloadBadge improved={improved} />
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={Boolean(exercise.isCompleted)}
+            onChange={() =>
+              dispatch({
+                type: "TOGGLE_EXERCISE_COMPLETED",
+                exerciseId: exercise.id,
+              })
+            }
+            aria-label="Mark exercise as completed"
+            className="h-5 w-5 rounded border-slate-300"
+          />
+          Exercise Completed
+        </label>
       </div>
 
       <PreviousPerformance
-        reps={exercise.previousBest?.reps}
-        weight={exercise.previousBest?.weight}
+        reps={previous?.reps}
+        weight={previous?.weight}
       />
 
       <div className="space-y-3">
         {exercise.sets.map((set) => (
           <SetRow
             key={set.id}
-            exerciseId={exercise.id}
             set={set}
+            exerciseId={exercise.id}
             dispatch={dispatch}
           />
         ))}
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4">
-        <input
-          id={`${exercise.id}-completed`}
-          type="checkbox"
-          checked={exercise.isCompleted ?? false}
-          onChange={() =>
-            dispatch({
-              type: "TOGGLE_EXERCISE_COMPLETED",
-              exerciseId: exercise.id,
-            })
-          }
-          aria-label="Mark exercise as completed"
-          className="h-5 w-5 rounded border-slate-300"
-        />
-        <label htmlFor={`${exercise.id}-completed`} className="font-medium">
-          Exercise Completed
-        </label>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="rounded-xl bg-slate-500 px-4 py-3 text-sm ">
-          Total volume: <span className="font-semibold">{totalVolume}</span>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-slate-600">Total volume: {totalVolume}</p>
 
         <Button
           type="button"

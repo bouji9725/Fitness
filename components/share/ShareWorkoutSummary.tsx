@@ -1,39 +1,42 @@
 ﻿import Card from "@/components/ui/Card";
-import type { StoredWorkoutSession } from "@/types/share";
+import type { SharePayload } from "@/types/share";
 
 type ShareWorkoutSummaryProps = {
-  workouts: StoredWorkoutSession[];
+  payload: SharePayload;
 };
 
 export default function ShareWorkoutSummary({
-  workouts,
+  payload,
 }: ShareWorkoutSummaryProps) {
   return (
-    <Card className="grid gap-4">
-      <div>
-        <h3 className="text-xl font-semibold ">Workout Summary</h3>
-        <p className="text-sm ">
-          Latest saved workout sessions
+    <Card className="space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-slate-900">
+          Workouts Shared
+        </h3>
+        <p className="text-sm text-slate-500">
+          Recent saved workout sessions included in coach sharing
         </p>
       </div>
 
-      {workouts.length === 0 ? (
-        <p className="text-sm ">No workout sessions to share yet.</p>
+      {payload.savedWorkouts.length === 0 ? (
+        <p className="text-sm text-slate-500">No workouts available to share.</p>
       ) : (
-        <ul className="grid gap-3">
-          {workouts.map((item) => (
-            <li
-              key={`${item.workout.id}-${item.savedAt}`}
+        <div className="space-y-3">
+          {payload.savedWorkouts.map((item) => (
+            <div
+              key={item.session.id}
               className="rounded-xl border border-slate-200 p-3"
             >
-              <p className="font-medium ">{item.workout.name}</p>
-              <p className="text-sm ">Workout date: {item.workout.date}</p>
-              <p className="text-xs ">
-                Saved: {new Date(item.savedAt).toLocaleString()}
+              <p className="font-medium text-slate-900">
+                {item.session.templateName}
               </p>
-            </li>
+              <p className="text-sm text-slate-500">
+                {new Date(item.session.performedAt).toLocaleString()}
+              </p>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </Card>
   );

@@ -6,19 +6,16 @@ import ShareBodyStatsSummary from "./ShareBodyStatsSummary";
 import ShareWorkoutSummary from "./ShareWorkoutSummary";
 import ShareNutritionSummary from "./ShareNutritionSummary";
 import SharePreviewCard from "./SharePreviewCard";
-import { buildSharePayload } from "@/lib/data/share";
 import ShareActionsCard from "./ShareActionsCard";
 import ShareSummaryCard from "./ShareSummaryCard";
-import {  loadNutritionSummary } from "@/lib/data/nutrition";
-import {loadProgressPhotos,loadBodyStats,
-  loadInBodyEntries, } from "@/lib/data/progress";
-  
+import { buildSharePayload } from "@/lib/data/share";
+import { loadNutritionSummary } from "@/lib/data/nutrition";
 import {
-  
- 
-  loadUserProfile,
-  saveUserProfile,
-} from "@/lib/data/profile";
+  loadProgressPhotos,
+  loadBodyStats,
+  loadInBodyEntries,
+} from "@/lib/data/progress";
+import { loadUserProfile, saveUserProfile } from "@/lib/data/profile";
 import { loadAllWorkoutSessions } from "@/lib/data/workouts";
 import type { UserProfile } from "@/types/profile";
 
@@ -70,7 +67,7 @@ export default function ShareOverview() {
   function handleToggleSharing() {
     if (!profile) return;
 
-    const updatedProfile = {
+    const updatedProfile: UserProfile = {
       ...profile,
       coachSharingEnabled: !profile.coachSharingEnabled,
     };
@@ -81,14 +78,14 @@ export default function ShareOverview() {
 
   if (!profile) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="">Loading share settings...</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+        Loading share settings...
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-6">
       <SharePermissionCard
         sharingEnabled={profile.coachSharingEnabled}
         coachName={profile.coachName ?? "Coach Budi"}
@@ -96,9 +93,10 @@ export default function ShareOverview() {
       />
 
       <ShareSummaryCard payload={payload} />
-
+      <ShareBodyStatsSummary payload={payload} />
+      <ShareWorkoutSummary payload={payload} />
+      <ShareNutritionSummary nutrition={payload.latestNutritionSummary} />
       <SharePreviewCard payload={payload} />
-
       <ShareActionsCard payload={payload} />
     </div>
   );

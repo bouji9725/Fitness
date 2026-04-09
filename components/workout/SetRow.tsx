@@ -1,4 +1,3 @@
-
 import type { SetEntry } from "@/types/workout";
 import type { WorkoutSessionAction } from "@/lib/workout-session-reducer";
 import Button from "@/components/ui/Button";
@@ -18,13 +17,12 @@ export default function SetRow({
   dispatch,
 }: SetRowProps) {
   return (
-    <div className="grid min-w-0 gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">
-      <div className="min-w-0">
-        <Label htmlFor={`${exerciseId}-${set.id}-reps`}>Reps</Label>
+    <div className="grid gap-3 rounded-xl border border-slate-200 p-4 sm:grid-cols-4">
+      <div className="space-y-1">
+        <Label htmlFor={`reps-${set.id}`}>Reps</Label>
         <Input
-          id={`${exerciseId}-${set.id}-reps`}
+          id={`reps-${set.id}`}
           type="number"
-          min={0}
           value={set.reps}
           onChange={(e) =>
             dispatch({
@@ -37,12 +35,11 @@ export default function SetRow({
         />
       </div>
 
-      <div className="min-w-0">
-        <Label htmlFor={`${exerciseId}-${set.id}-weight`}>Weight</Label>
+      <div className="space-y-1">
+        <Label htmlFor={`weight-${set.id}`}>Weight</Label>
         <Input
-          id={`${exerciseId}-${set.id}-weight`}
+          id={`weight-${set.id}`}
           type="number"
-          min={0}
           value={set.weight}
           onChange={(e) =>
             dispatch({
@@ -55,10 +52,28 @@ export default function SetRow({
         />
       </div>
 
-      <div className="flex min-w-0 gap-2 sm:min-w-fit">
+      <div className="flex items-end">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={set.completed}
+            onChange={() =>
+              dispatch({
+                type: "TOGGLE_SET_COMPLETED",
+                exerciseId,
+                setId: set.id,
+              })
+            }
+            className="h-5 w-5 rounded border-slate-300"
+          />
+          Completed
+        </label>
+      </div>
+
+      <div className="flex items-end gap-2">
         <Button
           type="button"
-          variant="ghost"
+          variant="secondary"
           onClick={() =>
             dispatch({
               type: "REMOVE_SET",
@@ -70,9 +85,10 @@ export default function SetRow({
         >
           Remove
         </Button>
+
         <Button
           type="button"
-          variant="ghost"
+          variant="secondary"
           onClick={() =>
             dispatch({
               type: "ADD_SET",

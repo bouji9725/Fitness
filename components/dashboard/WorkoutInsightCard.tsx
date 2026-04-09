@@ -1,47 +1,42 @@
 ﻿import Card from "@/components/ui/Card";
-import type { WorkoutDay } from "@/types/workout";
+import type { WorkoutSessionRecord } from "@/types/workout";
 
-type RecentWorkout = {
-  workout: WorkoutDay;
-  savedAt: string;
+type WorkoutInsightCardProps = {
+  sessions: WorkoutSessionRecord[];
 };
 
-type RecentWorkoutsListProps = {
-  items: RecentWorkout[];
-};
+export default function WorkoutInsightCard({
+  sessions,
+}: WorkoutInsightCardProps) {
+  const totalSessions = sessions.length;
 
-export default function RecentWorkoutsList({
-  items,
-}: RecentWorkoutsListProps) {
+  const completedSessions = sessions.filter(
+    (item) => item.session.status === "completed"
+  ).length;
+
+  const latestSession = sessions[0];
+
   return (
-    <Card>
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold ">Recent Workouts</h3>
-        <p className="text-sm ">
-          Your latest saved workout sessions
+    <Card className="space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-slate-900">
+          Workout Insights
+        </h3>
+        <p className="text-sm text-slate-500">
+          Quick summary of your saved training sessions
         </p>
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-sm ">
-          No saved workouts yet. Save a session to see it here.
+      <div className="space-y-2 text-sm text-slate-600">
+        <p>Total sessions: {totalSessions}</p>
+        <p>Completed sessions: {completedSessions}</p>
+        <p>
+          Latest session:{" "}
+          {latestSession
+            ? latestSession.session.templateName
+            : "No sessions yet"}
         </p>
-      ) : (
-        <ul className="space-y-3">
-          {items.map((item) => (
-            <li
-              key={`${item.workout.id}-${item.savedAt}`}
-              className="rounded-xl border border-slate-200 p-3"
-            >
-              <p className="font-medium ">{item.workout.name}</p>
-              <p className="text-sm ">{item.workout.date}</p>
-              <p className="mt-1 text-xs ">
-                Saved: {new Date(item.savedAt).toLocaleString()}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+      </div>
     </Card>
   );
 }

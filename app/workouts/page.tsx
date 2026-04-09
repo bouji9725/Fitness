@@ -1,7 +1,7 @@
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
-import WorkoutDayCard from "@/components/workout/WorkoutDayCard";
-import { workoutTemplates } from "@/lib/mock-data";
+import WorkoutDayCard from "@/components/workout/WorkoutTemplateDay";
+import { workoutTemplates } from "@/lib/data/workout-templates.ts";
 
 export default function WorkoutsPage() {
   return (
@@ -9,7 +9,7 @@ export default function WorkoutsPage() {
       <div className="space-y-6">
         <PageHeader
           title="Workouts"
-          subtitle="Choose a workout template to start or continue a session."
+          description="Choose a workout template to start or continue a session."
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

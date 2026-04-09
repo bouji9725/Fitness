@@ -1,11 +1,12 @@
-import type { BodyStatsEntry, InBodyEntry, ProgressPhotoEntry } from "@/types/progress";
+import type {
+  BodyStatsEntry,
+  InBodyEntry,
+  ProgressPhotoEntry,
+} from "@/types/progress";
 import type { NutritionResults } from "@/types/nutrition";
-import type { WorkoutDay } from "@/types/workout";
+import type { WorkoutSessionRecord } from "@/types/workout";
 
-export type StoredWorkoutSession = {
-  workout: WorkoutDay;
-  savedAt: string;
-};
+export type StoredWorkoutSession = WorkoutSessionRecord;
 
 export type SharePayload = {
   coachName: string;

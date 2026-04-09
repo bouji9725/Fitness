@@ -1,42 +1,36 @@
 import { calculateExerciseVolume } from "@/lib/calculations/workouts";
-import type { WorkoutDay } from "@/types/workout";
-
-type StoredWorkoutSession = {
-  workout: WorkoutDay;
-  savedAt: string;
-};
+import type { WorkoutSessionRecord } from "@/types/workout";
 
 export type DashboardMetrics = {
   totalSavedWorkouts: number;
   totalExercisesLogged: number;
   totalCompletedSets: number;
   totalVolume: number;
-  recentWorkouts: StoredWorkoutSession[];
+  recentWorkouts: WorkoutSessionRecord[];
 };
 
 export function getDashboardMetrics(
-  sessions: StoredWorkoutSession[]
+  sessions: WorkoutSessionRecord[]
 ): DashboardMetrics {
   const totalSavedWorkouts = sessions.length;
 
-  const totalExercisesLogged = sessions.reduce(
-    (sum, session) => sum + session.workout.exercises.length,
-    0
-  );
+  const totalExercisesLogged = sessions.reduce((sum, record) => {
+    return sum + record.session.exercises.length;
+  }, 0);
 
-  const totalCompletedSets = sessions.reduce((sum, session) => {
+  const totalCompletedSets = sessions.reduce((sum, record) => {
     return (
       sum +
-      session.workout.exercises.reduce((exerciseSum, exercise) => {
+      record.session.exercises.reduce((exerciseSum, exercise) => {
         return exerciseSum + exercise.sets.filter((set) => set.completed).length;
       }, 0)
     );
   }, 0);
 
-  const totalVolume = sessions.reduce((sum, session) => {
+  const totalVolume = sessions.reduce((sum, record) => {
     return (
       sum +
-      session.workout.exercises.reduce((exerciseSum, exercise) => {
+      record.session.exercises.reduce((exerciseSum, exercise) => {
         return exerciseSum + calculateExerciseVolume(exercise.sets);
       }, 0)
     );

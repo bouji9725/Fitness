@@ -1,4 +1,8 @@
-import type { BodyStatsEntry, InBodyEntry, ProgressPhotoEntry } from "@/types/progress";
+import type {
+  BodyStatsEntry,
+  InBodyEntry,
+  ProgressPhotoEntry,
+} from "@/types/progress";
 import type { NutritionResults } from "@/types/nutrition";
 import type { SharePayload, StoredWorkoutSession } from "@/types/share";
 

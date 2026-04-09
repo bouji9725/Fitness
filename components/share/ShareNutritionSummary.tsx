@@ -9,44 +9,26 @@ export default function ShareNutritionSummary({
   nutrition,
 }: ShareNutritionSummaryProps) {
   return (
-    <Card className="grid gap-4">
-      <div>
-        <h3 className="text-xl font-semibold ">Nutrition Summary</h3>
-        <p className="text-sm ">
+    <Card className="space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-slate-900">
+          Nutrition Shared
+        </h3>
+        <p className="text-sm text-slate-500">
           Latest calorie and macro recommendations
         </p>
       </div>
 
       {!nutrition ? (
-        <p className="text-sm ">
+        <p className="text-sm text-slate-500">
           No nutrition data to share yet.
         </p>
       ) : (
-        <div className="grid gap-2 text-sm ">
-          <p>
-            Calories:{" "}
-            <span className="font-medium ">
-              {nutrition.calorieTarget} kcal
-            </span>
-          </p>
-          <p>
-            Protein:{" "}
-            <span className="font-medium ">
-              {nutrition.proteinTargetGrams} g
-            </span>
-          </p>
-          <p>
-            Fat:{" "}
-            <span className="font-medium ">
-              {nutrition.fatTargetGrams} g
-            </span>
-          </p>
-          <p>
-            Carbs:{" "}
-            <span className="font-medium ">
-              {nutrition.carbsTargetGrams} g
-            </span>
-          </p>
+        <div className="space-y-2 text-sm text-slate-600">
+          <p>Calories: {nutrition.calorieTarget} kcal</p>
+          <p>Protein: {nutrition.proteinTargetGrams} g</p>
+          <p>Fat: {nutrition.fatTargetGrams} g</p>
+          <p>Carbs: {nutrition.carbsTargetGrams} g</p>
         </div>
       )}
     </Card>
