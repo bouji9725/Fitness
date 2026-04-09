@@ -26,7 +26,9 @@ type WorkoutSessionProps = {
 };
 
 export default function WorkoutSession({ template }: WorkoutSessionProps) {
-  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
+  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(
+    null
+  );
 
   const [sessionState, dispatch] = useReducer(
     workoutSessionReducer,

@@ -28,22 +28,10 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Saved Workouts"
-          value={metrics.totalSavedWorkouts}
-        />
-        <StatCard
-          label="Exercises Logged"
-          value={metrics.totalExercisesLogged}
-        />
-        <StatCard
-          label="Completed Sets"
-          value={metrics.totalCompletedSets}
-        />
-        <StatCard
-          label="Total Volume"
-          value={metrics.totalVolume}
-        />
+        <StatCard label="Saved Workouts" value={metrics.totalSavedWorkouts} />
+        <StatCard label="Exercises Logged" value={metrics.totalExercisesLogged} />
+        <StatCard label="Completed Sets" value={metrics.totalCompletedSets} />
+        <StatCard label="Total Volume" value={metrics.totalVolume} />
       </div>
 
       <RecentWorkoutsList items={metrics.recentWorkouts} />

@@ -1,3 +1,4 @@
+
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import WorkoutDayCard from "@/components/workout/WorkoutTemplateDay";
@@ -12,11 +13,17 @@ export default function WorkoutsPage() {
           description="Choose a workout template to start or continue a session."
         />
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {workoutTemplates.map((template) => (
-            <WorkoutDayCard key={template.id} workout={template} />
-          ))}
-        </div>
+        {workoutTemplates.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No workout templates available.
+          </p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {workoutTemplates.map((template) => (
+              <WorkoutDayCard key={template.id} workout={template} />
+            ))}
+          </div>
+        )}
       </div>
     </AppShell>
   );

@@ -1,4 +1,5 @@
 ﻿"use client";
+"use client";
 
 import { useState } from "react";
 import type { SessionExercise } from "@/types/workout";
@@ -6,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import FormField from "@/components/ui/FormField";
+import { createId } from "@/lib/utils/create-id";
 
 type AddExerciseFormProps = {
   onAddExercise: (exercise: SessionExercise) => void;
@@ -13,11 +15,11 @@ type AddExerciseFormProps = {
 
 function createExerciseId(name: string) {
   const slug = name.trim().toLowerCase().replace(/\s+/g, "-");
-  return `session-exercise-${slug}-${crypto.randomUUID()}`;
+  return `session-exercise-${slug}-${createId("id")}`;
 }
 
 function createSetId() {
-  return `set-${crypto.randomUUID()}`;
+  return createId("set");
 }
 
 export default function AddExerciseForm({
