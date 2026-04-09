@@ -62,7 +62,14 @@ export default function ShareOverview() {
       savedWorkouts,
       latestNutritionSummary: nutritionSummary,
     });
-  }, [profile, bodyStats, inBodyEntries, progressPhotos, savedWorkouts, nutritionSummary]);
+  }, [
+    profile,
+    bodyStats,
+    inBodyEntries,
+    progressPhotos,
+    savedWorkouts,
+    nutritionSummary,
+  ]);
 
   function handleToggleSharing() {
     if (!profile) return;

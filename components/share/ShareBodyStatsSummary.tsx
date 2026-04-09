@@ -26,12 +26,14 @@ export default function ShareBodyStatsSummary({
             ? new Date(payload.latestBodyStats.date).toLocaleDateString()
             : "No body stats shared"}
         </p>
+
         <p>
           Latest InBody:{" "}
           {payload.latestInBody
             ? new Date(payload.latestInBody.date).toLocaleDateString()
             : "No InBody entry shared"}
         </p>
+
         <p>
           Latest photo:{" "}
           {payload.latestPhoto
