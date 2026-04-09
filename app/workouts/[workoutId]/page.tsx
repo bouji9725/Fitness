@@ -1,28 +1,78 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import WorkoutSession from "@/components/workout/WorkoutSession";
-import { workoutTemplates } from "@/lib/data/workout-templates";
+import type { WorkoutTemplate } from "@/types/workout";
 
-type WorkoutDetailsPageProps = {
-  params: Promise<{ workoutId: string }>;
-};
+export default function WorkoutDetailsPage() {
+  const params = useParams();
+  const workoutId = params.workoutId as string;
 
-export default async function WorkoutDetailsPage({
-  params,
-}: WorkoutDetailsPageProps) {
-  const { workoutId } = await params;
+  const [template, setTemplate] = useState<WorkoutTemplate | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const template = workoutTemplates.find((item) => item.id === workoutId);
+  useEffect(() => {
+    async function fetchTemplate() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/workout-templates/${workoutId}`);
+
+        if (response.status === 404) {
+          setTemplate(null);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Failed to load workout template.");
+        }
+
+        const data: WorkoutTemplate = await response.json();
+        setTemplate(data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while loading the workout."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (workoutId) {
+      fetchTemplate();
+    }
+  }, [workoutId]);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <p className="text-sm text-slate-500">Loading workout...</p>
+      </AppShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppShell>
+        <PageHeader title="Error" description={error} />
+      </AppShell>
+    );
+  }
 
   if (!template) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <PageHeader
-            title="Workout not found"
-            description="The requested workout template does not exist."
-          />
-        </div>
+        <PageHeader
+          title="Workout not found"
+          description="The requested workout template does not exist."
+        />
       </AppShell>
     );
   }
