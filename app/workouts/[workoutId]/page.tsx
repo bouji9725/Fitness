@@ -1,7 +1,7 @@
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import WorkoutSession from "@/components/workout/WorkoutSession";
-import { workoutTemplates } from "@/lib/data/workout-templates.ts";
+import { workoutTemplates } from "@/lib/data/workout-templates";
 
 type WorkoutDetailsPageProps = {
   params: Promise<{ workoutId: string }>;

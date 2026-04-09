@@ -1,7 +1,7 @@
 import AppShell from "@/components/layout/AppShell";
 import PageHeader from "@/components/layout/PageHeader";
 import WorkoutDayCard from "@/components/workout/WorkoutTemplateDay";
-import { workoutTemplates } from "@/lib/data/workout-templates.ts";
+import { workoutTemplates } from "@/lib/data/workout-templates";
 
 export default function WorkoutsPage() {
   return (
