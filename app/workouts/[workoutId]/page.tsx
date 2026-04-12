@@ -16,24 +16,22 @@ export default function WorkoutDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTemplate() {
+    async function fetchTemplateFromCollection() {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/workout-templates/${workoutId}`);
-
-        if (response.status === 404) {
-          setTemplate(null);
-          return;
-        }
+        const response = await fetch("/api/workout-templates");
 
         if (!response.ok) {
-          throw new Error("Failed to load workout template.");
+          throw new Error("Failed to load workout templates.");
         }
 
-        const data: WorkoutTemplate = await response.json();
-        setTemplate(data);
+        const data: WorkoutTemplate[] = await response.json();
+        const matchedTemplate =
+          data.find((item) => item.id === workoutId) ?? null;
+
+        setTemplate(matchedTemplate);
       } catch (err) {
         setError(
           err instanceof Error
@@ -46,7 +44,7 @@ export default function WorkoutDetailsPage() {
     }
 
     if (workoutId) {
-      fetchTemplate();
+      fetchTemplateFromCollection();
     }
   }, [workoutId]);
 

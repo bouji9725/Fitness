@@ -11,69 +11,101 @@ import AddExerciseForm from "./AddExerciseForm";
 import SessionSummary from "./SessionSummary";
 import SaveWorkoutBar from "./SaveWorkoutBar";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
-import {
-  clearWorkoutSession,
-  loadActiveWorkoutSessionForTemplate,
-  saveWorkoutSession,
-} from "@/lib/data/workouts";
-import {
-  createWorkoutSessionFromTemplate,
-  resetWorkoutSessionFromTemplate,
-} from "@/lib/services/workout-session-service";
+import { resetWorkoutSessionFromTemplate } from "@/lib/services/workout-session-service";
 
 type WorkoutSessionProps = {
   template: WorkoutTemplate;
 };
 
 export default function WorkoutSession({ template }: WorkoutSessionProps) {
-  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(
-    null
-  );
-
+  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
   const [sessionState, dispatch] = useReducer(
     workoutSessionReducer,
-    createWorkoutSessionFromTemplate(template)
+    null
   );
-
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = loadActiveWorkoutSessionForTemplate(template.id);
+    async function createSessionFromApi() {
+      try {
+        setHasHydrated(false);
+        setError(null);
 
-    if (saved) {
-      setBaseSession(saved.session);
-      dispatch({
-        type: "RESET_WORKOUT",
-        initialWorkout: saved.session,
-      });
-      setLastSavedAt(saved.savedAt);
-    } else {
-      const freshSession = createWorkoutSessionFromTemplate(template);
-      setBaseSession(freshSession);
-      dispatch({
-        type: "RESET_WORKOUT",
-        initialWorkout: freshSession,
-      });
-      setLastSavedAt(null);
+        const response = await fetch("/api/workout-sessions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ templateId: template.id }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create workout session.");
+        }
+
+        const session: WorkoutSessionType = await response.json();
+
+        setBaseSession(session);
+        dispatch({
+          type: "RESET_WORKOUT",
+          initialWorkout: session,
+        });
+        setLastSavedAt(null);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while creating the workout session."
+        );
+      } finally {
+        setHasHydrated(true);
+      }
     }
 
-    setHasHydrated(true);
+    createSessionFromApi();
   }, [template]);
 
   const isDirty = useMemo(() => {
-    if (!baseSession) return false;
+    if (!baseSession || !sessionState) return false;
     return JSON.stringify(sessionState) !== JSON.stringify(baseSession);
   }, [sessionState, baseSession]);
 
-  function handleSaveWorkout() {
-    saveWorkoutSession(sessionState);
-    setBaseSession(sessionState);
-    setLastSavedAt(new Date().toISOString());
+  async function handleSaveWorkout() {
+    if (!sessionState) return;
+
+    try {
+      setError(null);
+
+      const response = await fetch(`/api/workout-sessions/${sessionState.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sessionState),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        throw new Error(
+          errorData?.error || "Failed to save workout session."
+        );
+      }
+      setBaseSession(sessionState);
+      setLastSavedAt(new Date().toISOString());
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while saving the workout session."
+      );
+    }
   }
 
   function handleResetWorkout() {
-    clearWorkoutSession(sessionState.id, template.id);
+    if (!sessionState) return;
 
     const resetSession = resetWorkoutSessionFromTemplate(sessionState, template);
 
@@ -96,6 +128,22 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
         Loading workout session...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+        {error}
+      </div>
+    );
+  }
+
+  if (!sessionState) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+        No workout session available.
       </div>
     );
   }

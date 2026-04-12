@@ -1,5 +1,6 @@
 import type { SessionExercise, SetEntry, WorkoutSession } from "@/types/workout";
 import { touchWorkoutSession } from "@/lib/services/workout-session-service";
+import { createId } from "@/lib/utils/create-id";
 
 export type WorkoutSessionAction =
   | {
@@ -43,7 +44,7 @@ export type WorkoutSessionAction =
 
 function createEmptySet(): SetEntry {
   return {
-    id: `set-${crypto.randomUUID()}`,
+    id: createId("set"),
     reps: 0,
     weight: 0,
     completed: false,
@@ -51,9 +52,18 @@ function createEmptySet(): SetEntry {
 }
 
 export function workoutSessionReducer(
-  state: WorkoutSession,
+  state: WorkoutSession | null,
   action: WorkoutSessionAction
-): WorkoutSession {
+): WorkoutSession | null {
+  if (!state) {
+    switch (action.type) {
+      case "RESET_WORKOUT":
+        return action.initialWorkout;
+      default:
+        return state;
+    }
+  }
+
   switch (action.type) {
     case "UPDATE_SET_REPS":
       return touchWorkoutSession({

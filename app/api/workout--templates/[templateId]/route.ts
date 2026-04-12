@@ -1,24 +1,11 @@
-import { NextResponse } from "next/server";
-import { workoutTemplates } from "@/lib/data/workout-templates";
-
-type RouteContext = {
-  params: Promise<{ templateId: string }>;
-};
+    import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
-  { params }: RouteContext
+  { params }: { params: { templateId: string } }
 ) {
-  const { templateId } = await params;
-
-  const template = workoutTemplates.find((item) => item.id === templateId);
-
-  if (!template) {
-    return NextResponse.json(
-      { error: "Workout template not found" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json(template);
+  return NextResponse.json({
+    ok: true,
+    templateId: params.templateId,
+  });
 }
