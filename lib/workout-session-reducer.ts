@@ -7,13 +7,13 @@ export type WorkoutSessionAction =
       type: "UPDATE_SET_REPS";
       exerciseId: string;
       setId: string;
-      reps: number;
+      reps: number | undefined;
     }
   | {
       type: "UPDATE_SET_WEIGHT";
       exerciseId: string;
       setId: string;
-      weight: number;
+      weight: number | undefined;
     }
   | {
       type: "TOGGLE_SET_COMPLETED";

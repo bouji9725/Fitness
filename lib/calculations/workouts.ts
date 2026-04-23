@@ -6,7 +6,7 @@ export function calculateSetVolume(weight: number, reps: number): number {
 
 export function calculateExerciseVolume(sets: SetEntry[]): number {
   return sets.reduce((total, set) => {
-    if (!set.completed) return total;
+    if (!set.completed || !set.weight || !set.reps) return total;
     return total + set.weight * set.reps;
   }, 0);
 }

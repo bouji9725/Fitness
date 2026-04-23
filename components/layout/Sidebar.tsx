@@ -41,7 +41,7 @@ function SidebarContent({ onClose }: SidebarContentProps) {
       {/* Product branding area */}
       <div className="border-b app-hairline px-5 py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-          Fitness SaaS
+          Fitness
         </p>
         <h2 className="mt-2 text-xl font-semibold text-white">Fitsler</h2>
         <p className="mt-2 text-sm leading-6 text-slate-300">
@@ -77,12 +77,7 @@ function SidebarContent({ onClose }: SidebarContentProps) {
 
       {/* Bottom helper area */}
       <div className="border-t app-hairline px-5 py-4">
-        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-          Current focus
-        </p>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          Build a clear, repeatable training workflow before adding backend complexity.
-        </p>
+        
       </div>
     </div>
   );

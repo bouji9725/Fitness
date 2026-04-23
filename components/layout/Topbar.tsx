@@ -36,11 +36,11 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
            Keep this generic until real auth/user data exists. */}
         <div className="hidden items-center gap-3 sm:flex">
           <div className="rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1 text-xs font-medium text-indigo-200">
-            Frontend phase
+            Login
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
-            Solo build
+            Sign up
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 export type SetEntry = {
   id: string;
-  reps: number;
-  weight: number;
+  reps: number | undefined;
+  weight: number | undefined;
   completed: boolean;
 };
 

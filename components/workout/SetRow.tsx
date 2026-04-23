@@ -22,13 +22,13 @@ export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
           <Input
             id={`reps-${set.id}`}
             type="number"
-            value={set.reps}
+            value={set.reps ?? ""}
             onChange={(e) =>
               dispatch({
                 type: "UPDATE_SET_REPS",
                 exerciseId,
                 setId: set.id,
-                reps: parseNumberInput(e.target.value) ?? 0,
+                reps: parseNumberInput(e.target.value),
               })
             }
           />
@@ -39,13 +39,13 @@ export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
           <Input
             id={`weight-${set.id}`}
             type="number"
-            value={set.weight}
+            value={set.weight ?? ""}
             onChange={(e) =>
               dispatch({
                 type: "UPDATE_SET_WEIGHT",
                 exerciseId,
                 setId: set.id,
-                weight: parseNumberInput(e.target.value) ?? 0,
+                weight: parseNumberInput(e.target.value),
               })
             }
           />
