@@ -8,11 +8,20 @@ type AppShellProps = {
   children: ReactNode;
 };
 
+// Shared application shell used by all product pages.
+// This component owns the structural layout:
+// - sidebar
+// - topbar
+// - main content region
+// It should not contain page-specific content or business logic.
 export default function AppShell({ children }: AppShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
+  // Lock body scroll while the mobile sidebar is open.
   useEffect(() => {
     if (!isMobileSidebarOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -20,7 +29,6 @@ export default function AppShell({ children }: AppShellProps) {
       }
     }
 
-    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleEscape);
 
@@ -31,39 +39,37 @@ export default function AppShell({ children }: AppShellProps) {
   }, [isMobileSidebarOpen]);
 
   return (
-    <div className="relative isolate min-h-screen overflow-x-hidden bg-black">
-      {/* Fixed background */}
+    <div className="relative min-h-screen">
+      {/* Soft global background accents for the shell. */}
       <div
-        className="pointer-events-none fixed inset-0 -z-10 bg-[url('/Abs.jpg')] bg-contain md:bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
-      />
-
-      {/* Dark overlay */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10 bg-black/45"
-        aria-hidden="true"
-      />
-
-      {/* Soft blur */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10 backdrop-blur-[1px]"
-        aria-hidden="true"
-      />
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute left-[-10%] top-[-12%] h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-8%] h-80 w-80 rounded-full bg-cyan-400/10 blur-3xl" />
+      </div>
 
       <div className="flex min-h-screen">
+        {/* Desktop sidebar */}
+        <Sidebar isMobileOpen={false} onClose={() => setIsMobileSidebarOpen(false)} />
+
+        {/* Mobile sidebar / overlay */}
         <Sidebar
           isMobileOpen={isMobileSidebarOpen}
           onClose={() => setIsMobileSidebarOpen(false)}
         />
 
-        <div className="flex min-h-screen flex-1 flex-col">
+        {/* Main app column */}
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col lg:pl-72">
           <Topbar onMenuToggle={() => setIsMobileSidebarOpen(true)} />
-          <main className="flex-1 px-4 py-6 md:px-6">{children}</main>
+
+          {/* Main content region.
+             Keep route-specific content inside PageContainer, not here. */}
+          <main className="flex-1">
+            {children}
+          </main>
         </div>
       </div>
     </div>
   );
 }
-
-
-

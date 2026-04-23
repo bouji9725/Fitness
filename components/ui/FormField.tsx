@@ -1,12 +1,15 @@
+import type { ReactNode } from "react";
 import Label from "./Label";
 
 type FormFieldProps = {
   label: string;
   htmlFor: string;
   error?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
+// Standard form field wrapper.
+// Keeps label, control, and validation message grouped together.
 export default function FormField({
   label,
   htmlFor,
@@ -14,13 +17,13 @@ export default function FormField({
   children,
 }: FormFieldProps) {
   return (
-    <div className="grid gap-2">
+    <div className="flex flex-col gap-2">
       <Label htmlFor={htmlFor}>{label}</Label>
 
       {children}
 
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-red-500">
+        <p className="text-sm text-red-200" role="alert">
           {error}
         </p>
       ) : null}

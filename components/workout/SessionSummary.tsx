@@ -6,6 +6,8 @@ type SessionSummaryProps = {
   workout: WorkoutSession;
 };
 
+// Compact summary block for the active workout session.
+// This helps the user understand progress without leaving the page.
 export default function SessionSummary({ workout }: SessionSummaryProps) {
   const totalExercises = workout.exercises.length;
 
@@ -21,27 +23,42 @@ export default function SessionSummary({ workout }: SessionSummaryProps) {
     return sum + calculateExerciseVolume(exercise.sets);
   }, 0);
 
+  const stats = [
+    { label: "Exercises", value: totalExercises },
+    { label: "Total sets", value: totalSets },
+    { label: "Completed sets", value: completedSets },
+    { label: "Total volume", value: totalVolume },
+  ];
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Card className="space-y-1">
-        <p className="text-sm text-slate-500">Exercises</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalExercises}</p>
-      </Card>
+    <Card className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+          Session summary
+        </p>
 
-      <Card className="space-y-1">
-        <p className="text-sm text-slate-500">Total Sets</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalSets}</p>
-      </Card>
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+          Current workout overview
+        </h3>
 
-      <Card className="space-y-1">
-        <p className="text-sm text-slate-500">Completed Sets</p>
-        <p className="text-2xl font-semibold text-slate-900">{completedSets}</p>
-      </Card>
+        <p className="mt-2 text-sm leading-7 text-slate-300">
+          Track how much work has been completed in the current session.
+        </p>
+      </div>
 
-      <Card className="space-y-1">
-        <p className="text-sm text-slate-500">Total Volume</p>
-        <p className="text-2xl font-semibold text-slate-900">{totalVolume}</p>
-      </Card>
-    </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <article
+            key={stat.label}
+            className="rounded-2xl border border-white/10 bg-white/5 p-4"
+          >
+            <p className="text-sm text-slate-400">{stat.label}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+              {stat.value}
+            </p>
+          </article>
+        ))}
+      </div>
+    </Card>
   );
 }

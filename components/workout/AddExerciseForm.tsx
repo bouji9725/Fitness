@@ -1,5 +1,4 @@
 ﻿"use client";
-"use client";
 
 import { useState } from "react";
 import type { SessionExercise } from "@/types/workout";
@@ -22,6 +21,7 @@ function createSetId() {
   return createId("set");
 }
 
+// Lightweight form for adding a custom exercise to the current session.
 export default function AddExerciseForm({
   onAddExercise,
 }: AddExerciseFormProps) {
@@ -53,27 +53,34 @@ export default function AddExerciseForm({
   }
 
   return (
-    <Card className="space-y-4">
-      <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-slate-900">Add Exercise</h3>
-        <p className="text-sm text-slate-500">
-          Add a new exercise and assign it to a muscle group.
+    <Card className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+          Custom exercise
+        </p>
+
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+          Add exercise
+        </h3>
+
+        <p className="mt-2 text-sm leading-7 text-slate-300">
+          Add a new exercise and assign it to a muscle group for this session.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <FormField label="Exercise name" htmlFor="exercise-name">
+        <FormField label="Exercise name" htmlFor="new-exercise-name">
           <Input
-            id="exercise-name"
+            id="new-exercise-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Incline Dumbbell Press"
           />
         </FormField>
 
-        <FormField label="Muscle group" htmlFor="muscle-group">
+        <FormField label="Muscle group" htmlFor="new-exercise-muscle-group">
           <Input
-            id="muscle-group"
+            id="new-exercise-muscle-group"
             value={muscleGroup}
             onChange={(e) => setMuscleGroup(e.target.value)}
             placeholder="e.g. Chest"
@@ -81,9 +88,9 @@ export default function AddExerciseForm({
         </FormField>
       </div>
 
-      <Button type="button" onClick={handleAddExercise}>
-        Add Exercise
-      </Button>
+      <div className="flex flex-wrap gap-3">
+        <Button onClick={handleAddExercise}>Add exercise</Button>
+      </div>
     </Card>
   );
 }

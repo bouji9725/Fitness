@@ -12,17 +12,24 @@ import SessionSummary from "./SessionSummary";
 import SaveWorkoutBar from "./SaveWorkoutBar";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
 import { resetWorkoutSessionFromTemplate } from "@/lib/services/workout-session-service";
+import { saveWorkoutSession } from "@/lib/data/workouts";
 
 type WorkoutSessionProps = {
   template: WorkoutTemplate;
 };
 
+// Main workout workflow container.
+// This component coordinates:
+// - session creation
+// - local editing state
+// - save/reset actions
+// - exercise rendering
+//
+// For the current frontend phase, saving is handled on the client through
+// localStorage-backed helpers. We are not pretending this is a real backend yet.
 export default function WorkoutSession({ template }: WorkoutSessionProps) {
   const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
-  const [sessionState, dispatch] = useReducer(
-    workoutSessionReducer,
-    null
-  );
+  const [sessionState, dispatch] = useReducer(workoutSessionReducer, null);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,28 +79,19 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
     return JSON.stringify(sessionState) !== JSON.stringify(baseSession);
   }, [sessionState, baseSession]);
 
-  async function handleSaveWorkout() {
+  function handleSaveWorkout() {
     if (!sessionState) return;
 
     try {
       setError(null);
 
-      const response = await fetch(`/api/workout-sessions/${sessionState.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionState),
-      });
+      // Frontend-phase persistence:
+      // save the current session to browser storage so the dashboard
+      // and related pages can read the saved workout history.
+      saveWorkoutSession(sessionState);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-
-        throw new Error(
-          errorData?.error || "Failed to save workout session."
-        );
-      }
-      setBaseSession(sessionState);
+      // Snapshot the saved state so dirty-checking resets correctly.
+      setBaseSession(structuredClone(sessionState));
       setLastSavedAt(new Date().toISOString());
     } catch (err) {
       setError(
@@ -115,6 +113,7 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
       initialWorkout: resetSession,
     });
     setLastSavedAt(null);
+    setError(null);
   }
 
   function handleAddExercise(exercise: SessionExercise) {
@@ -126,33 +125,40 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
 
   if (!hasHydrated) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+      <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
         Loading workout session...
-      </div>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-        {error}
-      </div>
+      <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6">
+        <p className="text-sm font-medium text-red-100">{error}</p>
+      </section>
     );
   }
 
   if (!sessionState) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+      <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
         No workout session available.
-      </div>
+      </section>
     );
   }
 
   return (
     <div className="space-y-6">
+      <SaveWorkoutBar
+        onSave={handleSaveWorkout}
+        onReset={handleResetWorkout}
+        isDirty={isDirty}
+        lastSavedAt={lastSavedAt}
+      />
+
       <SessionSummary workout={sessionState} />
 
-      <div className="space-y-4">
+      <section className="space-y-6">
         {sessionState.exercises.map((exercise) => (
           <ExerciseCard
             key={exercise.id}
@@ -160,16 +166,9 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
             dispatch={dispatch}
           />
         ))}
-      </div>
+      </section>
 
       <AddExerciseForm onAddExercise={handleAddExercise} />
-
-      <SaveWorkoutBar
-        isDirty={isDirty}
-        lastSavedAt={lastSavedAt}
-        onSave={handleSaveWorkout}
-        onReset={handleResetWorkout}
-      />
     </div>
   );
 }

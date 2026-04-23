@@ -1,16 +1,16 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/profile", label: "Profile" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/workouts", label: "Workouts" },
   { href: "/progress", label: "Progress" },
   { href: "/nutrition", label: "Nutrition" },
+  { href: "/profile", label: "Profile" },
   { href: "/share", label: "Share" },
-  
 ];
 
 type SidebarProps = {
@@ -18,72 +18,94 @@ type SidebarProps = {
   onClose: () => void;
 };
 
-function SidebarContent({ onClose }: Pick<SidebarProps, "onClose">) {
-  return (
-    <>
-      <div className="mb-8 flex items-start bg-transparent justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold ">Fitsler Pro</h1>
-          <p className="text-sm ">Tracking & Progress</p>
-        </div>
+type SidebarContentProps = {
+  onClose: () => void;
+};
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close navigation menu"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-600 bg-transparent text-slate-300 shadow-sm transition hover:bg-slate-800 lg:hidden"
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M6 6l12 12" />
-            <path d="M18 6L6 18" />
-          </svg>
-        </button>
+// Primary product navigation.
+// Keep links, labels, and active-state logic centralized here.
+// This file should define navigation structure, not page content.
+function SidebarContent({ onClose }: SidebarContentProps) {
+  const pathname = usePathname();
+
+  function isActive(href: string) {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Product branding area */}
+      <div className="border-b app-hairline px-5 py-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
+          Fitness SaaS
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">Fitsler</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          Training, progress, and nutrition in one focused workspace.
+        </p>
       </div>
 
-      <nav aria-label="Sidebar navigation">
-        <ul className="space-y-2">
-          {links.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                onClick={onClose}
-                className="block rounded-xl px-3 py-2  transition hover:bg-slate-800"
-              >
-                <h2>{link.label}</h2>
-              </Link>
-            </li>
-          ))}
+      {/* Main navigation list */}
+      <nav aria-label="Primary navigation" className="flex-1 px-3 py-4">
+        <ul className="flex flex-col gap-1">
+          {links.map((link) => {
+            const active = isActive(link.href);
+
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={onClose}
+                  className={[
+                    "flex items-center rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-indigo-500/15 text-white ring-1 ring-inset ring-indigo-400/30"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white",
+                  ].join(" ")}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
-    </>
+
+      {/* Bottom helper area */}
+      <div className="border-t app-hairline px-5 py-4">
+        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+          Current focus
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          Build a clear, repeatable training workflow before adding backend complexity.
+        </p>
+      </div>
+    </div>
   );
 }
 
 export default function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
   return (
     <>
-      <aside className="hidden w-64 shrink-0 border-r border-slate-800 bg-transparent p-6 lg:block">
+      {/* Desktop sidebar */}
+      <aside className="app-panel fixed inset-y-0 left-0 z-30 hidden w-72 border-r lg:block">
         <SidebarContent onClose={onClose} />
       </aside>
 
+      {/* Mobile overlay */}
       {isMobileOpen ? (
-        <div className="fixed inset-0 z-40 lg:hidden" aria-hidden={!isMobileOpen}>
+        <div className="fixed inset-0 z-50 lg:hidden">
           <button
-            type="button"
-            onClick={onClose}
             aria-label="Close navigation overlay"
-            className="absolute inset-0 bg-slate-900/45"
+            className="absolute inset-0 bg-slate-950/70"
+            onClick={onClose}
           />
 
-          <aside className="absolute left-0 top-0 flex h-full w-72 max-w-[85vw] flex-col border-r border-slate-200 bg-slate-900 p-6 shadow-xl">
+          <aside className="app-panel absolute inset-y-0 left-0 w-[88vw] max-w-72 border-r">
             <SidebarContent onClose={onClose} />
           </aside>
         </div>

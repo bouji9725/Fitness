@@ -1,15 +1,21 @@
+import type { HTMLAttributes, ReactNode } from "react";
 
-import type { ReactNode } from "react";
-
-
-type CardProps = {
+type CardProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
-  className?: string;
 };
 
-export default function Card({ children, className = "" }: CardProps) {
+// Shared surface wrapper for panels and cards.
+// Keep this component visually neutral and reusable across features.
+export default function Card({
+  children,
+  className = "",
+  ...props
+}: CardProps) {
   return (
-    <div className={`rounded-2xl border border-slate-200 bg-white/200 p-5 shadow-sm ${className}`}>
+    <div
+      className={`app-surface rounded-[var(--radius-xl)] p-5 sm:p-6 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

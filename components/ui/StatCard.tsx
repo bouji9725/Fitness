@@ -3,13 +3,26 @@
 type StatCardProps = {
   label: string;
   value: string | number;
+  helperText?: string;
 };
 
-export default function StatCard({ label, value }: StatCardProps) {
+// Compact metric card for dashboard-style summary values.
+export default function StatCard({
+  label,
+  value,
+  helperText,
+}: StatCardProps) {
   return (
-    <Card>
-      <p>{label}</p>
-      <p className="mt-2">{value}</p>
+    <Card className="h-full p-5">
+      <p className="text-sm text-slate-400">{label}</p>
+
+      <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+        {value}
+      </p>
+
+      {helperText ? (
+        <p className="mt-3 text-sm leading-6 text-slate-300">{helperText}</p>
+      ) : null}
     </Card>
   );
 }

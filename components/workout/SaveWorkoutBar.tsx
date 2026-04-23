@@ -8,6 +8,8 @@ type SaveWorkoutBarProps = {
   lastSavedAt: string | null;
 };
 
+// Sticky-style action bar for the workout session.
+// Keep the actions simple and high-signal.
 export default function SaveWorkoutBar({
   onSave,
   onReset,
@@ -15,25 +17,26 @@ export default function SaveWorkoutBar({
   lastSavedAt,
 }: SaveWorkoutBarProps) {
   return (
-    <Card className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-slate-900">
-          Workout Session
-        </h3>
-        <p className="text-sm text-slate-500">
+    <Card className="flex flex-col gap-4 border border-white/10 bg-slate-950/70 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+          Workout session
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-slate-300">
           {lastSavedAt
             ? `Last saved: ${new Date(lastSavedAt).toLocaleString()}`
-            : "Not saved yet"}
+            : "Changes have not been saved yet."}
         </p>
       </div>
 
-      <div className="flex gap-3">
-        <Button type="button" variant="secondary" onClick={onReset}>
-          Reset to Template
+      <div className="flex flex-wrap gap-3">
+        <Button variant="secondary" onClick={onReset}>
+          Reset to template
         </Button>
 
-        <Button type="button" onClick={onSave} disabled={!isDirty}>
-          Save Workout
+        <Button onClick={onSave} disabled={!isDirty}>
+          Save workout
         </Button>
       </div>
     </Card>
