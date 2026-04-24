@@ -7,12 +7,6 @@ import PageContainer from "@/components/layout/PageContainer";
 import PageHeader from "@/components/layout/PageHeader";
 import type { WorkoutTemplate } from "@/types/workout";
 
-// Workout templates page.
-// This page lists all available workout plans/templates.
-// Priorities:
-// - fast scanning
-// - clear structure
-// - strong CTA into a workout session
 export default function WorkoutsPage() {
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +44,15 @@ export default function WorkoutsPage() {
     <AppShell>
       <PageContainer>
         <PageHeader
+          eyebrow="Workout templates"
           title="Workouts"
-          description="Choose a workout template and move directly into a session-focused logging flow."
+          description="Select a training template and move into a focused session logging flow."
           actions={
             <Link
               href="/dashboard"
               className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
             >
-              Back to dashboard
+              View dashboard
             </Link>
           }
         />
@@ -72,7 +67,7 @@ export default function WorkoutsPage() {
           </section>
         ) : templates.length === 0 ? (
           <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-            No workout templates available.
+            No workout templates are available yet.
           </section>
         ) : (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -85,7 +80,7 @@ export default function WorkoutsPage() {
                   className="app-surface rounded-[var(--radius-xl)] p-5 transition hover:border-indigo-400/30"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-                    Template
+                    Training template
                   </p>
 
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
@@ -94,8 +89,8 @@ export default function WorkoutsPage() {
 
                   <p className="mt-3 text-sm leading-7 text-slate-300">
                     {template.exercises.length} exercise
-                    {template.exercises.length === 1 ? "" : "s"} ready for this
-                    session.
+                    {template.exercises.length === 1 ? "" : "s"} prepared for
+                    this session.
                   </p>
 
                   <div className="mt-5 space-y-2">
@@ -118,7 +113,7 @@ export default function WorkoutsPage() {
                     href={`/workouts/${template.id}`}
                     className="mt-6 inline-flex min-h-11 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-4 text-sm font-medium text-white transition hover:bg-indigo-500/25"
                   >
-                    Open workout
+                    Start session
                   </Link>
                 </article>
               );

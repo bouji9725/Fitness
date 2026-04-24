@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StatCard from "@/components/ui/StatCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
+import WorkoutInsightCard from "./WorkoutInsightCard";
 import { loadAllWorkoutSessions } from "@/lib/data/workouts";
 import { getDashboardMetrics } from "@/lib/data/dashboard";
 
@@ -27,6 +28,16 @@ export default function DashboardOverview() {
       </section>
     );
   }
+
+  const averageExercisesPerWorkout =
+    metrics.totalSavedWorkouts > 0
+      ? (metrics.totalExercisesLogged / metrics.totalSavedWorkouts).toFixed(1)
+      : "0";
+
+  const averageSetsPerWorkout =
+    metrics.totalSavedWorkouts > 0
+      ? (metrics.totalCompletedSets / metrics.totalSavedWorkouts).toFixed(1)
+      : "0";
 
   return (
     <div className="space-y-6">
@@ -54,7 +65,31 @@ export default function DashboardOverview() {
         />
       </section>
 
-      {/* Secondary overview row */}
+      {/* Insight row */}
+      <section className="grid gap-6 xl:grid-cols-3">
+        <WorkoutInsightCard
+          title="Training consistency"
+          description="A simple view of how much history has already been built."
+          value={metrics.totalSavedWorkouts}
+          helperText="Each saved session strengthens your training history."
+        />
+
+        <WorkoutInsightCard
+          title="Average exercises"
+          description="How dense your typical saved workout currently is."
+          value={averageExercisesPerWorkout}
+          helperText="Exercises per saved workout session."
+        />
+
+        <WorkoutInsightCard
+          title="Average completed sets"
+          description="How much work gets completed in a typical workout."
+          value={averageSetsPerWorkout}
+          helperText="Completed sets per saved workout session."
+        />
+      </section>
+
+      {/* Activity history */}
       <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <div className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
@@ -62,7 +97,7 @@ export default function DashboardOverview() {
           </p>
 
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Training snapshot
+            Workout history snapshot
           </h2>
 
           <p className="mt-3 text-sm leading-7 text-slate-300">

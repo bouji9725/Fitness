@@ -7,33 +7,42 @@ type NutritionSummaryCardProps = {
   fatFreeMassLbs: number;
 };
 
+// Body composition summary for the nutrition flow.
 export default function NutritionSummaryCard({
   weightKg,
   bodyFatPercent,
   fatFreeMassKg,
   fatFreeMassLbs,
 }: NutritionSummaryCardProps) {
-  return (
-    <Card className="grid gap-3">
-      <h3 className="text-xl font-semibold ">
-        Body Composition Summary
-      </h3>
+  const rows = [
+    { label: "Weight", value: `${weightKg} kg` },
+    { label: "Body fat", value: `${bodyFatPercent}%` },
+    { label: "Fat-free mass", value: `${fatFreeMassKg} kg` },
+    { label: "Fat-free mass (lbs)", value: `${fatFreeMassLbs} lbs` },
+  ];
 
-      <div className="grid gap-2 text-sm ">
-        <p>
-          Total Weight: <span className="font-medium ">{weightKg} kg</span>
+  return (
+    <Card className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+          Body data
         </p>
-        <p>
-          Body Fat: <span className="font-medium ">{bodyFatPercent}%</span>
-        </p>
-        <p>
-          Fat-Free Mass:{" "}
-          <span className="font-medium ">{fatFreeMassKg} kg</span>
-        </p>
-        <p>
-          Fat-Free Mass:{" "}
-          <span className="font-medium ">{fatFreeMassLbs} lbs</span>
-        </p>
+
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+          Body composition summary
+        </h3>
+      </div>
+
+      <div className="space-y-3">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex items-start justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm text-slate-400">{row.label}</span>
+            <span className="text-sm font-medium text-white">{row.value}</span>
+          </div>
+        ))}
       </div>
     </Card>
   );

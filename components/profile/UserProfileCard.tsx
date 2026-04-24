@@ -1,4 +1,5 @@
 ﻿import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 import ProfileInfoRow from "./ProfileInfoRow";
 import type { UserProfile } from "@/types/profile";
 
@@ -31,6 +32,8 @@ function formatGoal(goal?: UserProfile["goal"]): string {
   return "Maintenance";
 }
 
+// Main profile summary card.
+// Keep this card structured around identity, body composition, and nutrition context.
 export default function UserProfileCard({
   profile,
   onEditProfile,
@@ -39,7 +42,7 @@ export default function UserProfileCard({
 }: UserProfileCardProps) {
   const profileDetails = profile
     ? [
-        { label: "Name", value: profile.name },
+        { label: "Name", value: profile.name || "Not set" },
         { label: "Age", value: profile.age ?? "Not set" },
         {
           label: "Height",
@@ -50,95 +53,90 @@ export default function UserProfileCard({
     : [];
 
   const bodyCompositionRows = [
-    { label: "Total Weight", value: `${bodyComposition.weightKg} kg` },
-    { label: "Body Fat", value: `${bodyComposition.bodyFatPercent}%` },
-    { label: "Fat-Free Mass", value: `${bodyComposition.fatFreeMassKg} kg` },
-    { label: "Fat-Free Mass", value: `${bodyComposition.fatFreeMassLbs} lbs` },
+    { label: "Weight", value: `${bodyComposition.weightKg} kg` },
+    { label: "Body fat", value: `${bodyComposition.bodyFatPercent}%` },
+    { label: "Fat-free mass", value: `${bodyComposition.fatFreeMassKg} kg` },
+    { label: "Fat-free mass (lbs)", value: `${bodyComposition.fatFreeMassLbs} lbs` },
+  ];
+
+  const macroRows = [
+    { label: "Daily calories", value: `${nutritionPlan.calorieTarget} kcal` },
+    { label: "Protein", value: `${nutritionPlan.proteinTargetGrams} g` },
+    { label: "Fat", value: `${nutritionPlan.fatTargetGrams} g` },
+    { label: "Carbs", value: `${nutritionPlan.carbsTargetGrams} g` },
   ];
 
   return (
-    <Card className="grid gap-6">
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="text-2xl font-semibold ">User Profile</h2>
+    <Card className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+            Profile
+          </p>
 
-        <button
-          type="button"
-          onClick={onEditProfile}
-          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-3 text-sm font-medium  transition hover:bg-slate-100"
-        >
-          Edit Profile
-        </button>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Personal fitness profile
+          </h2>
+
+          <p className="mt-2 text-sm leading-7 text-slate-300">
+            Review your core body data, current goal, and nutrition targets in one place.
+          </p>
+        </div>
+
+        <Button variant="secondary" onClick={onEditProfile}>
+          Edit profile
+        </Button>
       </div>
 
       {!profile ? (
-        <p className="text-sm ">No profile saved yet.</p>
-      ) : (
-        <div className="grid gap-6 text-sm ">
-          <div className="grid gap-2">
-            <h3 className="text-lg font-semibold ">Profile Details</h3>
-            {profileDetails.map((item) => (
-              <ProfileInfoRow
-                key={item.label}
-                label={item.label}
-                value={item.value}
-              />
-            ))}
-          </div>
-
-          <div className="grid gap-2">
-            <h3 className="text-lg font-semibold ">Body Composition Summary</h3>
-            {bodyCompositionRows.map((item, index) => (
-              <ProfileInfoRow
-                key={`${item.label}-${index}`}
-                label={item.label}
-                value={item.value}
-              />
-            ))}
-          </div>
-
-          <div className="grid gap-3">
-            <h3 className="text-lg font-semibold ">Nutrition Plan Targets</h3>
-
-            <div className="rounded-2xl bg-transparent px-4 border border-slate-200 py-4">
-              <p className="text-sm ">Daily calorie target</p>
-              <p className="text-2xl font-bold ">
-                {nutritionPlan.calorieTarget} kcal
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              <div className="rounded-xl border border-slate-200 p-3">
-                <ProfileInfoRow
-                  label="Protein"
-                  value={`${nutritionPlan.proteinTargetGrams} g`}
-                  className="font-medium "
-                />
-                <ProfileInfoRow label="Calories" value={`${nutritionPlan.proteinCalories} kcal`} />
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-3">
-                <ProfileInfoRow
-                  label="Fat"
-                  value={`${nutritionPlan.fatTargetGrams} g`}
-                  className="font-medium "
-                />
-                <p>
-                  <span className="font-medium ">Calories:</span>{" "}
-                  {nutritionPlan.fatCalories} kcal ({nutritionPlan.fatPercent}% of calories)
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-3">
-                <ProfileInfoRow
-                  label="Carbs"
-                  value={`${nutritionPlan.carbsTargetGrams} g`}
-                  className="font-medium "
-                />
-                <ProfileInfoRow label="Calories" value={`${nutritionPlan.carbCalories} kcal`} />
-              </div>
-            </div>
-          </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+          No profile saved yet.
         </div>
+      ) : (
+        <>
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-white">Profile details</h3>
+            <div className="space-y-3">
+              {profileDetails.map((item) => (
+                <ProfileInfoRow
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-white">Body composition</h3>
+            <div className="space-y-3">
+              {bodyCompositionRows.map((item) => (
+                <ProfileInfoRow
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-white">Nutrition targets</h3>
+            <div className="space-y-3">
+              {macroRows.map((item) => (
+                <ProfileInfoRow
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+              Fat calories: {nutritionPlan.fatCalories} kcal ({nutritionPlan.fatPercent}%)
+            </div>
+          </section>
+        </>
       )}
     </Card>
   );

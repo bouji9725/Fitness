@@ -3,75 +3,65 @@ import AppShell from "@/components/layout/AppShell";
 import PageContainer from "@/components/layout/PageContainer";
 import PageHeader from "@/components/layout/PageHeader";
 
-// Home page for the fitness product.
-// This is not a marketing landing page.
-// It should orient the user quickly and guide them into the main workflows.
 export default function HomePage() {
   const modules = [
     {
       title: "Dashboard",
       description:
-        "See recent activity, track consistency, and understand where your training stands.",
+        "Review saved workouts, training volume, completed sets, and recent activity.",
       href: "/dashboard",
     },
     {
       title: "Workouts",
       description:
-        "Open a workout template, log sets and reps, and build a repeatable training flow.",
+        "Choose a workout template, log sets, track volume, and save your session.",
       href: "/workouts",
     },
     {
       title: "Progress",
       description:
-        "Record body stats over time and compare the latest check-in with previous entries.",
+        "Track body stats over time and compare your latest check-in with previous entries.",
       href: "/progress",
     },
     {
       title: "Nutrition",
       description:
-        "Calculate calories and macros in a simple, structured planning workflow.",
+        "Calculate calorie and macro targets based on your current body data and goal.",
       href: "/nutrition",
     },
-  ];
-
-  const highlights = [
-    "Workflow-first UI built around real product modules",
-    "Clear route structure for workouts, progress, nutrition, and sharing",
-    "Frontend foundation prepared for later backend and auth integration",
   ];
 
   return (
     <AppShell>
       <PageContainer>
         <PageHeader
-          title="Fitsler"
-          description="A focused fitness workspace for training sessions, progress tracking, nutrition planning, and coach-friendly summaries."
+          eyebrow="Fitness tracker"
+          title="Train with structure. Track with clarity."
+          description="Fitsler helps you organize workouts, monitor progress, calculate nutrition targets, and prepare clear summaries for coaching or personal review."
           actions={
             <Link
               href="/workouts"
               className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-4 text-sm font-medium text-white transition hover:bg-indigo-500/25"
             >
-              Start with workouts
+              Start workout
             </Link>
           }
         />
 
-        {/* Hero / product introduction */}
-        <section className="grid gap-6 lg:grid-cols-[1.35fr_0.95fr]">
+        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="app-panel rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-              Product overview
+              Core workflow
             </p>
 
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Build a clean training routine around one consistent workflow.
+              Everything starts with a logged workout.
             </h2>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-              This app is designed around the core tasks a fitness user actually
-              repeats: choosing a workout, logging the session, reviewing recent
-              training, tracking body progress, and planning nutrition without
-              clutter.
+              Pick a training template, record your sets, save the session, and
+              let the dashboard, progress, nutrition, and sharing views build on
+              that data.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -79,38 +69,40 @@ export default function HomePage() {
                 href="/dashboard"
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
               >
-                Open dashboard
+                View dashboard
               </Link>
 
               <Link
-                href="/progress"
+                href="/nutrition"
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
               >
-                Track progress
+                Plan nutrition
               </Link>
             </div>
           </div>
 
-          {/* Product highlights */}
           <aside className="app-surface rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-              Why this app flow matters
+              Product focus
             </p>
 
-            <ul className="mt-4 space-y-4">
-              {highlights.map((item) => (
-                <li
+            <div className="mt-5 space-y-4">
+              {[
+                "Workout logging with saved session history",
+                "Dashboard metrics based on completed training data",
+                "Progress and nutrition views connected to user inputs",
+              ].map((item) => (
+                <div
                   key={item}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-7 text-slate-300"
                 >
                   {item}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </aside>
         </section>
 
-        {/* Main module grid */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {modules.map((module) => (
             <article

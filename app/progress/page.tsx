@@ -15,12 +15,6 @@ import {
 } from "@/lib/calculations/progress";
 import type { BodyStatsEntry } from "@/types/progress";
 
-// Progress tracking page.
-// This page owns body composition tracking and historical comparison.
-// Structure it around:
-// - adding a new entry
-// - latest insights
-// - historical context
 export default function ProgressPage() {
   const [entries, setEntries] = useState<BodyStatsEntry[]>([]);
 
@@ -45,14 +39,15 @@ export default function ProgressPage() {
     <AppShell>
       <PageContainer>
         <PageHeader
+          eyebrow="Progress tracking"
           title="Progress"
-          description="Track body measurements over time and compare your latest update with the previous check-in."
+          description="Record body stats, review your latest check-in, and compare changes over time."
           actions={
             <Link
-              href="/dashboard"
+              href="/share"
               className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
             >
-              Back to dashboard
+              Review share summary
             </Link>
           }
         />
@@ -60,16 +55,16 @@ export default function ProgressPage() {
         <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-              New entry
+              Check-in
             </p>
 
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Add body stats
+              Add a progress entry
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-slate-300">
-              Save a new progress entry to keep your measurements organized and
-              easy to compare over time.
+              Save your current body data to keep your progress history accurate
+              and easy to compare.
             </p>
 
             <div className="mt-6">
@@ -80,11 +75,15 @@ export default function ProgressPage() {
           <div className="space-y-6">
             <section className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-                Latest snapshot
+                Latest data
               </p>
 
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                Latest snapshot
+              </h2>
+
               {latest ? (
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <p className="text-sm text-slate-400">Weight</p>
                     <p className="mt-2 text-2xl font-semibold text-white">
@@ -110,8 +109,8 @@ export default function ProgressPage() {
                 </div>
               ) : (
                 <p className="mt-4 text-sm leading-7 text-slate-300">
-                  No body stats saved yet. Add your first entry to start
-                  tracking progress.
+                  No progress entries yet. Add your first check-in to start
+                  tracking changes.
                 </p>
               )}
             </section>
@@ -128,9 +127,13 @@ export default function ProgressPage() {
                   Comparison
                 </p>
 
-                <p className="mt-4 text-sm leading-7 text-slate-300">
-                  Add at least two entries to unlock a meaningful comparison
-                  between your latest and previous body stats.
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                  Not enough data yet
+                </h2>
+
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  Add at least two progress entries to compare your latest
+                  check-in with the previous one.
                 </p>
               </section>
             )}
@@ -165,10 +168,7 @@ export default function ProgressPage() {
 
                 <tbody>
                   {entries.map((entry) => (
-                    <tr
-                      key={entry.id}
-                      className="text-sm text-slate-200"
-                    >
+                    <tr key={entry.id} className="text-sm text-slate-200">
                       <td className="rounded-l-2xl border border-white/10 bg-white/5 px-3 py-3">
                         {entry.date}
                       </td>
@@ -179,7 +179,9 @@ export default function ProgressPage() {
                         {entry.bodyFatPercent}%
                       </td>
                       <td className="border-y border-white/10 bg-white/5 px-3 py-3">
-                        {entry.muscleMassKg != null ? `${entry.muscleMassKg} kg` : "—"}
+                        {entry.muscleMassKg != null
+                          ? `${entry.muscleMassKg} kg`
+                          : "—"}
                       </td>
                       <td className="rounded-r-2xl border border-white/10 bg-white/5 px-3 py-3">
                         {entry.notes?.trim() ? entry.notes : "—"}

@@ -5,19 +5,40 @@ type ShareCoachCardProps = {
   coachName?: string;
 };
 
+// Coach sharing status card.
+// Keep the message clear and trustworthy.
 export default function ShareCoachCard({
   enabled,
   coachName,
 }: ShareCoachCardProps) {
   return (
-    <Card className="grid gap-3">
-      <h3 className="text-xl font-semibold ">Coach Sharing</h3>
+    <Card className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+          Sharing
+        </p>
 
-      <p className="text-sm ">
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+          Coach sharing status
+        </h2>
+
+        <p className="mt-2 text-sm leading-7 text-slate-300">
+          Control whether your current fitness summary is prepared for coach review.
+        </p>
+      </div>
+
+      <div
+        className={[
+          "rounded-2xl border px-4 py-4 text-sm leading-7",
+          enabled
+            ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100"
+            : "border-white/10 bg-white/5 text-slate-300",
+        ].join(" ")}
+      >
         {enabled
-          ? `Your progress can be shared with ${coachName ?? "your coach"}.`
-          : "Coach sharing is currently disabled."}
-      </p>
+          ? `Sharing is enabled${coachName ? ` for ${coachName}` : ""}.`
+          : "Sharing is currently disabled."}
+      </div>
     </Card>
   );
 }

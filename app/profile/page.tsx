@@ -29,9 +29,6 @@ function mapProfileGoalToNutritionGoal(
   return "gain-muscle";
 }
 
-// Profile page.
-// This page manages user identity, goals, and sharing preferences.
-// Keep display and edit concerns separated.
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile>({
     id: "user-1",
@@ -90,8 +87,9 @@ export default function ProfilePage() {
     <AppShell>
       <PageContainer>
         <PageHeader
+          eyebrow="Personal settings"
           title="Profile"
-          description="Manage your personal fitness settings, training goal, and coach-sharing preferences."
+          description="Manage your fitness goal, body context, and coach-sharing preferences."
           actions={
             <Button
               onClick={() => setIsEditProfileOpen((prev) => !prev)}
@@ -110,8 +108,13 @@ export default function ProfilePage() {
               </p>
 
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                Update your profile
+                Update your fitness profile
               </h2>
+
+              <p className="mt-2 text-sm leading-7 text-slate-300">
+                These values help connect your profile, progress, nutrition, and
+                sharing views.
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -120,10 +123,7 @@ export default function ProfilePage() {
                   id="profile-name"
                   value={profile.name}
                   onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
+                    setProfile((prev) => ({ ...prev, name: e.target.value }))
                   }
                   placeholder="Your name"
                 />
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                       heightCm: parseNumberInput(e.target.value),
                     }))
                   }
-                  placeholder="Height (cm)"
+                  placeholder="Height"
                 />
               </FormField>
 
@@ -193,7 +193,7 @@ export default function ProfilePage() {
                   }
                   className="h-4 w-4 rounded border-slate-300"
                 />
-                Enable coach sharing
+                Prepare profile summary for coach review
               </label>
 
               <div className="mt-4">
@@ -252,39 +252,6 @@ export default function ProfilePage() {
             enabled={profile.coachSharingEnabled}
             coachName={profile.coachName}
           />
-        </section>
-
-        <section className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-            Connected data
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Current profile context
-          </h2>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">Latest weight</p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {bodyWeightKg} kg
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">Latest body fat</p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {bodyFatPercent}%
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">Calorie target</p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {nutritionToShow.calorieTarget}
-              </p>
-            </article>
-          </div>
         </section>
       </PageContainer>
     </AppShell>

@@ -3,25 +3,23 @@
 type PageHeaderProps = {
   title: string;
   description?: string;
+  eyebrow?: string;
   actions?: ReactNode;
 };
 
 // Standard page header used across product pages.
-// Provides a consistent pattern for:
-// - title
-// - supporting description
-// - optional actions
-// Every main route should use this component.
+// Provides consistent hierarchy for title, description, and optional actions.
 export default function PageHeader({
   title,
   description,
+  eyebrow = "Workspace",
   actions,
 }: PageHeaderProps) {
   return (
     <section className="flex flex-col gap-4 rounded-[var(--radius-xl)] border border-white/10 bg-white/5 p-5 shadow-[var(--shadow-soft)] backdrop-blur-xl sm:p-6 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-          Workspace
+          {eyebrow}
         </p>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -36,9 +34,7 @@ export default function PageHeader({
       </div>
 
       {actions ? (
-        <div className="flex shrink-0 items-center gap-3">
-          {actions}
-        </div>
+        <div className="flex shrink-0 items-center gap-3">{actions}</div>
       ) : null}
     </section>
   );

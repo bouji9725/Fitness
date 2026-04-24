@@ -1,5 +1,7 @@
 ﻿"use client";
 
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -13,6 +15,8 @@ import ProteinRecommendationCard from "./ProteinRecommendationCard";
 import NutritionPlanCard from "./NutritionPlanCard";
 import type { NutritionGoal, RecompDirection } from "@/types/nutrition";
 
+// Nutrition calculator.
+// Keep the form clear, then show outputs in dedicated summary cards.
 export default function NutritionCalculator() {
   const [weightKg, setWeightKg] = useState<number | undefined>(80);
   const [bodyFatPercent, setBodyFatPercent] = useState<number | undefined>(15);
@@ -54,35 +58,36 @@ export default function NutritionCalculator() {
   }, [results]);
 
   return (
-    <div className="grid gap-6">
-      <Card className="grid gap-4">
+    <div className="space-y-6">
+      <Card className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold ">
-            Nutrition Plan Calculator
-          </h2>
-          <p className="mt-1 text-sm ">
-            Calculate FFM, protein, calories, fats, and carbs based on your
-            goal.
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+            Inputs
+          </p>
+
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Nutrition plan calculator
+          </h3>
+
+          <p className="mt-2 text-sm leading-7 text-slate-300">
+            Estimate fat-free mass, calories, protein, fats, and carbs based on your goal.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Body Weight (kg)" htmlFor="weightKg">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <FormField label="Weight (kg)" htmlFor="nutrition-weight">
             <Input
-              id="weightKg"
+              id="nutrition-weight"
               type="number"
-              min={1}
               value={weightKg ?? ""}
               onChange={(e) => setWeightKg(parseNumberInput(e.target.value))}
             />
           </FormField>
 
-          <FormField label="Body Fat (%)" htmlFor="bodyFatPercent">
+          <FormField label="Body fat (%)" htmlFor="nutrition-body-fat">
             <Input
-              id="bodyFatPercent"
+              id="nutrition-body-fat"
               type="number"
-              min={1}
-              max={60}
               value={bodyFatPercent ?? ""}
               onChange={(e) =>
                 setBodyFatPercent(parseNumberInput(e.target.value))
@@ -90,66 +95,62 @@ export default function NutritionCalculator() {
             />
           </FormField>
 
-          <FormField label="BMR (kcal)" htmlFor="bmr">
+          <FormField label="BMR" htmlFor="nutrition-bmr">
             <Input
-              id="bmr"
+              id="nutrition-bmr"
               type="number"
-              min={500}
               value={bmr ?? ""}
               onChange={(e) => setBmr(parseNumberInput(e.target.value))}
             />
           </FormField>
 
-          <FormField label="Total Calories Burned / TDEE (kcal)" htmlFor="tdee">
+          <FormField label="TDEE" htmlFor="nutrition-tdee">
             <Input
-              id="tdee"
+              id="nutrition-tdee"
               type="number"
-              min={500}
               value={tdee ?? ""}
               onChange={(e) => setTdee(parseNumberInput(e.target.value))}
             />
           </FormField>
 
-          <FormField label="Nutrition Goal" htmlFor="goal">
+          <FormField label="Goal" htmlFor="nutrition-goal">
             <Select
-              id="goal"
+              id="nutrition-goal"
               value={goal}
               onChange={(e) => setGoal(e.target.value as NutritionGoal)}
             >
-              <option value="lose-weight">Losing Weight</option>
-              <option value="gain-muscle">Gaining Muscle</option>
-              <option value="body-recomp">Body Recomposition</option>
+              <option value="lose-weight">Lose weight</option>
+              <option value="gain-muscle">Gain muscle</option>
+              <option value="body-recomp">Body recomposition</option>
             </Select>
           </FormField>
 
-          <FormField label="Calorie Adjustment (kcal)" htmlFor="adjustment">
+          <FormField label="Adjustment" htmlFor="nutrition-adjustment">
             <Input
-              id="adjustment"
+              id="nutrition-adjustment"
               type="number"
-              min={200}
-              max={1000}
               value={adjustment ?? ""}
               onChange={(e) => setAdjustment(parseNumberInput(e.target.value))}
             />
           </FormField>
         </div>
 
-        {goal === "body-recomp" && (
-          <div className="md:max-w-sm">
-            <FormField label="Recomp Direction" htmlFor="recompDirection">
+        {goal === "body-recomp" ? (
+          <div className="max-w-sm">
+            <FormField label="Recomp direction" htmlFor="nutrition-recomp-direction">
               <Select
-                id="recompDirection"
+                id="nutrition-recomp-direction"
                 value={recompDirection}
                 onChange={(e) =>
                   setRecompDirection(e.target.value as RecompDirection)
                 }
               >
-                <option value="slight-deficit">Slight Deficit</option>
-                <option value="slight-surplus">Slight Surplus</option>
+                <option value="slight-deficit">Slight deficit</option>
+                <option value="slight-surplus">Slight surplus</option>
               </Select>
             </FormField>
           </div>
-        )}
+        ) : null}
       </Card>
 
       <div className="grid gap-6 xl:grid-cols-3">

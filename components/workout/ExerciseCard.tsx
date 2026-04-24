@@ -25,7 +25,12 @@ export default function ExerciseCard({
   const previous = exercise.previousBest;
 
   const improved =
-    previous && firstCompletedSet
+    previous &&
+    firstCompletedSet &&
+    firstCompletedSet.weight !== undefined &&
+    firstCompletedSet.reps !== undefined &&
+    previous.weight !== undefined &&
+    previous.reps !== undefined
       ? isProgressiveOverload(
           firstCompletedSet.weight,
           firstCompletedSet.reps,
