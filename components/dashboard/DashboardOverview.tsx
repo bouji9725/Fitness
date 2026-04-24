@@ -4,27 +4,51 @@ import { useEffect, useState } from "react";
 import StatCard from "@/components/ui/StatCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
 import WorkoutInsightCard from "./WorkoutInsightCard";
-import { loadAllWorkoutSessions } from "@/lib/data/workouts";
 import { getDashboardMetrics } from "@/lib/data/dashboard";
+import { listSavedWorkoutSessions } from "@/lib/api/workouts-api";
 
 // Main dashboard overview.
-// This component translates saved workout data into a simple, scannable summary.
+// Reads saved workout data through the API client.
 export default function DashboardOverview() {
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState(() => getDashboardMetrics([]));
 
   useEffect(() => {
-    const sessions = loadAllWorkoutSessions();
-    const nextMetrics = getDashboardMetrics(sessions);
+    async function loadDashboardData() {
+      try {
+        setError(null);
 
-    setMetrics(nextMetrics);
-    setHasHydrated(true);
+        const sessions = await listSavedWorkoutSessions();
+        const nextMetrics = getDashboardMetrics(sessions);
+
+        setMetrics(nextMetrics);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while loading dashboard data."
+        );
+      } finally {
+        setHasHydrated(true);
+      }
+    }
+
+    loadDashboardData();
   }, []);
 
   if (!hasHydrated) {
     return (
       <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
         Loading dashboard insights...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">
+        {error}
       </section>
     );
   }
@@ -41,7 +65,6 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
-      {/* High-signal KPI row */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Saved workouts"
@@ -65,7 +88,6 @@ export default function DashboardOverview() {
         />
       </section>
 
-      {/* Insight row */}
       <section className="grid gap-6 xl:grid-cols-3">
         <WorkoutInsightCard
           title="Training consistency"
@@ -89,7 +111,6 @@ export default function DashboardOverview() {
         />
       </section>
 
-      {/* Activity history */}
       <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <div className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">

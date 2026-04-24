@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { workoutTemplates } from "@/lib/data/workout-templates";
+import { workoutStore } from "@/lib/server/workout-store";
 
+// GET /api/workout-templates
+// Returns all available workout templates.
 export async function GET() {
-  return NextResponse.json(workoutTemplates);
+  return NextResponse.json(workoutStore.listTemplates());
 }

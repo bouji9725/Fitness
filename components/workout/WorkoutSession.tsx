@@ -12,47 +12,33 @@ import SessionSummary from "./SessionSummary";
 import SaveWorkoutBar from "./SaveWorkoutBar";
 import { workoutSessionReducer } from "@/lib/workout-session-reducer";
 import { resetWorkoutSessionFromTemplate } from "@/lib/services/workout-session-service";
-import { saveWorkoutSession } from "@/lib/data/workouts";
+import {
+  createWorkoutSession,
+  updateWorkoutSession,
+} from "@/lib/api/workouts-api";
 
 type WorkoutSessionProps = {
   template: WorkoutTemplate;
 };
 
 // Main workout workflow container.
-// This component coordinates:
-// - session creation
-// - local editing state
-// - save/reset actions
-// - exercise rendering
-//
-// For the current frontend phase, saving is handled on the client through
-// localStorage-backed helpers. We are not pretending this is a real backend yet.
+// UI talks to the API client. It does not know how persistence is implemented.
 export default function WorkoutSession({ template }: WorkoutSessionProps) {
-  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(null);
+  const [baseSession, setBaseSession] = useState<WorkoutSessionType | null>(
+    null
+  );
   const [sessionState, dispatch] = useReducer(workoutSessionReducer, null);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function createSessionFromApi() {
+    async function createSession() {
       try {
         setHasHydrated(false);
         setError(null);
 
-        const response = await fetch("/api/workout-sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ templateId: template.id }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create workout session.");
-        }
-
-        const session: WorkoutSessionType = await response.json();
+        const session = await createWorkoutSession(template.id);
 
         setBaseSession(session);
         dispatch({
@@ -71,28 +57,29 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
       }
     }
 
-    createSessionFromApi();
-  }, [template]);
+    createSession();
+  }, [template.id]);
 
   const isDirty = useMemo(() => {
     if (!baseSession || !sessionState) return false;
     return JSON.stringify(sessionState) !== JSON.stringify(baseSession);
   }, [sessionState, baseSession]);
 
-  function handleSaveWorkout() {
+  async function handleSaveWorkout() {
     if (!sessionState) return;
 
     try {
       setError(null);
 
-      // Frontend-phase persistence:
-      // save the current session to browser storage so the dashboard
-      // and related pages can read the saved workout history.
-      saveWorkoutSession(sessionState);
+      const savedRecord = await updateWorkoutSession(sessionState);
 
-      // Snapshot the saved state so dirty-checking resets correctly.
-      setBaseSession(structuredClone(sessionState));
-      setLastSavedAt(new Date().toISOString());
+      setBaseSession(savedRecord.session);
+      setLastSavedAt(savedRecord.savedAt);
+
+      dispatch({
+        type: "RESET_WORKOUT",
+        initialWorkout: savedRecord.session,
+      });
     } catch (err) {
       setError(
         err instanceof Error

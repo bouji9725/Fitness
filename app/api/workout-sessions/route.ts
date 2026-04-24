@@ -1,31 +1,32 @@
 import { NextResponse } from "next/server";
-import { workoutTemplates } from "@/lib/data/workout-templates";
-import { createWorkoutSessionFromTemplate } from "@/lib/services/workout-session-service";
+import { workoutStore } from "@/lib/server/workout-store";
 
+// GET /api/workout-sessions
+// Returns saved workout session records.
+export async function GET() {
+  return NextResponse.json(workoutStore.listSavedSessions());
+}
+
+// POST /api/workout-sessions
+// Creates a new draft session from a workout template.
 export async function POST(request: Request) {
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
 
-  const { templateId } = body;
-
-  if (!templateId) {
+  if (!body || typeof body.templateId !== "string") {
     return NextResponse.json(
-      { error: "templateId is required" },
+      { error: "templateId is required." },
       { status: 400 }
     );
   }
 
-  const template = workoutTemplates.find(
-    (t) => t.id === templateId
-  );
+  const session = workoutStore.createSession(body.templateId);
 
-  if (!template) {
+  if (!session) {
     return NextResponse.json(
-      { error: "Template not found" },
+      { error: "Workout template not found." },
       { status: 404 }
     );
   }
-
-  const session = createWorkoutSessionFromTemplate(template);
 
   return NextResponse.json(session, { status: 201 });
 }

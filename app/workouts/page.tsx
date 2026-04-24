@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import PageContainer from "@/components/layout/PageContainer";
 import PageHeader from "@/components/layout/PageHeader";
+import { listWorkoutTemplates } from "@/lib/api/workouts-api";
 import type { WorkoutTemplate } from "@/types/workout";
 
 export default function WorkoutsPage() {
@@ -18,13 +19,7 @@ export default function WorkoutsPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("/api/workout-templates");
-
-        if (!response.ok) {
-          throw new Error("Failed to load workout templates.");
-        }
-
-        const data: WorkoutTemplate[] = await response.json();
+        const data = await listWorkoutTemplates();
         setTemplates(data);
       } catch (err) {
         setError(
