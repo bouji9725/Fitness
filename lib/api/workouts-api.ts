@@ -1,19 +1,40 @@
+import { ApiError } from "./api-error";
 import type {
   WorkoutSession,
   WorkoutSessionRecord,
   WorkoutTemplate,
 } from "@/types/workout";
 
+type ApiErrorPayload = {
+  error?: {
+    message?: string;
+    details?: unknown;
+  };
+};
+
 async function parseApiResponse<T>(response: Response): Promise<T> {
-  const data = await response.json().catch(() => null);
+  const data = (await response.json().catch(() => null)) as
+    | ApiErrorPayload
+    | T
+    | null;
 
   if (!response.ok) {
     const message =
-      data && typeof data === "object" && "error" in data
-        ? String(data.error)
+      data &&
+      typeof data === "object" &&
+      "error" in data &&
+      data.error?.message
+        ? data.error.message
         : "API request failed.";
 
-    throw new Error(message);
+    const details =
+      data &&
+      typeof data === "object" &&
+      "error" in data
+        ? data.error?.details
+        : undefined;
+
+    throw new ApiError(message, response.status, details);
   }
 
   return data as T;

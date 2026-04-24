@@ -1,32 +1,41 @@
-import { NextResponse } from "next/server";
 import { workoutStore } from "@/lib/server/workout-store";
+import {
+  apiErrorResponse,
+  apiSuccessResponse,
+} from "@/lib/server/api-response";
+import { validateCreateWorkoutSessionPayload } from "@/lib/server/workout-validation";
 
 // GET /api/workout-sessions
 // Returns saved workout session records.
 export async function GET() {
-  return NextResponse.json(workoutStore.listSavedSessions());
+  return apiSuccessResponse(workoutStore.listSavedSessions());
 }
 
 // POST /api/workout-sessions
 // Creates a new draft session from a workout template.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
+  const validation = validateCreateWorkoutSessionPayload(body);
 
-  if (!body || typeof body.templateId !== "string") {
-    return NextResponse.json(
-      { error: "templateId is required." },
-      { status: 400 }
-    );
+  if (!validation.ok) {
+    return apiErrorResponse({
+      status: 400,
+      message: validation.message,
+      details: validation.details,
+    });
   }
 
-  const session = workoutStore.createSession(body.templateId);
+  const session = workoutStore.createSession(validation.data.templateId);
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Workout template not found." },
-      { status: 404 }
-    );
+    return apiErrorResponse({
+      status: 404,
+      message: "Workout template not found.",
+      details: {
+        templateId: validation.data.templateId,
+      },
+    });
   }
 
-  return NextResponse.json(session, { status: 201 });
+  return apiSuccessResponse(session, 201);
 }

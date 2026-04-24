@@ -1,6 +1,9 @@
-import { NextResponse } from "next/server";
 import { workoutStore } from "@/lib/server/workout-store";
-import type { WorkoutSession } from "@/types/workout";
+import {
+  apiErrorResponse,
+  apiSuccessResponse,
+} from "@/lib/server/api-response";
+import { validateWorkoutSessionPayload } from "@/lib/server/workout-validation";
 
 type RouteContext = {
   params: Promise<{
@@ -15,43 +18,51 @@ export async function GET(_request: Request, context: RouteContext) {
   const session = workoutStore.getSession(sessionId);
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Workout session not found." },
-      { status: 404 }
-    );
+    return apiErrorResponse({
+      status: 404,
+      message: "Workout session not found.",
+      details: { sessionId },
+    });
   }
 
-  return NextResponse.json(session);
+  return apiSuccessResponse(session);
 }
 
 // PATCH /api/workout-sessions/:sessionId
 // Saves an updated workout session.
 export async function PATCH(request: Request, context: RouteContext) {
   const { sessionId } = await context.params;
-  const body = (await request.json().catch(() => null)) as WorkoutSession | null;
+  const body = await request.json().catch(() => null);
+  const validation = validateWorkoutSessionPayload(body);
 
-  if (!body || typeof body.id !== "string") {
-    return NextResponse.json(
-      { error: "Valid workout session payload is required." },
-      { status: 400 }
-    );
+  if (!validation.ok) {
+    return apiErrorResponse({
+      status: 400,
+      message: validation.message,
+      details: validation.details,
+    });
   }
 
-  if (body.id !== sessionId) {
-    return NextResponse.json(
-      { error: "Session id in URL and payload must match." },
-      { status: 400 }
-    );
+  if (validation.data.id !== sessionId) {
+    return apiErrorResponse({
+      status: 400,
+      message: "Session id in URL and payload must match.",
+      details: {
+        urlSessionId: sessionId,
+        payloadSessionId: validation.data.id,
+      },
+    });
   }
 
-  const savedRecord = workoutStore.saveSession(sessionId, body);
+  const savedRecord = workoutStore.saveSession(sessionId, validation.data);
 
   if (!savedRecord) {
-    return NextResponse.json(
-      { error: "Workout session not found." },
-      { status: 404 }
-    );
+    return apiErrorResponse({
+      status: 404,
+      message: "Workout session not found.",
+      details: { sessionId },
+    });
   }
 
-  return NextResponse.json(savedRecord);
+  return apiSuccessResponse(savedRecord);
 }
