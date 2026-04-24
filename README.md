@@ -1,6 +1,6 @@
 # Fitness App (Maintainer README)
 
-# Fitsler — Fitness SaaS Frontend
+# Fitsler — Fitness App
 
 A production-minded fitness tracking application built with Next.js, React, TypeScript, and Tailwind CSS.
 
