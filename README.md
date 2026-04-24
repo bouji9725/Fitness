@@ -39,8 +39,28 @@ https://fitness-seven-sage.vercel.app
 The app follows an API-first frontend architecture:
 
 ```txt
-UI components
-  -> lib/api/*
-  -> app/api/*
-  -> lib/server/*
-  -> temporary server-side stores
+| Route                   | Purpose                              |
+| ----------------------- | ------------------------------------ |
+| `/`                     | Product overview                     |
+| `/dashboard`            | Training metrics and recent activity |
+| `/workouts`             | Workout template selection           |
+| `/workouts/[workoutId]` | Active workout session logging       |
+| `/progress`             | Body stats tracking                  |
+| `/nutrition`            | Nutrition and macro planning         |
+| `/profile`              | Profile and coach-sharing settings   |
+| `/share`                | Coach-ready summary                  |
+
+| Method | Endpoint                            | Purpose                     |
+| ------ | ----------------------------------- | --------------------------- |
+| GET    | `/api/workout-templates`            | List workout templates      |
+| GET    | `/api/workout-sessions`             | List saved workout sessions |
+| POST   | `/api/workout-sessions`             | Create workout session      |
+| GET    | `/api/workout-sessions/[sessionId]` | Get workout session         |
+| PATCH  | `/api/workout-sessions/[sessionId]` | Save workout session        |
+| GET    | `/api/profile`                      | Get profile                 |
+| PUT    | `/api/profile`                      | Update profile              |
+| GET    | `/api/progress`                     | List progress entries       |
+| POST   | `/api/progress`                     | Add progress entry          |
+| GET    | `/api/nutrition`                    | Get nutrition summary       |
+| PUT    | `/api/nutrition`                    | Save nutrition summary      |
+
