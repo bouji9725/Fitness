@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import StatCard from "@/components/ui/StatCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
 import WorkoutInsightCard from "./WorkoutInsightCard";
-import { getDashboardMetrics } from "@/lib/data/dashboard";
+import { getDashboardMetrics } from "@/lib/calculations/dashboard";
 import { listSavedWorkoutSessions } from "@/lib/api/workouts-api";
 
 // Main dashboard overview.

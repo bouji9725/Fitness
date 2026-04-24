@@ -12,14 +12,14 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import { getProfile, updateProfile } from "@/lib/api/profile-api";
-import { loadBodyStats } from "@/lib/data/progress";
-import { loadNutritionSummary } from "@/lib/data/nutrition";
+import { listProgressEntries } from "@/lib/api/progress-api";
+import { getNutritionSummary } from "@/lib/api/nutrition-api";
 import { calculateNutritionResults } from "@/lib/calculations/nutrition";
 import { getLatestBodyStats } from "@/lib/calculations/progress";
 import { parseNumberInput } from "@/lib/utils/number";
 import type { UserProfile } from "@/types/profile";
 import type { BodyStatsEntry } from "@/types/progress";
-import type { NutritionGoal } from "@/types/nutrition";
+import type { NutritionGoal, NutritionResults } from "@/types/nutrition";
 
 function mapProfileGoalToNutritionGoal(
   goal?: UserProfile["goal"]
@@ -44,9 +44,8 @@ export default function ProfilePage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [latestBodyStats, setLatestBodyStats] =
     useState<BodyStatsEntry | null>(null);
-  const [savedNutritionSummary, setSavedNutritionSummary] = useState(
-    loadNutritionSummary()
-  );
+  const [savedNutritionSummary, setSavedNutritionSummary] =
+    useState<NutritionResults | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,12 +55,16 @@ export default function ProfilePage() {
         setLoading(true);
         setError(null);
 
-        const savedProfile = await getProfile();
-        const bodyStatsEntries = loadBodyStats();
+        const [savedProfile, bodyStatsEntries, nutritionSummary] =
+          await Promise.all([
+            getProfile(),
+            listProgressEntries(),
+            getNutritionSummary(),
+          ]);
 
         setProfile(savedProfile);
         setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
-        setSavedNutritionSummary(loadNutritionSummary());
+        setSavedNutritionSummary(nutritionSummary);
       } catch (err) {
         setError(
           err instanceof Error
@@ -98,10 +101,14 @@ export default function ProfilePage() {
       setError(null);
 
       const savedProfile = await updateProfile(profile);
+      const [bodyStatsEntries, nutritionSummary] = await Promise.all([
+        listProgressEntries(),
+        getNutritionSummary(),
+      ]);
 
       setProfile(savedProfile);
-      setSavedNutritionSummary(loadNutritionSummary());
-      setLatestBodyStats(getLatestBodyStats(loadBodyStats()));
+      setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
+      setSavedNutritionSummary(nutritionSummary);
       setIsEditProfileOpen(false);
     } catch (err) {
       setError(
