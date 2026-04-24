@@ -11,7 +11,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
-import { loadUserProfile, saveUserProfile } from "@/lib/data/profile";
+import { getProfile, updateProfile } from "@/lib/api/profile-api";
 import { loadBodyStats } from "@/lib/data/progress";
 import { loadNutritionSummary } from "@/lib/data/nutrition";
 import { calculateNutritionResults } from "@/lib/calculations/nutrition";
@@ -29,34 +29,51 @@ function mapProfileGoalToNutritionGoal(
   return "gain-muscle";
 }
 
-export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>({
-    id: "user-1",
-    name: "User",
-    age: 25,
-    heightCm: 180,
-    goal: "gain-muscle",
-    coachSharingEnabled: false,
-    coachName: "",
-  });
+const fallbackProfile: UserProfile = {
+  id: "user-1",
+  name: "User",
+  age: 25,
+  heightCm: 180,
+  goal: "gain-muscle",
+  coachSharingEnabled: false,
+  coachName: "",
+};
 
+export default function ProfilePage() {
+  const [profile, setProfile] = useState<UserProfile>(fallbackProfile);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [latestBodyStats, setLatestBodyStats] =
     useState<BodyStatsEntry | null>(null);
   const [savedNutritionSummary, setSavedNutritionSummary] = useState(
     loadNutritionSummary()
   );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedProfile = loadUserProfile();
-    const bodyStatsEntries = loadBodyStats();
+    async function loadProfilePageData() {
+      try {
+        setLoading(true);
+        setError(null);
 
-    if (savedProfile) {
-      setProfile(savedProfile);
+        const savedProfile = await getProfile();
+        const bodyStatsEntries = loadBodyStats();
+
+        setProfile(savedProfile);
+        setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
+        setSavedNutritionSummary(loadNutritionSummary());
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while loading the profile."
+        );
+      } finally {
+        setLoading(false);
+      }
     }
 
-    setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
-    setSavedNutritionSummary(loadNutritionSummary());
+    loadProfilePageData();
   }, []);
 
   const bodyWeightKg = latestBodyStats?.weightKg ?? 80;
@@ -76,11 +93,23 @@ export default function ProfilePage() {
 
   const nutritionToShow = savedNutritionSummary ?? fallbackNutrition;
 
-  function handleSaveProfile() {
-    saveUserProfile(profile);
-    setSavedNutritionSummary(loadNutritionSummary());
-    setLatestBodyStats(getLatestBodyStats(loadBodyStats()));
-    setIsEditProfileOpen(false);
+  async function handleSaveProfile() {
+    try {
+      setError(null);
+
+      const savedProfile = await updateProfile(profile);
+
+      setProfile(savedProfile);
+      setSavedNutritionSummary(loadNutritionSummary());
+      setLatestBodyStats(getLatestBodyStats(loadBodyStats()));
+      setIsEditProfileOpen(false);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while saving the profile."
+      );
+    }
   }
 
   return (
@@ -100,7 +129,19 @@ export default function ProfilePage() {
           }
         />
 
-        {isEditProfileOpen ? (
+        {loading ? (
+          <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
+            Loading profile...
+          </section>
+        ) : null}
+
+        {error ? (
+          <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">
+            {error}
+          </section>
+        ) : null}
+
+        {!loading && isEditProfileOpen ? (
           <Card className="space-y-6 rounded-[var(--radius-xl)] p-5 sm:p-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
@@ -137,7 +178,7 @@ export default function ProfilePage() {
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      age: parseNumberInput(e.target.value),
+                      age: parseNumberInput(e.target.value) ?? 0,
                     }))
                   }
                   placeholder="Age"
@@ -152,7 +193,7 @@ export default function ProfilePage() {
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      heightCm: parseNumberInput(e.target.value),
+                      heightCm: parseNumberInput(e.target.value) ?? 0,
                     }))
                   }
                   placeholder="Height"
@@ -226,33 +267,35 @@ export default function ProfilePage() {
           </Card>
         ) : null}
 
-        <section className="grid gap-6 xl:grid-cols-2">
-          <UserProfileCard
-            profile={profile}
-            onEditProfile={() => setIsEditProfileOpen(true)}
-            bodyComposition={{
-              weightKg: bodyWeightKg,
-              bodyFatPercent,
-              fatFreeMassKg: nutritionToShow.fatFreeMassKg,
-              fatFreeMassLbs: nutritionToShow.fatFreeMassLbs,
-            }}
-            nutritionPlan={{
-              calorieTarget: nutritionToShow.calorieTarget,
-              fatPercent: nutritionToShow.fatPercent,
-              proteinTargetGrams: nutritionToShow.proteinTargetGrams,
-              fatTargetGrams: nutritionToShow.fatTargetGrams,
-              carbsTargetGrams: nutritionToShow.carbsTargetGrams,
-              proteinCalories: nutritionToShow.proteinCalories,
-              fatCalories: nutritionToShow.fatCalories,
-              carbCalories: nutritionToShow.carbCalories,
-            }}
-          />
+        {!loading ? (
+          <section className="grid gap-6 xl:grid-cols-2">
+            <UserProfileCard
+              profile={profile}
+              onEditProfile={() => setIsEditProfileOpen(true)}
+              bodyComposition={{
+                weightKg: bodyWeightKg,
+                bodyFatPercent,
+                fatFreeMassKg: nutritionToShow.fatFreeMassKg,
+                fatFreeMassLbs: nutritionToShow.fatFreeMassLbs,
+              }}
+              nutritionPlan={{
+                calorieTarget: nutritionToShow.calorieTarget,
+                fatPercent: nutritionToShow.fatPercent,
+                proteinTargetGrams: nutritionToShow.proteinTargetGrams,
+                fatTargetGrams: nutritionToShow.fatTargetGrams,
+                carbsTargetGrams: nutritionToShow.carbsTargetGrams,
+                proteinCalories: nutritionToShow.proteinCalories,
+                fatCalories: nutritionToShow.fatCalories,
+                carbCalories: nutritionToShow.carbCalories,
+              }}
+            />
 
-          <ShareCoachCard
-            enabled={profile.coachSharingEnabled}
-            coachName={profile.coachName}
-          />
-        </section>
+            <ShareCoachCard
+              enabled={profile.coachSharingEnabled}
+              coachName={profile.coachName}
+            />
+          </section>
+        ) : null}
       </PageContainer>
     </AppShell>
   );
