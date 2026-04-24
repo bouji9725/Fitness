@@ -1,14 +1,12 @@
 ﻿"use client";
 
-"use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import { calculateNutritionResults } from "@/lib/calculations/nutrition";
-import { saveNutritionSummary } from "@/lib/data/nutrition";
+import { saveNutritionSummaryApi } from "@/lib/api/nutrition-api";
 import { parseNumberInput } from "@/lib/utils/number";
 import NutritionSummaryCard from "./NutritionSummaryCard";
 import ProteinRecommendationCard from "./ProteinRecommendationCard";
@@ -16,16 +14,19 @@ import NutritionPlanCard from "./NutritionPlanCard";
 import type { NutritionGoal, RecompDirection } from "@/types/nutrition";
 
 // Nutrition calculator.
-// Keep the form clear, then show outputs in dedicated summary cards.
+// UI calculates the result, then persists the latest summary through the API.
 export default function NutritionCalculator() {
-  const [weightKg, setWeightKg] = useState<number | undefined>(80);
-  const [bodyFatPercent, setBodyFatPercent] = useState<number | undefined>(15);
-  const [bmr, setBmr] = useState<number | undefined>(1800);
-  const [tdee, setTdee] = useState<number | undefined>(2600);
+  const [weightKg, setWeightKg] = useState(80);
+  const [bodyFatPercent, setBodyFatPercent] = useState(15);
+  const [bmr, setBmr] = useState(1800);
+  const [tdee, setTdee] = useState(2600);
   const [goal, setGoal] = useState<NutritionGoal>("gain-muscle");
-  const [adjustment, setAdjustment] = useState<number | undefined>(500);
+  const [adjustment, setAdjustment] = useState(500);
   const [recompDirection, setRecompDirection] =
     useState<RecompDirection>("slight-deficit");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle"
+  );
 
   const safeWeightKg = weightKg ?? 0;
   const safeBodyFatPercent = bodyFatPercent ?? 0;
@@ -54,7 +55,29 @@ export default function NutritionCalculator() {
   ]);
 
   useEffect(() => {
-    saveNutritionSummary(results);
+    let cancelled = false;
+
+    async function persistNutritionSummary() {
+      try {
+        setSaveStatus("saving");
+
+        await saveNutritionSummaryApi(results);
+
+        if (!cancelled) {
+          setSaveStatus("saved");
+        }
+      } catch {
+        if (!cancelled) {
+          setSaveStatus("error");
+        }
+      }
+    }
+
+    persistNutritionSummary();
+
+    return () => {
+      cancelled = true;
+    };
   }, [results]);
 
   return (
@@ -70,7 +93,14 @@ export default function NutritionCalculator() {
           </h3>
 
           <p className="mt-2 text-sm leading-7 text-slate-300">
-            Estimate fat-free mass, calories, protein, fats, and carbs based on your goal.
+            Estimate fat-free mass, calories, protein, fats, and carbs based on
+            your goal.
+          </p>
+
+          <p className="mt-3 text-sm text-slate-400">
+            {saveStatus === "saving" && "Saving nutrition summary..."}
+            {saveStatus === "saved" && "Nutrition summary saved."}
+            {saveStatus === "error" && "Nutrition summary could not be saved."}
           </p>
         </div>
 
@@ -79,8 +109,8 @@ export default function NutritionCalculator() {
             <Input
               id="nutrition-weight"
               type="number"
-              value={weightKg ?? ""}
-              onChange={(e) => setWeightKg(parseNumberInput(e.target.value))}
+              value={weightKg}
+              onChange={(e) => setWeightKg(parseNumberInput(e.target.value) ?? 0)}
             />
           </FormField>
 
@@ -88,9 +118,9 @@ export default function NutritionCalculator() {
             <Input
               id="nutrition-body-fat"
               type="number"
-              value={bodyFatPercent ?? ""}
+              value={bodyFatPercent}
               onChange={(e) =>
-                setBodyFatPercent(parseNumberInput(e.target.value))
+                setBodyFatPercent(parseNumberInput(e.target.value) ?? 0)
               }
             />
           </FormField>
@@ -99,8 +129,8 @@ export default function NutritionCalculator() {
             <Input
               id="nutrition-bmr"
               type="number"
-              value={bmr ?? ""}
-              onChange={(e) => setBmr(parseNumberInput(e.target.value))}
+              value={bmr}
+              onChange={(e) => setBmr(parseNumberInput(e.target.value) ?? 0)}
             />
           </FormField>
 
@@ -108,8 +138,8 @@ export default function NutritionCalculator() {
             <Input
               id="nutrition-tdee"
               type="number"
-              value={tdee ?? ""}
-              onChange={(e) => setTdee(parseNumberInput(e.target.value))}
+              value={tdee}
+              onChange={(e) => setTdee(parseNumberInput(e.target.value) ?? 0)}
             />
           </FormField>
 
@@ -129,8 +159,8 @@ export default function NutritionCalculator() {
             <Input
               id="nutrition-adjustment"
               type="number"
-              value={adjustment ?? ""}
-              onChange={(e) => setAdjustment(parseNumberInput(e.target.value))}
+              value={adjustment}
+              onChange={(e) => setAdjustment(parseNumberInput(e.target.value) ?? 0)}
             />
           </FormField>
         </div>
