@@ -131,10 +131,7 @@ export default function DashboardOverview() {
             <p className="mt-2 text-3xl font-semibold text-white">
               {metrics.recentWorkouts.length}
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              Up to five of your latest saved sessions are shown in the activity
-              panel.
-            </p>
+            
           </div>
         </div>
 

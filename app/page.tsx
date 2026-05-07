@@ -36,8 +36,8 @@ export default function HomePage() {
       <PageContainer>
         <PageHeader
           eyebrow="Fitness tracker"
-          title="Train with structure. Track with clarity."
-          description="Fitsler helps you organize workouts, monitor progress, calculate nutrition targets, and prepare clear summaries for coaching or personal review."
+          title="Train, Track, progress."
+          description="Fitsler helps you organize workouts."
           actions={
             <Link
               href="/workouts"
@@ -51,17 +51,16 @@ export default function HomePage() {
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="app-panel rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-              Core workflow
+             
             </p>
 
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Everything starts with a logged workout.
+              Plan your workout, Nutrition intake.
             </h2>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
               Pick a training template, record your sets, save the session, and
-              let the dashboard, progress, nutrition, and sharing views build on
-              that data.
+              let the dashboard, progress, and calculate your macronutrition daily intake.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -83,7 +82,7 @@ export default function HomePage() {
 
           <aside className="app-surface rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-              Product focus
+              App Provides
             </p>
 
             <div className="mt-5 space-y-4">
@@ -109,9 +108,7 @@ export default function HomePage() {
               key={module.title}
               className="app-surface rounded-[var(--radius-lg)] p-5 transition hover:border-indigo-400/30"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-                Module
-              </p>
+              
 
               <h3 className="mt-3 text-xl font-semibold text-white">
                 {module.title}

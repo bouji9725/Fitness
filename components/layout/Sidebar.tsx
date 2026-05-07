@@ -39,13 +39,13 @@ function SidebarContent({ onClose }: SidebarContentProps) {
     <div className="flex h-full flex-col">
       <div className="border-b app-hairline px-5 py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-          Fitness Workspace
+          Fitness Assistance
         </p>
 
         <h2 className="mt-2 text-xl font-semibold text-white">Fitsler</h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Track workouts, progress, nutrition, and coach-ready summaries.
+          Track workouts, progress, nutrition.
         </p>
       </div>
 
@@ -77,7 +77,7 @@ function SidebarContent({ onClose }: SidebarContentProps) {
 
       <div className="border-t app-hairline px-5 py-4">
         <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-          Main workflow
+          Track your workout
         </p>
 
         <Link

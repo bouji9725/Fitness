@@ -31,10 +31,10 @@ function mapProfileGoalToNutritionGoal(
 
 const fallbackProfile: UserProfile = {
   id: "user-1",
-  name: "User",
-  age: 25,
-  heightCm: 180,
-  goal: "gain-muscle",
+  name: "",
+  age: undefined,
+  heightCm: undefined,
+  goal: undefined,
   coachSharingEnabled: false,
   coachName: "",
 };
@@ -181,11 +181,11 @@ export default function ProfilePage() {
                 <Input
                   id="profile-age"
                   type="number"
-                  value={profile.age}
+                  value={profile.age ?? ""}
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      age: parseNumberInput(e.target.value) ?? 0,
+                      age: parseNumberInput(e.target.value),
                     }))
                   }
                   placeholder="Age"
@@ -196,11 +196,11 @@ export default function ProfilePage() {
                 <Input
                   id="profile-height"
                   type="number"
-                  value={profile.heightCm}
+                  value={profile.heightCm ?? ""}
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      heightCm: parseNumberInput(e.target.value) ?? 0,
+                      heightCm: parseNumberInput(e.target.value),
                     }))
                   }
                   placeholder="Height"

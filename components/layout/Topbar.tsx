@@ -24,7 +24,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
 
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-indigo-300">
-              Training workspace
+              Workout Tracker
             </p>
 
             <p className="truncate text-sm text-slate-300">
