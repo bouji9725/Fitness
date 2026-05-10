@@ -149,16 +149,41 @@ NutritionResults → { proteinTargetGrams, calorieTarget, fatTargetGrams, carbsT
 
 ---
 
-## Current branch status (styling)
+## Workflow rules
 
-Modified files on this branch (as of session start):
-- `app/page.tsx`
-- `app/profile/page.tsx`
-- `components/dashboard/DashboardOverview.tsx`
-- `components/layout/Sidebar.tsx`
-- `components/layout/Topbar.tsx`
-- `components/nutrition/NutritionCalculator.tsx`
+These rules apply in every session, no exceptions.
 
-Recent work completed: API-first migration across all data domains (profile, progress, nutrition, workout sessions). Legacy local data imports have been removed.
+1. **Plan before changes** — Before editing any project file, state the problem and present the solution options. Wait for explicit approval before touching code.
+2. **CLAUDE.md stays current** — Run `/sync-claude-md` (or the Stop hook handles it automatically) to keep this file accurate after structural changes.
+3. **Log work to Notion** — After each session where meaningful work is done, append an entry to the Work Log page in the Fitsler App Notion space.
+4. **No unsolicited refactors** — Only change what the approved task requires. Do not clean up surrounding code, rename things, or add abstractions unless asked.
 
-Next planned milestone: Prisma + database integration to replace in-memory stores.
+---
+
+## Slash commands
+
+| Command | What it does |
+|---|---|
+| `/sync-claude-md` | Analyzes the project, updates all stale sections of this file, commits the result |
+
+The `Stop` hook (`.claude/settings.json`) auto-patches the **Current branch status** section below after every session.
+
+---
+
+## Current branch status (2026-05-10)
+
+**Branch:** `styling`
+
+**Modified files:**
+```
+Clean — no uncommitted changes
+```
+
+**Recent commits:**
+```
+a1337a1 add CLAUDE.md with full codebase documentation and styling updates
+6c241f5 remove legacy local data access after API-first migration
+39ae1a3 feat: add API-first nutrition data boundary
+0274775 feat: add API-first progress data boundary
+3dfdfbd feat: add API-first profile data boundary
+```
