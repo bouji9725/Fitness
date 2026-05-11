@@ -29,7 +29,7 @@ function validateProfilePayload(body: unknown): UserProfile | null {
 }
 
 export async function GET() {
-  return apiSuccessResponse(profileStore.getProfile());
+  return apiSuccessResponse(await profileStore.getProfile());
 }
 
 export async function PUT(request: Request) {
@@ -43,5 +43,5 @@ export async function PUT(request: Request) {
     });
   }
 
-  return apiSuccessResponse(profileStore.saveProfile(profile));
+  return apiSuccessResponse(await profileStore.saveProfile(profile));
 }

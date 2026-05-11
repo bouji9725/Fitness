@@ -12,10 +12,9 @@ type RouteContext = {
 };
 
 // GET /api/workout-sessions/:sessionId
-// Returns one workout session by id.
 export async function GET(_request: Request, context: RouteContext) {
   const { sessionId } = await context.params;
-  const session = workoutStore.getSession(sessionId);
+  const session = await workoutStore.getSession(sessionId);
 
   if (!session) {
     return apiErrorResponse({
@@ -29,7 +28,6 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 // PATCH /api/workout-sessions/:sessionId
-// Saves an updated workout session.
 export async function PATCH(request: Request, context: RouteContext) {
   const { sessionId } = await context.params;
   const body = await request.json().catch(() => null);
@@ -54,7 +52,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     });
   }
 
-  const savedRecord = workoutStore.saveSession(sessionId, validation.data);
+  const savedRecord = await workoutStore.saveSession(sessionId, validation.data);
 
   if (!savedRecord) {
     return apiErrorResponse({

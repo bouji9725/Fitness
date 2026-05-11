@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

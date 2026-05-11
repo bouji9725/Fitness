@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model UserProfile {
+  id                  String  @id @default("user-1")
+  name                String  @default("")
+  age                 Int?
+  heightCm            Float?
+  goal                String?
+  coachSharingEnabled Boolean @default(false)
+  coachName           String?
+}
+
+model BodyStatsEntry {
+  id             String  @id
+  date           String
+  weightKg       Float
+  bodyFatPercent Float
+  muscleMassKg   Float?
+  notes          String?
+}
+
+model NutritionSummary {
+  id                 String @id @default("singleton")
+  fatFreeMassKg      Float
+  fatFreeMassLbs     Float
+  proteinFactor      Float
+  proteinTargetGrams Float
+  calorieTarget      Float
+  fatPercent         Float
+  fatTargetGrams     Float
+  carbsTargetGrams   Float
+  proteinCalories    Float
+  fatCalories        Float
+  carbCalories       Float
+}
+
+// exercises is stored as a JSON string (SessionExercise[]).
+// This avoids a three-table join while keeping the API boundary identical.
+model WorkoutSession {
+  id           String                @id
+  templateId   String
+  templateName String
+  performedAt  String
+  status       String                @default("draft")
+  exercises    String
+  createdAt    String
+  updatedAt    String
+  record       WorkoutSessionRecord?
+}
+
+model WorkoutSessionRecord {
+  id        String         @id @default(cuid())
+  sessionId String         @unique
+  session   WorkoutSession @relation(fields: [sessionId], references: [id])
+  savedAt   String
+}

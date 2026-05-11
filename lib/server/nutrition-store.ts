@@ -1,19 +1,38 @@
+import { prisma } from "./prisma";
 import type { NutritionResults } from "@/types/nutrition";
 
-declare global {
-  // Temporary server-side nutrition store.
-  // This will later be replaced by database persistence.
-  // eslint-disable-next-line no-var
-  var __fitnessNutritionStore: NutritionResults | null | undefined;
-}
+const SINGLETON_ID = "singleton";
 
 export const nutritionStore = {
-  getSummary(): NutritionResults | null {
-    return globalThis.__fitnessNutritionStore ?? null;
+  async getSummary(): Promise<NutritionResults | null> {
+    const row = await prisma.nutritionSummary.findUnique({
+      where: { id: SINGLETON_ID },
+    });
+
+    if (!row) return null;
+
+    return {
+      fatFreeMassKg: row.fatFreeMassKg,
+      fatFreeMassLbs: row.fatFreeMassLbs,
+      proteinFactor: row.proteinFactor,
+      proteinTargetGrams: row.proteinTargetGrams,
+      calorieTarget: row.calorieTarget,
+      fatPercent: row.fatPercent,
+      fatTargetGrams: row.fatTargetGrams,
+      carbsTargetGrams: row.carbsTargetGrams,
+      proteinCalories: row.proteinCalories,
+      fatCalories: row.fatCalories,
+      carbCalories: row.carbCalories,
+    };
   },
 
-  saveSummary(summary: NutritionResults): NutritionResults {
-    globalThis.__fitnessNutritionStore = summary;
+  async saveSummary(summary: NutritionResults): Promise<NutritionResults> {
+    await prisma.nutritionSummary.upsert({
+      where: { id: SINGLETON_ID },
+      create: { id: SINGLETON_ID, ...summary },
+      update: { ...summary },
+    });
+
     return summary;
   },
 };

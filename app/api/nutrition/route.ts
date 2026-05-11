@@ -36,13 +36,11 @@ function validateNutritionSummaryPayload(body: unknown): NutritionResults | null
 }
 
 // GET /api/nutrition
-// Returns the latest saved nutrition summary.
 export async function GET() {
-  return apiSuccessResponse(nutritionStore.getSummary());
+  return apiSuccessResponse(await nutritionStore.getSummary());
 }
 
 // PUT /api/nutrition
-// Saves the latest nutrition summary.
 export async function PUT(request: Request) {
   const body = await request.json().catch(() => null);
   const summary = validateNutritionSummaryPayload(body);
@@ -54,5 +52,5 @@ export async function PUT(request: Request) {
     });
   }
 
-  return apiSuccessResponse(nutritionStore.saveSummary(summary));
+  return apiSuccessResponse(await nutritionStore.saveSummary(summary));
 }

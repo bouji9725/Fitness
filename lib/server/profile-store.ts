@@ -1,7 +1,10 @@
+import { prisma } from "./prisma";
 import type { UserProfile } from "@/types/profile";
 
+const DEFAULT_ID = "user-1";
+
 const defaultProfile: UserProfile = {
-  id: "user-1",
+  id: DEFAULT_ID,
   name: "User",
   age: 25,
   heightCm: 180,
@@ -10,25 +13,51 @@ const defaultProfile: UserProfile = {
   coachName: "",
 };
 
-declare global {
-  var __fitnessProfileStore: UserProfile | undefined;
+function rowToProfile(row: {
+  id: string;
+  name: string;
+  age: number | null;
+  heightCm: number | null;
+  goal: string | null;
+  coachSharingEnabled: boolean;
+  coachName: string | null;
+}): UserProfile {
+  return {
+    id: row.id,
+    name: row.name,
+    age: row.age ?? undefined,
+    heightCm: row.heightCm ?? undefined,
+    goal: (row.goal as UserProfile["goal"]) ?? undefined,
+    coachSharingEnabled: row.coachSharingEnabled,
+    coachName: row.coachName ?? undefined,
+  };
 }
 
 export const profileStore = {
-  getProfile(): UserProfile {
-    if (!globalThis.__fitnessProfileStore) {
-      globalThis.__fitnessProfileStore = defaultProfile;
-    }
+  async getProfile(): Promise<UserProfile> {
+    const row = await prisma.userProfile.findUnique({
+      where: { id: DEFAULT_ID },
+    });
 
-    return globalThis.__fitnessProfileStore;
+    return row ? rowToProfile(row) : defaultProfile;
   },
 
-  saveProfile(profile: UserProfile): UserProfile {
-    globalThis.__fitnessProfileStore = {
-      ...profile,
-      id: profile.id || "user-1",
+  async saveProfile(profile: UserProfile): Promise<UserProfile> {
+    const data = {
+      name: profile.name,
+      age: profile.age ?? null,
+      heightCm: profile.heightCm ?? null,
+      goal: profile.goal ?? null,
+      coachSharingEnabled: profile.coachSharingEnabled,
+      coachName: profile.coachName ?? null,
     };
 
-    return globalThis.__fitnessProfileStore;
+    const row = await prisma.userProfile.upsert({
+      where: { id: DEFAULT_ID },
+      create: { id: DEFAULT_ID, ...data },
+      update: data,
+    });
+
+    return rowToProfile(row);
   },
 };

@@ -110,7 +110,7 @@ export default function NutritionCalculator() {
               id="nutrition-weight"
               type="number"
               value={weightKg}
-              onChange={(e) => setWeightKg(parseNumberInput(e.target.value) ?? undefined)}
+              onChange={(e) => setWeightKg(parseNumberInput(e.target.value) ?? 0)}
             />
           </FormField>
 
@@ -120,7 +120,7 @@ export default function NutritionCalculator() {
               type="number"
               value={bodyFatPercent}
               onChange={(e) =>
-                setBodyFatPercent(parseNumberInput(e.target.value) ?? undefined)
+                setBodyFatPercent(parseNumberInput(e.target.value) ?? 0)
               }
             />
           </FormField>

@@ -6,13 +6,11 @@ import {
 import { validateCreateWorkoutSessionPayload } from "@/lib/server/workout-validation";
 
 // GET /api/workout-sessions
-// Returns saved workout session records.
 export async function GET() {
-  return apiSuccessResponse(workoutStore.listSavedSessions());
+  return apiSuccessResponse(await workoutStore.listSavedSessions());
 }
 
 // POST /api/workout-sessions
-// Creates a new draft session from a workout template.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const validation = validateCreateWorkoutSessionPayload(body);
@@ -25,7 +23,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const session = workoutStore.createSession(validation.data.templateId);
+  const session = await workoutStore.createSession(validation.data.templateId);
 
   if (!session) {
     return apiErrorResponse({

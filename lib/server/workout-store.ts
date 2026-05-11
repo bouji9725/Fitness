@@ -3,101 +3,120 @@ import {
   createWorkoutSessionFromTemplate,
   touchWorkoutSession,
 } from "@/lib/services/workout-session-service";
+import { prisma } from "./prisma";
 import type {
   WorkoutSession,
   WorkoutSessionRecord,
   WorkoutTemplate,
 } from "@/types/workout";
 
-type WorkoutStoreState = {
-  sessions: Map<string, WorkoutSession>;
-  savedRecords: Map<string, WorkoutSessionRecord>;
-};
-
-declare global {
-  // Keeps the temporary store stable during local development hot reloads.
-  // This is intentionally temporary and will be replaced by Prisma/database later.
-  // eslint-disable-next-line no-var
-  var __fitnessWorkoutStore: WorkoutStoreState | undefined;
+function serializeExercises(session: WorkoutSession): string {
+  return JSON.stringify(session.exercises);
 }
 
-function getStore(): WorkoutStoreState {
-  if (!globalThis.__fitnessWorkoutStore) {
-    globalThis.__fitnessWorkoutStore = {
-      sessions: new Map<string, WorkoutSession>(),
-      savedRecords: new Map<string, WorkoutSessionRecord>(),
-    };
-  }
-
-  return globalThis.__fitnessWorkoutStore;
+function rowToSession(row: {
+  id: string;
+  templateId: string;
+  templateName: string;
+  performedAt: string;
+  status: string;
+  exercises: string;
+  createdAt: string;
+  updatedAt: string;
+}): WorkoutSession {
+  return {
+    id: row.id,
+    templateId: row.templateId,
+    templateName: row.templateName,
+    performedAt: row.performedAt,
+    status: row.status as WorkoutSession["status"],
+    exercises: JSON.parse(row.exercises),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-// Temporary server-side workout store.
-// This gives the frontend a real API boundary before database integration.
 export const workoutStore = {
+  // Template methods stay synchronous — static seed data, no DB needed.
   listTemplates(): WorkoutTemplate[] {
     return workoutTemplates;
   },
 
   getTemplateById(templateId: string): WorkoutTemplate | null {
-    return workoutTemplates.find((template) => template.id === templateId) ?? null;
+    return workoutTemplates.find((t) => t.id === templateId) ?? null;
   },
 
-  createSession(templateId: string): WorkoutSession | null {
+  async createSession(templateId: string): Promise<WorkoutSession | null> {
     const template = this.getTemplateById(templateId);
-
-    if (!template) {
-      return null;
-    }
+    if (!template) return null;
 
     const session = createWorkoutSessionFromTemplate(template);
-    const store = getStore();
 
-    store.sessions.set(session.id, session);
+    await prisma.workoutSession.create({
+      data: {
+        id: session.id,
+        templateId: session.templateId,
+        templateName: session.templateName,
+        performedAt: session.performedAt,
+        status: session.status,
+        exercises: serializeExercises(session),
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+      },
+    });
 
     return session;
   },
 
-  getSession(sessionId: string): WorkoutSession | null {
-    const store = getStore();
-
-    return (
-      store.sessions.get(sessionId) ??
-      store.savedRecords.get(sessionId)?.session ??
-      null
-    );
-  },
-
-  saveSession(sessionId: string, session: WorkoutSession): WorkoutSessionRecord | null {
-    const existingSession = this.getSession(sessionId);
-
-    if (!existingSession) {
-      return null;
-    }
-
-    const nextSession = touchWorkoutSession({
-      ...session,
-      id: sessionId,
+  async getSession(sessionId: string): Promise<WorkoutSession | null> {
+    const row = await prisma.workoutSession.findUnique({
+      where: { id: sessionId },
     });
 
-    const record: WorkoutSessionRecord = {
-      session: nextSession,
-      savedAt: new Date().toISOString(),
-    };
-
-    const store = getStore();
-
-    store.sessions.set(sessionId, nextSession);
-    store.savedRecords.set(sessionId, record);
-
-    return record;
+    return row ? rowToSession(row) : null;
   },
 
-  listSavedSessions(): WorkoutSessionRecord[] {
-    const store = getStore();
-
-    return Array.from(store.savedRecords.values()).sort((a, b) => {
-      return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime();
+  async saveSession(
+    sessionId: string,
+    session: WorkoutSession
+  ): Promise<WorkoutSessionRecord | null> {
+    const exists = await prisma.workoutSession.findUnique({
+      where: { id: sessionId },
+      select: { id: true },
     });
+
+    if (!exists) return null;
+
+    const nextSession = touchWorkoutSession({ ...session, id: sessionId });
+    const savedAt = new Date().toISOString();
+
+    await prisma.workoutSession.update({
+      where: { id: sessionId },
+      data: {
+        status: nextSession.status,
+        exercises: serializeExercises(nextSession),
+        updatedAt: nextSession.updatedAt,
+      },
+    });
+
+    await prisma.workoutSessionRecord.upsert({
+      where: { sessionId },
+      create: { sessionId, savedAt },
+      update: { savedAt },
+    });
+
+    return { session: nextSession, savedAt };
+  },
+
+  async listSavedSessions(): Promise<WorkoutSessionRecord[]> {
+    const records = await prisma.workoutSessionRecord.findMany({
+      include: { session: true },
+      orderBy: { savedAt: "desc" },
+    });
+
+    return records.map((record) => ({
+      session: rowToSession(record.session),
+      savedAt: record.savedAt,
+    }));
   },
 };

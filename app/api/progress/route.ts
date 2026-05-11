@@ -29,13 +29,11 @@ function validateProgressEntryPayload(body: unknown): BodyStatsEntry | null {
 }
 
 // GET /api/progress
-// Returns all saved progress entries.
 export async function GET() {
-  return apiSuccessResponse(progressStore.listEntries());
+  return apiSuccessResponse(await progressStore.listEntries());
 }
 
 // POST /api/progress
-// Adds one progress entry and returns the updated list.
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const entry = validateProgressEntryPayload(body);
@@ -47,5 +45,5 @@ export async function POST(request: Request) {
     });
   }
 
-  return apiSuccessResponse(progressStore.addEntry(entry), 201);
+  return apiSuccessResponse(await progressStore.addEntry(entry), 201);
 }

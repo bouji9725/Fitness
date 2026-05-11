@@ -1,31 +1,44 @@
+import { prisma } from "./prisma";
 import type { BodyStatsEntry } from "@/types/progress";
 
-declare global {
-  // Temporary server-side progress store.
-  // This will later be replaced by database persistence.
-  // eslint-disable-next-line no-var
-  var __fitnessProgressStore: BodyStatsEntry[] | undefined;
-}
-
-function getStore(): BodyStatsEntry[] {
-  if (!globalThis.__fitnessProgressStore) {
-    globalThis.__fitnessProgressStore = [];
-  }
-
-  return globalThis.__fitnessProgressStore;
+function rowToEntry(row: {
+  id: string;
+  date: string;
+  weightKg: number;
+  bodyFatPercent: number;
+  muscleMassKg: number | null;
+  notes: string | null;
+}): BodyStatsEntry {
+  return {
+    id: row.id,
+    date: row.date,
+    weightKg: row.weightKg,
+    bodyFatPercent: row.bodyFatPercent,
+    muscleMassKg: row.muscleMassKg ?? undefined,
+    notes: row.notes ?? undefined,
+  };
 }
 
 export const progressStore = {
-  listEntries(): BodyStatsEntry[] {
-    return [...getStore()].sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
+  async listEntries(): Promise<BodyStatsEntry[]> {
+    const rows = await prisma.bodyStatsEntry.findMany({
+      orderBy: { date: "desc" },
     });
+
+    return rows.map(rowToEntry);
   },
 
-  addEntry(entry: BodyStatsEntry): BodyStatsEntry[] {
-    const currentEntries = getStore();
-
-    globalThis.__fitnessProgressStore = [entry, ...currentEntries];
+  async addEntry(entry: BodyStatsEntry): Promise<BodyStatsEntry[]> {
+    await prisma.bodyStatsEntry.create({
+      data: {
+        id: entry.id,
+        date: entry.date,
+        weightKg: entry.weightKg,
+        bodyFatPercent: entry.bodyFatPercent,
+        muscleMassKg: entry.muscleMassKg ?? null,
+        notes: entry.notes ?? null,
+      },
+    });
 
     return this.listEntries();
   },
