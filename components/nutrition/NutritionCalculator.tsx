@@ -16,23 +16,23 @@ import type { NutritionGoal, RecompDirection } from "@/types/nutrition";
 // Nutrition calculator.
 // UI calculates the result, then persists the latest summary through the API.
 export default function NutritionCalculator() {
-  const [weightKg, setWeightKg] = useState(80);
-  const [bodyFatPercent, setBodyFatPercent] = useState(15);
-  const [bmr, setBmr] = useState(1800);
-  const [tdee, setTdee] = useState(2600);
+  const [weightKg, setWeightKg] = useState<number | "">("");
+  const [bodyFatPercent, setBodyFatPercent] = useState<number | "">("");
+  const [bmr, setBmr] = useState<number | "">("");
+  const [tdee, setTdee] = useState<number | "">("");
   const [goal, setGoal] = useState<NutritionGoal>("gain-muscle");
-  const [adjustment, setAdjustment] = useState(500);
+  const [adjustment, setAdjustment] = useState<number | ("")>("");
   const [recompDirection, setRecompDirection] =
     useState<RecompDirection>("slight-deficit");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
     "idle"
   );
 
-  const safeWeightKg = weightKg ?? 0;
-  const safeBodyFatPercent = bodyFatPercent ?? 0;
-  const safeBmr = bmr ?? 0;
-  const safeTdee = tdee ?? 0;
-  const safeAdjustment = adjustment ?? 0;
+  const safeWeightKg = typeof weightKg === "number" ? weightKg : 0;
+  const safeBodyFatPercent = typeof bodyFatPercent === "number" ? bodyFatPercent : 0;
+  const safeBmr = typeof bmr === "number" ? bmr : 0;
+  const safeTdee = typeof tdee === "number" ? tdee : 0;
+  const safeAdjustment = typeof adjustment === "number" ? adjustment : 0;
 
   const results = useMemo(() => {
     return calculateNutritionResults({
@@ -110,7 +110,7 @@ export default function NutritionCalculator() {
               id="nutrition-weight"
               type="number"
               value={weightKg}
-              onChange={(e) => setWeightKg(parseNumberInput(e.target.value) ?? 0)}
+              onChange={(e) => setWeightKg(parseNumberInput(e.target.value) ?? "")}
             />
           </FormField>
 
@@ -120,7 +120,7 @@ export default function NutritionCalculator() {
               type="number"
               value={bodyFatPercent}
               onChange={(e) =>
-                setBodyFatPercent(parseNumberInput(e.target.value) ?? 0)
+                setBodyFatPercent(parseNumberInput(e.target.value) ?? "")
               }
             />
           </FormField>
@@ -130,7 +130,7 @@ export default function NutritionCalculator() {
               id="nutrition-bmr"
               type="number"
               value={bmr}
-              onChange={(e) => setBmr(parseNumberInput(e.target.value) ?? 0)}
+              onChange={(e) => setBmr(parseNumberInput(e.target.value) ?? "")}
             />
           </FormField>
 
@@ -139,7 +139,7 @@ export default function NutritionCalculator() {
               id="nutrition-tdee"
               type="number"
               value={tdee}
-              onChange={(e) => setTdee(parseNumberInput(e.target.value) ?? 0)}
+              onChange={(e) => setTdee(parseNumberInput(e.target.value) ?? "")}
             />
           </FormField>
 
@@ -160,7 +160,7 @@ export default function NutritionCalculator() {
               id="nutrition-adjustment"
               type="number"
               value={adjustment}
-              onChange={(e) => setAdjustment(parseNumberInput(e.target.value) ?? 0)}
+              onChange={(e) => setAdjustment(parseNumberInput(e.target.value) ?? "")}
             />
           </FormField>
         </div>
