@@ -11,37 +11,53 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function validateProfilePayload(body: unknown): UserProfile | null {
   if (!isRecord(body)) return null;
+
   if (typeof body.name !== "string") return null;
-  if (typeof body.age !== "number") return null;
-  if (typeof body.heightCm !== "number") return null;
-  if (typeof body.goal !== "string") return null;
   if (typeof body.coachSharingEnabled !== "boolean") return null;
 
   return {
     id: typeof body.id === "string" ? body.id : "user-1",
     name: body.name,
-    age: body.age,
-    heightCm: body.heightCm,
-    goal: body.goal as UserProfile["goal"],
+    age: typeof body.age === "number" ? body.age : undefined,
+    heightCm: typeof body.heightCm === "number" ? body.heightCm : undefined,
+    goal:
+      typeof body.goal === "string"
+        ? (body.goal as UserProfile["goal"])
+        : undefined,
     coachSharingEnabled: body.coachSharingEnabled,
-    coachName: typeof body.coachName === "string" ? body.coachName : "",
+    coachName: typeof body.coachName === "string" ? body.coachName : undefined,
   };
 }
 
 export async function GET() {
-  return apiSuccessResponse(await profileStore.getProfile());
+  try {
+    const profile = await profileStore.getProfile();
+    return apiSuccessResponse(profile);
+  } catch (error) {
+    console.error("Failed to load profile:", error);
+    return apiErrorResponse({ status: 500, message: "Failed to load profile." });
+  }
 }
 
 export async function PUT(request: Request) {
-  const body = await request.json().catch(() => null);
-  const profile = validateProfilePayload(body);
+  try {
+    const body = await request.json().catch(() => null);
+    const profile = validateProfilePayload(body);
 
-  if (!profile) {
+    if (!profile) {
+      return apiErrorResponse({
+        status: 400,
+        message: "Invalid profile payload.",
+      });
+    }
+
+    const updated = await profileStore.saveProfile(profile);
+    return apiSuccessResponse(updated);
+  } catch (error) {
+    console.error("Failed to update profile:", error);
     return apiErrorResponse({
-      status: 400,
-      message: "Valid profile payload is required.",
+      status: 500,
+      message: "Failed to update profile.",
     });
   }
-
-  return apiSuccessResponse(await profileStore.saveProfile(profile));
 }

@@ -3,6 +3,7 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@/lib/server/api-response";
+import { Prisma } from "@/lib/generated/prisma/client";
 import type { BodyStatsEntry } from "@/types/progress";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -28,22 +29,47 @@ function validateProgressEntryPayload(body: unknown): BodyStatsEntry | null {
   };
 }
 
-// GET /api/progress
 export async function GET() {
-  return apiSuccessResponse(await progressStore.listEntries());
-}
-
-// POST /api/progress
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-  const entry = validateProgressEntryPayload(body);
-
-  if (!entry) {
+  try {
+    const entries = await progressStore.listEntries();
+    return apiSuccessResponse(entries);
+  } catch (error) {
+    console.error("Failed to load progress entries:", error);
     return apiErrorResponse({
-      status: 400,
-      message: "Valid progress entry payload is required.",
+      status: 500,
+      message: "Failed to load progress entries.",
     });
   }
+}
 
-  return apiSuccessResponse(await progressStore.addEntry(entry), 201);
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => null);
+    const entry = validateProgressEntryPayload(body);
+
+    if (!entry) {
+      return apiErrorResponse({
+        status: 400,
+        message: "Valid progress entry payload is required.",
+      });
+    }
+
+    const entries = await progressStore.addEntry(entry);
+    return apiSuccessResponse(entries, 201);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return apiErrorResponse({
+        status: 409,
+        message: "Duplicated ID: a progress entry with this ID already exists.",
+      });
+    }
+    console.error("Failed to add progress entry:", error);
+    return apiErrorResponse({
+      status: 500,
+      message: "Failed to add progress entry.",
+    });
+  }
 }

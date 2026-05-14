@@ -6,8 +6,6 @@ type ApiErrorResponseOptions = {
   details?: unknown;
 };
 
-// Server-side helper for consistent API error responses.
-// Keep all API route errors shaped the same way.
 export function apiErrorResponse({
   status,
   message,

@@ -27,7 +27,7 @@ function validateNutritionSummaryPayload(body: unknown): NutritionResults | null
   ];
 
   for (const field of requiredNumberFields) {
-    if (typeof body[field] !== "number" || !Number.isFinite(body[field])) {
+    if (typeof body[field] !== "number" || !Number.isFinite(body[field] as number)) {
       return null;
     }
   }
@@ -35,22 +35,38 @@ function validateNutritionSummaryPayload(body: unknown): NutritionResults | null
   return body as NutritionResults;
 }
 
-// GET /api/nutrition
 export async function GET() {
-  return apiSuccessResponse(await nutritionStore.getSummary());
-}
-
-// PUT /api/nutrition
-export async function PUT(request: Request) {
-  const body = await request.json().catch(() => null);
-  const summary = validateNutritionSummaryPayload(body);
-
-  if (!summary) {
+  try {
+    const summary = await nutritionStore.getSummary();
+    return apiSuccessResponse(summary);
+  } catch (error) {
+    console.error("Failed to load nutrition summary:", error);
     return apiErrorResponse({
-      status: 400,
-      message: "Valid nutrition summary payload is required.",
+      status: 500,
+      message: "Failed to load nutrition summary.",
     });
   }
+}
 
-  return apiSuccessResponse(await nutritionStore.saveSummary(summary));
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json().catch(() => null);
+    const summary = validateNutritionSummaryPayload(body);
+
+    if (!summary) {
+      return apiErrorResponse({
+        status: 400,
+        message: "Valid nutrition summary payload is required.",
+      });
+    }
+
+    const saved = await nutritionStore.saveSummary(summary);
+    return apiSuccessResponse(saved);
+  } catch (error) {
+    console.error("Failed to save nutrition summary:", error);
+    return apiErrorResponse({
+      status: 500,
+      message: "Failed to save nutrition summary.",
+    });
+  }
 }
