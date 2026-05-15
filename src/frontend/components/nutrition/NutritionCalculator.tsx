@@ -1,32 +1,68 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Card from "@frontend/components/ui/Card";
 import Input from "@frontend/components/ui/Input";
 import Select from "@frontend/components/ui/Select";
 import FormField from "@frontend/components/ui/FormField";
-import { calculateNutritionResults } from "@shared/calculations/nutrition";
+import {
+  calculateNutritionResults,
+  calculateMifflinStJeorBMR,
+} from "@shared/calculations/nutrition";
+import { getLatestBodyStats } from "@shared/calculations/progress";
 import { saveNutritionSummaryApi } from "@frontend/api/nutrition-api";
+import { getProfile } from "@frontend/api/profile-api";
+import { listProgressEntries } from "@frontend/api/progress-api";
 import { parseNumberInput } from "@shared/utils/number";
 import NutritionSummaryCard from "./NutritionSummaryCard";
 import ProteinRecommendationCard from "./ProteinRecommendationCard";
 import NutritionPlanCard from "./NutritionPlanCard";
 import type { NutritionGoal, RecompDirection } from "@shared/types/nutrition";
 
-// Nutrition calculator.
-// UI calculates the result, then persists the latest summary through the API.
 export default function NutritionCalculator() {
   const [weightKg, setWeightKg] = useState<number | "">("");
   const [bodyFatPercent, setBodyFatPercent] = useState<number | "">("");
   const [bmr, setBmr] = useState<number | "">("");
   const [tdee, setTdee] = useState<number | "">("");
   const [goal, setGoal] = useState<NutritionGoal>("gain-muscle");
-  const [adjustment, setAdjustment] = useState<number | ("")>("");
+  const [adjustment, setAdjustment] = useState<number | "">("");
   const [recompDirection, setRecompDirection] =
     useState<RecompDirection>("slight-deficit");
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
-    "idle"
-  );
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  // Pre-fill all inputs from profile + latest progress entry on mount.
+  useEffect(() => {
+    async function prefill() {
+      const [profile, entries] = await Promise.all([
+        getProfile(),
+        listProgressEntries(),
+      ]);
+
+      const latest = getLatestBodyStats(entries);
+
+      if (latest?.weightKg) setWeightKg(latest.weightKg);
+      if (latest?.bodyFatPercent) setBodyFatPercent(latest.bodyFatPercent);
+      if (profile.goal) setGoal(profile.goal);
+
+      if (profile.sex && profile.age && profile.heightCm) {
+        const weightForBmr = latest?.weightKg ?? 80;
+        const computedBmr = calculateMifflinStJeorBMR(
+          weightForBmr,
+          profile.heightCm,
+          profile.age,
+          profile.sex
+        );
+        setBmr(computedBmr);
+        setTdee(Math.round(computedBmr * 1.375));
+      }
+    }
+
+    prefill().catch(() => {
+      // Fail silently — user can fill fields manually.
+    });
+  }, []);
 
   const safeWeightKg = typeof weightKg === "number" ? weightKg : 0;
   const safeBodyFatPercent = typeof bodyFatPercent === "number" ? bodyFatPercent : 0;
@@ -60,16 +96,10 @@ export default function NutritionCalculator() {
     async function persistNutritionSummary() {
       try {
         setSaveStatus("saving");
-
         await saveNutritionSummaryApi(results);
-
-        if (!cancelled) {
-          setSaveStatus("saved");
-        }
+        if (!cancelled) setSaveStatus("saved");
       } catch {
-        if (!cancelled) {
-          setSaveStatus("error");
-        }
+        if (!cancelled) setSaveStatus("error");
       }
     }
 
@@ -94,7 +124,8 @@ export default function NutritionCalculator() {
 
           <p className="mt-2 text-sm leading-7 text-slate-300">
             Estimate fat-free mass, calories, protein, fats, and carbs based on
-            your goal.
+            your goal. Fields are pre-filled from your profile and latest progress
+            entry — adjust as needed.
           </p>
 
           <p className="mt-3 text-sm text-slate-400">
@@ -125,7 +156,7 @@ export default function NutritionCalculator() {
             />
           </FormField>
 
-          <FormField label="BMR" htmlFor="nutrition-bmr">
+          <FormField label="BMR (auto-calculated)" htmlFor="nutrition-bmr">
             <Input
               id="nutrition-bmr"
               type="number"
@@ -134,7 +165,7 @@ export default function NutritionCalculator() {
             />
           </FormField>
 
-          <FormField label="TDEE" htmlFor="nutrition-tdee">
+          <FormField label="TDEE (auto-calculated)" htmlFor="nutrition-tdee">
             <Input
               id="nutrition-tdee"
               type="number"
@@ -152,10 +183,11 @@ export default function NutritionCalculator() {
               <option value="lose-weight">Lose weight</option>
               <option value="gain-muscle">Gain muscle</option>
               <option value="body-recomp">Body recomposition</option>
+              <option value="maintenance">Maintenance</option>
             </Select>
           </FormField>
 
-          <FormField label="Adjustment" htmlFor="nutrition-adjustment">
+          <FormField label="Adjustment (kcal)" htmlFor="nutrition-adjustment">
             <Input
               id="nutrition-adjustment"
               type="number"
@@ -167,7 +199,10 @@ export default function NutritionCalculator() {
 
         {goal === "body-recomp" ? (
           <div className="max-w-sm">
-            <FormField label="Recomp direction" htmlFor="nutrition-recomp-direction">
+            <FormField
+              label="Recomp direction"
+              htmlFor="nutrition-recomp-direction"
+            >
               <Select
                 id="nutrition-recomp-direction"
                 value={recompDirection}

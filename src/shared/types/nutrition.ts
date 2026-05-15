@@ -1,7 +1,8 @@
 export type NutritionGoal =
   | "lose-weight"
   | "gain-muscle"
-  | "body-recomp";
+  | "body-recomp"
+  | "maintenance";
 
 export type RecompDirection = "slight-deficit" | "slight-surplus";
 

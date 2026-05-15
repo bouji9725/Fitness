@@ -21,9 +21,9 @@ type ShareData = {
 
 function formatGoal(goal?: UserProfile["goal"]): string {
   if (!goal) return "Not set";
-  if (goal === "lose-fat") return "Lose Fat";
+  if (goal === "lose-weight") return "Lose Weight";
   if (goal === "gain-muscle") return "Gain Muscle";
-  if (goal === "recomp") return "Recomp";
+  if (goal === "body-recomp") return "Body Recomposition";
   return "Maintenance";
 }
 

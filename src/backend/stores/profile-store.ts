@@ -4,6 +4,7 @@ import type { UserProfile } from "@shared/types/profile";
 function rowToProfile(row: {
   id: string;
   name: string;
+  sex: string | null;
   age: number | null;
   heightCm: number | null;
   goal: string | null;
@@ -13,6 +14,7 @@ function rowToProfile(row: {
   return {
     id: row.id,
     name: row.name,
+    sex: (row.sex as UserProfile["sex"]) ?? undefined,
     age: row.age ?? undefined,
     heightCm: row.heightCm ?? undefined,
     goal: (row.goal as UserProfile["goal"]) ?? undefined,
@@ -27,16 +29,13 @@ export const profileStore = {
 
     return row
       ? rowToProfile(row)
-      : {
-          id: userId,
-          name: "",
-          coachSharingEnabled: false,
-        };
+      : { id: userId, name: "", coachSharingEnabled: false };
   },
 
   async saveProfile(userId: string, profile: UserProfile): Promise<UserProfile> {
     const data = {
       name: profile.name,
+      sex: profile.sex ?? null,
       age: profile.age ?? null,
       heightCm: profile.heightCm ?? null,
       goal: profile.goal ?? null,

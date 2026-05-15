@@ -24,6 +24,7 @@ model UserProfile {
   id                  String  @id
   user                User    @relation(fields: [id], references: [id])
   name                String  @default("")
+  sex                 String?
   age                 Int?
   heightCm            Float?
   goal                String?

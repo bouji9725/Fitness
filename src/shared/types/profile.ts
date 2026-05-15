@@ -1,9 +1,12 @@
+import type { NutritionGoal } from "./nutrition";
+
 export type UserProfile = {
   id: string;
   name: string;
+  sex?: "male" | "female";
   age?: number;
   heightCm?: number;
-  goal?: "lose-fat" | "gain-muscle" | "recomp" | "maintenance";
+  goal?: NutritionGoal;
   coachSharingEnabled: boolean;
   coachName?: string;
 };

@@ -3,6 +3,16 @@ import type {
   NutritionResults,
 } from "@shared/types/nutrition";
 
+export function calculateMifflinStJeorBMR(
+  weightKg: number,
+  heightCm: number,
+  age: number,
+  sex: "male" | "female"
+): number {
+  const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
+  return Math.round(sex === "male" ? base + 5 : base - 161);
+}
+
 export function roundToOneDecimal(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -60,6 +70,7 @@ export function calculateCalorieTarget(inputs: NutritionInputs): number {
     return tdee + adjustment;
   }
 
+  // "maintenance"
   return tdee;
 }
 
@@ -73,6 +84,7 @@ export function getFatPercent(inputs: NutritionInputs): number {
     return recompDirection === "slight-deficit" ? 0.2 : 0.25;
   }
 
+  // "maintenance"
   return 0.25;
 }
 

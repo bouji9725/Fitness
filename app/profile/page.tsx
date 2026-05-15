@@ -14,20 +14,12 @@ import FormField from "@frontend/components/ui/FormField";
 import { getProfile, updateProfile } from "@frontend/api/profile-api";
 import { listProgressEntries } from "@frontend/api/progress-api";
 import { getNutritionSummary } from "@frontend/api/nutrition-api";
-import { calculateNutritionResults } from "@shared/calculations/nutrition";
+import { calculateNutritionResults, calculateMifflinStJeorBMR } from "@shared/calculations/nutrition";
 import { getLatestBodyStats } from "@shared/calculations/progress";
 import { parseNumberInput } from "@shared/utils/number";
 import type { UserProfile } from "@shared/types/profile";
 import type { BodyStatsEntry } from "@shared/types/progress";
-import type { NutritionGoal, NutritionResults } from "@shared/types/nutrition";
-
-function mapProfileGoalToNutritionGoal(
-  goal?: UserProfile["goal"]
-): NutritionGoal {
-  if (goal === "lose-fat") return "lose-weight";
-  if (goal === "recomp") return "body-recomp";
-  return "gain-muscle";
-}
+import type { NutritionResults } from "@shared/types/nutrition";
 
 const fallbackProfile: UserProfile = {
   id: "",
@@ -82,17 +74,29 @@ export default function ProfilePage() {
   const bodyWeightKg = latestBodyStats?.weightKg ?? 80;
   const bodyFatPercent = latestBodyStats?.bodyFatPercent ?? 15;
 
+  const bmr = useMemo(() => {
+    if (profile.sex && profile.age && profile.heightCm) {
+      return calculateMifflinStJeorBMR(
+        bodyWeightKg,
+        profile.heightCm,
+        profile.age,
+        profile.sex
+      );
+    }
+    return 1800;
+  }, [profile.sex, profile.age, profile.heightCm, bodyWeightKg]);
+
   const fallbackNutrition = useMemo(() => {
     return calculateNutritionResults({
       weightKg: bodyWeightKg,
       bodyFatPercent,
-      bmr: 1800,
-      tdee: 2600,
-      goal: mapProfileGoalToNutritionGoal(profile.goal),
+      bmr,
+      tdee: Math.round(bmr * 1.375),
+      goal: profile.goal ?? "gain-muscle",
       adjustment: 500,
       recompDirection: "slight-deficit",
     });
-  }, [bodyWeightKg, bodyFatPercent, profile.goal]);
+  }, [bodyWeightKg, bodyFatPercent, bmr, profile.goal]);
 
   const nutritionToShow = savedNutritionSummary ?? fallbackNutrition;
 
@@ -177,6 +181,23 @@ export default function ProfilePage() {
                 />
               </FormField>
 
+              <FormField label="Biological sex" htmlFor="profile-sex">
+                <Select
+                  id="profile-sex"
+                  value={profile.sex ?? ""}
+                  onChange={(e) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      sex: (e.target.value || undefined) as UserProfile["sex"],
+                    }))
+                  }
+                >
+                  <option value="">Prefer not to say</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </Select>
+              </FormField>
+
               <FormField label="Age" htmlFor="profile-age">
                 <Input
                   id="profile-age"
@@ -210,17 +231,18 @@ export default function ProfilePage() {
               <FormField label="Goal" htmlFor="profile-goal">
                 <Select
                   id="profile-goal"
-                  value={profile.goal}
+                  value={profile.goal ?? ""}
                   onChange={(e) =>
                     setProfile((prev) => ({
                       ...prev,
-                      goal: e.target.value as UserProfile["goal"],
+                      goal: (e.target.value || undefined) as UserProfile["goal"],
                     }))
                   }
                 >
-                  <option value="lose-fat">Lose Fat</option>
+                  <option value="">Not set</option>
+                  <option value="lose-weight">Lose Weight</option>
                   <option value="gain-muscle">Gain Muscle</option>
-                  <option value="recomp">Recomp</option>
+                  <option value="body-recomp">Body Recomposition</option>
                   <option value="maintenance">Maintenance</option>
                 </Select>
               </FormField>
