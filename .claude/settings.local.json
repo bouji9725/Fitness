@@ -10,7 +10,14 @@
       "mcp__claude_ai_Notion__notion-search",
       "Bash(npx prisma *)",
       "Bash(xargs grep -l \"proxy.ts\\\\|proxy.js\\\\|middleware-to-proxy\")",
-      "Bash(del *)"
+      "Bash(del *)",
+      "Bash(curl -s http://localhost:3000/api/health/db)",
+      "Bash(curl -s -c /tmp/fit_cookies.txt http://localhost:3000/api/auth/csrf)",
+      "Bash(node -e ' *)",
+      "Bash(npx tsx *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(curl -s http://localhost:3000/api/health/db -b /tmp/fit_cookies.txt)",
+      "Bash(npm test *)"
     ]
   }
 }

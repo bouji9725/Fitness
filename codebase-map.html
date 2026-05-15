@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitsler — Codebase Map</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #020617;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --border: rgba(255,255,255,0.07);
+      --accent: #818cf8;
+      --text: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --radius: 1.25rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding-bottom: 8rem;
+    }
+
+    /* ── Nav ─────────────────────────────────── */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(2,6,23,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 2rem;
+      overflow-x: auto;
+    }
+    .topnav-brand {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      padding: 1rem 1.5rem 1rem 0;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      margin-right: 1rem;
+    }
+    .topnav a {
+      display: inline-block;
+      padding: 1rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .topnav a:hover { color: var(--text); border-bottom-color: var(--accent); }
+
+    /* ── Page header ─────────────────────────── */
+    .page-header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem 2.5rem;
+    }
+    .eyebrow {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .page-title {
+      margin-top: 0.75rem;
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .page-desc {
+      margin-top: 0.75rem;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      max-width: 600px;
+    }
+
+    /* ── Legend ──────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      margin-top: 2rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 860px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Sections ────────────────────────────── */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 1rem;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(129,140,248,0.12);
+      border: 1px solid rgba(129,140,248,0.22);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .section-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+    .section-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    /* ── Diagram card ────────────────────────── */
+    .diagram-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+    }
+    .diagram-label {
+      padding: 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.02);
+      letter-spacing: 0.05em;
+    }
+    .diagram-body {
+      padding: 2rem 1.5rem;
+      overflow-x: auto;
+    }
+    .diagram-body .mermaid {
+      display: flex;
+      justify-content: center;
+      min-width: 400px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ═══════════════════════════════════════════════ -->
+<nav class="topnav">
+  <span class="topnav-brand">Fitsler · Codebase Map</span>
+  <a href="#architecture">Architecture</a>
+  <a href="#components">Component Tree</a>
+  <a href="#dataflow">API &amp; Data Flow</a>
+  <a href="#shared">Shared Layer</a>
+</nav>
+
+<!-- ══ PAGE HEADER ══════════════════════════════════════ -->
+<header class="page-header">
+  <p class="eyebrow">Visual Architecture</p>
+  <h1 class="page-title">Codebase Map</h1>
+  <p class="page-desc">
+    Every file, component, and function mapped out — showing parent-child render trees,
+    API request chains, and shared dependency graphs. Four focused diagrams covering the full codebase.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#3730a3"></span> Pages</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#1d4ed8"></span> Layout</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#166534"></span> Feature Components</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#9a3412"></span> UI Primitives</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#92400e"></span> API Clients</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#0c4a6e"></span> Auth Layer</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#4a044e"></span> API Routes</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#3b0764"></span> Stores</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#064e3b"></span> Shared</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#292524"></span> Database</div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — ARCHITECTURE OVERVIEW
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <span class="section-num">1</span>
+    <div>
+      <div class="section-title">Architecture Overview</div>
+      <div class="section-subtitle">All six layers and how they connect — browser through to database</div>
+    </div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-label">flowchart LR — request flows left → right</div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart LR
+  classDef page     fill:#1e1b4b,stroke:#818cf8,color:#c7d2fe
+  classDef layout   fill:#0c2a4a,stroke:#60a5fa,color:#bfdbfe
+  classDef feature  fill:#052e16,stroke:#4ade80,color:#bbf7d0
+  classDef ui       fill:#431407,stroke:#fb923c,color:#fed7aa
+  classDef apicl    fill:#422006,stroke:#fbbf24,color:#fef3c7
+  classDef auth     fill:#042f4b,stroke:#38bdf8,color:#bae6fd
+  classDef route    fill:#2e0347,stroke:#c084fc,color:#ede9fe
+  classDef store    fill:#1a0533,stroke:#d946ef,color:#fae8ff
+  classDef shared   fill:#022c22,stroke:#34d399,color:#a7f3d0
+  classDef db       fill:#1c1917,stroke:#a8a29e,color:#e7e5e4
+
+  subgraph PAGES["Pages — app/"]
+    direction TB
+    p1["/"]:::page
+    p2["dashboard/"]:::page
+    p3["nutrition/"]:::page
+    p4["profile/"]:::page
+    p5["progress/"]:::page
+    p6["share/"]:::page
+    p7["workouts/"]:::page
+    p8["workouts/[id]/"]:::page
+    p9["login/"]:::page
+    p10["register/"]:::page
+  end
+
+  subgraph COMPS["Components — src/frontend/components/"]
+    direction TB
+    subgraph LAY["layout/"]
+      AppShell:::layout
+      Sidebar:::layout
+      Topbar:::layout
+      PageContainer:::layout
+      PageHeader:::layout
+    end
+    subgraph FEAT["feature components"]
+      DashboardOverview:::feature
+      NutritionCalculator:::feature
+      WorkoutSession:::feature
+      ShareOverview:::feature
+      UserProfileCard:::feature
+      BodyStatsForm:::feature
+      ExerciseCard:::feature
+    end
+    subgraph UIP["ui/"]
+      Card:::ui
+      Button:::ui
+      Input:::ui
+      Select:::ui
+      FormField:::ui
+      Label:::ui
+      StatCard:::ui
+      Textarea:::ui
+    end
+  end
+
+  subgraph ACLIENTS["API Clients — src/frontend/api/"]
+    direction TB
+    acN["nutrition-api.ts"]:::apicl
+    acP["profile-api.ts"]:::apicl
+    acR["progress-api.ts"]:::apicl
+    acW["workouts-api.ts"]:::apicl
+  end
+
+  subgraph AUTHL["Auth — proxy.ts + auth.ts"]
+    proxy["proxy.ts JWT guard"]:::auth
+    authts["auth.ts + auth.config.ts"]:::auth
+    sessts["session.ts"]:::auth
+    actts["actions.ts + login/actions + register/actions"]:::auth
+  end
+
+  subgraph AROUTES["API Routes — app/api/"]
+    direction TB
+    rPro["/api/profile"]:::route
+    rNut["/api/nutrition"]:::route
+    rPrg["/api/progress"]:::route
+    rSes["/api/workout-sessions"]:::route
+    rSid["/api/workout-sessions/[id]"]:::route
+    rTpl["/api/workout-templates"]:::route
+    rAut["/api/auth/nextauth"]:::route
+  end
+
+  subgraph STORES["Stores — src/backend/stores/"]
+    direction TB
+    sPro["profile-store"]:::store
+    sNut["nutrition-store"]:::store
+    sPrg["progress-store"]:::store
+    sWrk["workout-store"]:::store
+    sUsr["user-store"]:::store
+  end
+
+  subgraph SHARED["Shared — src/shared/"]
+    direction TB
+    sh1["types/ nutrition · profile · progress · workout · share"]:::shared
+    sh2["calculations/ nutrition · progress · workouts · dashboard"]:::shared
+    sh3["utils/ create-id · number"]:::shared
+    sh4["services/ workout-session-service"]:::shared
+    sh5["frontend/ reducer · share-export"]:::shared
+  end
+
+  subgraph DB["Database"]
+    prisma["Prisma 7"]:::db
+    pg[("PostgreSQL\ndb.prisma.io")]:::db
+  end
+
+  PAGES -->|"renders layout"| LAY
+  PAGES -->|"renders feature"| FEAT
+  FEAT -->|"uses"| UIP
+  PAGES -->|"calls"| ACLIENTS
+  FEAT -->|"calls"| ACLIENTS
+  FEAT -.->|"imports"| SHARED
+  ACLIENTS -->|"HTTP fetch"| proxy
+  proxy -->|"JWT check → forward"| AROUTES
+  authts --- proxy
+  AROUTES -->|"reads/writes"| STORES
+  AROUTES -.->|"imports"| SHARED
+  STORES -->|"ORM"| prisma
+  STORES -.->|"imports"| SHARED
+  prisma --> pg
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — COMPONENT RENDER TREE
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="components">
+  <div class="section-header">
+    <span class="section-num">2</span>
+    <div>
+      <div class="section-title">Component Render Tree</div>
+      <div class="section-subtitle">Every React component and what it renders — pages at top, UI primitives at bottom</div>
+    </div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-label">flowchart TD — parent renders child (arrow = renders/uses)</div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart TD
+  classDef page    fill:#1e1b4b,stroke:#818cf8,color:#c7d2fe
+  classDef layout  fill:#0c2a4a,stroke:#60a5fa,color:#bfdbfe
+  classDef feature fill:#052e16,stroke:#4ade80,color:#bbf7d0
+  classDef ui      fill:#431407,stroke:#fb923c,color:#fed7aa
+
+  %% ── Pages ──────────────────────────────
+  p_home["/  Home"]:::page
+  p_dash["dashboard/"]:::page
+  p_nutr["nutrition/"]:::page
+  p_prof["profile/"]:::page
+  p_prog["progress/"]:::page
+  p_shar["share/"]:::page
+  p_work["workouts/"]:::page
+  p_wkid["workouts/[id]/"]:::page
+  p_logi["login/"]:::page
+  p_regi["register/"]:::page
+
+  %% ── Layout ─────────────────────────────
+  AppShell:::layout
+  Sidebar:::layout
+  Topbar:::layout
+  PageContainer:::layout
+  PageHeader:::layout
+
+  AppShell --> Sidebar
+  AppShell --> Topbar
+  AppShell --> PageContainer
+  PageContainer --> PageHeader
+
+  %% All main pages use AppShell
+  p_home --> AppShell
+  p_dash --> AppShell
+  p_nutr --> AppShell
+  p_prof --> AppShell
+  p_prog --> AppShell
+  p_shar --> AppShell
+  p_work --> AppShell
+  p_wkid --> AppShell
+
+  %% ── UI Primitives ───────────────────────
+  Card:::ui
+  Button:::ui
+  Input:::ui
+  Select:::ui
+  FormField:::ui
+  Label:::ui
+  Textarea:::ui
+  StatCard:::ui
+  FormField --> Label
+  StatCard --> Card
+
+  %% ── Dashboard ───────────────────────────
+  p_dash --> DashboardOverview:::feature
+  DashboardOverview --> StatCard
+  DashboardOverview --> RecentWorkoutsList:::feature
+  DashboardOverview --> WorkoutInsightCard:::feature
+  RecentWorkoutsList --> Card
+  WorkoutInsightCard --> Card
+
+  %% ── Nutrition ───────────────────────────
+  p_nutr --> NutritionCalculator:::feature
+  NutritionCalculator --> Card
+  NutritionCalculator --> Input
+  NutritionCalculator --> Select
+  NutritionCalculator --> FormField
+  NutritionCalculator --> NutritionSummaryCard:::feature
+  NutritionCalculator --> ProteinRecommendationCard:::feature
+  NutritionCalculator --> NutritionPlanCard:::feature
+  NutritionSummaryCard --> Card
+  ProteinRecommendationCard --> Card
+  NutritionPlanCard --> Card
+
+  %% ── Profile ─────────────────────────────
+  p_prof --> UserProfileCard:::feature
+  p_prof --> ShareCoachCard:::feature
+  p_prof --> Card
+  p_prof --> Button
+  p_prof --> Input
+  p_prof --> Select
+  p_prof --> FormField
+  UserProfileCard --> Card
+  UserProfileCard --> Button
+  UserProfileCard --> ProfileInfoRow:::feature
+  ShareCoachCard --> Card
+
+  %% ── Progress ────────────────────────────
+  p_prog --> BodyStatsForm:::feature
+  p_prog --> MonthlyComparisonCard:::feature
+  BodyStatsForm --> Card
+  BodyStatsForm --> Button
+  BodyStatsForm --> Input
+  BodyStatsForm --> Textarea
+  BodyStatsForm --> FormField
+  MonthlyComparisonCard --> Card
+
+  %% ── Share ───────────────────────────────
+  p_shar --> ShareOverview:::feature
+  ShareOverview --> Card
+
+  %% ── Workouts list ───────────────────────
+  p_work --> WorkoutTemplateDay:::feature
+  WorkoutTemplateDay --> Card
+
+  %% ── Workout session ─────────────────────
+  p_wkid --> WorkoutSession:::feature
+  WorkoutSession --> ExerciseCard:::feature
+  WorkoutSession --> AddExerciseForm:::feature
+  WorkoutSession --> SaveWorkoutBar:::feature
+  WorkoutSession --> SessionSummary:::feature
+  ExerciseCard --> Card
+  ExerciseCard --> Button
+  ExerciseCard --> OverloadBadge:::feature
+  ExerciseCard --> PreviousPerformance:::feature
+  ExerciseCard --> SetRow:::feature
+  SetRow --> Button
+  SetRow --> Input
+  SetRow --> Label
+  AddExerciseForm --> Card
+  AddExerciseForm --> Button
+  AddExerciseForm --> FormField
+  AddExerciseForm --> Input
+  SaveWorkoutBar --> Card
+  SaveWorkoutBar --> Button
+  SessionSummary --> Card
+
+  %% ── Auth pages (no AppShell) ────────────
+  p_logi --> Input
+  p_logi --> Button
+  p_logi --> FormField
+  p_regi --> Input
+  p_regi --> Button
+  p_regi --> FormField
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — API & DATA FLOW
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="dataflow">
+  <div class="section-header">
+    <span class="section-num">3</span>
+    <div>
+      <div class="section-title">API &amp; Data Flow</div>
+      <div class="section-subtitle">Which component calls which API client → route → store → database</div>
+    </div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-label">flowchart LR — data request flows left → right</div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart LR
+  classDef comp   fill:#052e16,stroke:#4ade80,color:#bbf7d0
+  classDef apicl  fill:#422006,stroke:#fbbf24,color:#fef3c7
+  classDef auth   fill:#042f4b,stroke:#38bdf8,color:#bae6fd
+  classDef route  fill:#2e0347,stroke:#c084fc,color:#ede9fe
+  classDef valid  fill:#1e0a2e,stroke:#a855f7,color:#e9d5ff
+  classDef store  fill:#1a0533,stroke:#d946ef,color:#fae8ff
+  classDef db     fill:#1c1917,stroke:#a8a29e,color:#e7e5e4
+
+  %% ── Callers ─────────────────────────────
+  DashboardOverview:::comp
+  NutritionCalculator:::comp
+  ProfilePage["profile/ page"]:::comp
+  ProgressPage["progress/ page"]:::comp
+  ShareOverview:::comp
+  WorkoutSession:::comp
+  WorkoutsPage["workouts/ page"]:::comp
+  LoginPage["login/ page"]:::comp
+  RegisterPage["register/ page"]:::comp
+
+  %% ── API Clients ─────────────────────────
+  acN["nutrition-api.ts"]:::apicl
+  acP["profile-api.ts"]:::apicl
+  acR["progress-api.ts"]:::apicl
+  acW["workouts-api.ts"]:::apicl
+
+  %% ── Auth / Proxy ────────────────────────
+  Proxy["proxy.ts\nJWT guard"]:::auth
+  AuthTS["auth.ts\nNextAuth.js v5\nCredentials provider"]:::auth
+
+  %% ── API Routes ──────────────────────────
+  rPro["/api/profile\nGET · PATCH"]:::route
+  rNut["/api/nutrition\nGET · PATCH"]:::route
+  rPrg["/api/progress\nGET · POST"]:::route
+  rSes["/api/workout-sessions\nGET · POST"]:::route
+  rSid["/api/workout-sessions/[id]\nGET · PATCH"]:::route
+  rTpl["/api/workout-templates\nGET"]:::route
+  rAut["/api/auth/nextauth\nGET · POST"]:::route
+
+  %% ── Validation ──────────────────────────
+  vPro["profile-validation"]:::valid
+  vNut["nutrition-validation"]:::valid
+  vPrg["progress-validation"]:::valid
+  vWrk["workout-validation"]:::valid
+
+  %% ── Stores ──────────────────────────────
+  sPro["profile-store"]:::store
+  sNut["nutrition-store"]:::store
+  sPrg["progress-store"]:::store
+  sWrk["workout-store"]:::store
+  sUsr["user-store"]:::store
+
+  %% ── Database ────────────────────────────
+  Prisma["Prisma 7"]:::db
+  PG[("PostgreSQL\ndb.prisma.io")]:::db
+
+  %% ── Component → API Client ──────────────
+  DashboardOverview --> acW
+  NutritionCalculator --> acN & acP & acR
+  ProfilePage --> acP & acR & acN
+  ProgressPage --> acR
+  ShareOverview --> acP & acR & acN & acW
+  WorkoutSession --> acW
+  WorkoutsPage --> acW
+
+  %% ── API Client → Proxy ──────────────────
+  acN & acP & acR & acW -->|"HTTP fetch"| Proxy
+
+  %% ── Auth pages → NextAuth directly ──────
+  LoginPage -->|"signIn() server action"| AuthTS
+  RegisterPage -->|"registerAction"| sUsr
+  AuthTS -->|"handles"| rAut
+
+  %% ── Proxy → Routes ──────────────────────
+  Proxy --> rPro & rNut & rPrg & rSes & rSid & rTpl
+
+  %% ── Routes → Validation ─────────────────
+  rPro --> vPro
+  rNut --> vNut
+  rPrg --> vPrg
+  rSes & rSid --> vWrk
+
+  %% ── Routes → Stores ─────────────────────
+  rPro --> sPro
+  rNut --> sNut
+  rPrg --> sPrg
+  rSes & rSid & rTpl --> sWrk
+  rAut --> sUsr
+
+  %% ── Stores → Prisma ─────────────────────
+  sPro & sNut & sPrg & sWrk & sUsr --> Prisma
+  Prisma --> PG
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4 — SHARED LAYER
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="shared">
+  <div class="section-header">
+    <span class="section-num">4</span>
+    <div>
+      <div class="section-title">Shared Layer Dependencies</div>
+      <div class="section-subtitle">Every shared type, calculation, util, and service — and which files import them</div>
+    </div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-label">flowchart LR — shared file → files that import it (solid = calculations/types used, dashed = type-only)</div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart LR
+  classDef shared  fill:#022c22,stroke:#34d399,color:#a7f3d0
+  classDef front   fill:#052e16,stroke:#4ade80,color:#bbf7d0
+  classDef back    fill:#1a0533,stroke:#d946ef,color:#fae8ff
+  classDef page    fill:#1e1b4b,stroke:#818cf8,color:#c7d2fe
+
+  %% ── Shared Types ────────────────────────
+  subgraph TYPES["Types — src/shared/types/"]
+    tNutr["nutrition.ts\nNutritionGoal · RecompDirection\nNutritionInputs · NutritionResults"]:::shared
+    tProf["profile.ts\nUserProfile"]:::shared
+    tProg["progress.ts\nBodyStatsEntry"]:::shared
+    tWork["workout.ts\nWorkoutTemplate · WorkoutSession\nSessionExercise · SetEntry"]:::shared
+    tShar["share.ts\nSharePayload · StoredWorkoutSession"]:::shared
+  end
+
+  %% ── Internal type deps ───────────────────
+  tNutr -.->|"NutritionGoal used by"| tProf
+  tProg -.-> tShar
+  tNutr -.-> tShar
+  tWork -.-> tShar
+
+  %% ── Shared Calculations ─────────────────
+  subgraph CALCS["Calculations — src/shared/calculations/"]
+    cNutr["nutrition.ts\ncalculateMifflinStJeorBMR()\ncalculateNutritionResults()\ngetProteinFactor() +5 more"]:::shared
+    cProg["progress.ts\ngetLatestBodyStats()\ngetPreviousBodyStats()\ncalculateBodyStatsDifference()"]:::shared
+    cWork["workouts.ts\ncalculateSetVolume()\ncalculateExerciseVolume()\nisProgressiveOverload()"]:::shared
+    cDash["dashboard.ts\ngetDashboardMetrics()"]:::shared
+  end
+
+  %% Calc internal deps
+  tNutr --> cNutr
+  tProg --> cProg
+  tWork --> cWork
+  tWork --> cDash
+  cWork --> cDash
+
+  %% ── Utils + Services ────────────────────
+  subgraph UTILS["Utils · Services · Frontend Misc"]
+    uId["utils/create-id.ts\ncreatId(prefix)"]:::shared
+    uNum["utils/number.ts\nparseNumberInput()"]:::shared
+    svc["services/workout-session-service.ts\ncreateWorkoutSessionFromTemplate()\ntouchWorkoutSession()\nresetWorkoutSession()"]:::shared
+    red["frontend/workout-session-reducer.ts\nworkoutSessionReducer()\nWorkoutSessionAction"]:::shared
+    exp["frontend/share-export.ts\ncopyToClipboard()\ndownloadJSON()\ndownloadPDFReport()\nformatShareText()"]:::shared
+  end
+
+  tWork --> svc
+  tWork --> red
+  svc --> red
+  tShar --> exp
+
+  %% ── Consumers: Frontend Components ──────
+  NutritionCalculator:::front
+  ProfilePage["profile/ page"]:::page
+  ProgressPage["progress/ page"]:::page
+  ShareOverview:::front
+  DashboardOverview:::front
+  ExerciseCard:::front
+  SessionSummary:::front
+  AddExerciseForm:::front
+  BodyStatsForm:::front
+  SetRow:::front
+  WorkoutSession:::front
+  WorkoutTemplateDay:::front
+  UserProfileCard:::front
+  ShareActionsCard:::front
+
+  %% ── Consumers: Backend ──────────────────
+  sProf["profile-store"]:::back
+  sNut["nutrition-store"]:::back
+  sPrg["progress-store"]:::back
+  sWrk["workout-store"]:::back
+  rProf["/api/profile route"]:::back
+  rNutr["/api/nutrition route"]:::back
+  rPrg["/api/progress route"]:::back
+  rWrk["/api/workout-sessions route"]:::back
+  vProf["profile-validation"]:::back
+  vNutr["nutrition-validation"]:::back
+  vPrg["progress-validation"]:::back
+  vWrk["workout-validation"]:::back
+
+  %% ── Calculation consumers ───────────────
+  cNutr --> NutritionCalculator
+  cNutr --> ProfilePage
+  cProg --> NutritionCalculator
+  cProg --> ShareOverview
+  cProg --> ProgressPage
+  cWork --> ExerciseCard
+  cWork --> SessionSummary
+  cDash --> DashboardOverview
+
+  %% ── Type consumers: Frontend ─────────────
+  tNutr -.-> NutritionCalculator
+  tNutr -.-> ProfilePage
+  tProf -.-> UserProfileCard
+  tProf -.-> ProfilePage
+  tProf -.-> ShareOverview
+  tProg -.-> BodyStatsForm
+  tProg -.-> ProgressPage
+  tProg -.-> ShareOverview
+  tWork -.-> WorkoutSession
+  tWork -.-> ExerciseCard
+  tWork -.-> SetRow
+  tWork -.-> WorkoutTemplateDay
+  tShar -.-> ShareActionsCard
+  tShar -.-> exp
+
+  %% ── Type consumers: Backend ─────────────
+  tProf -.-> sProf
+  tProf -.-> rProf
+  tProf -.-> vProf
+  tNutr -.-> sNut
+  tNutr -.-> rNutr
+  tNutr -.-> vNutr
+  tProg -.-> sPrg
+  tProg -.-> rPrg
+  tProg -.-> vPrg
+  tWork -.-> sWrk
+  tWork -.-> rWrk
+  tWork -.-> vWrk
+
+  %% ── Util consumers ──────────────────────
+  uId --> AddExerciseForm
+  uId --> red
+  uNum --> NutritionCalculator
+  uNum --> ProfilePage
+  uNum --> BodyStatsForm
+  uNum --> SetRow
+
+  %% ── Service consumers ───────────────────
+  svc --> sWrk
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Fitsler</strong> · Codebase Map · 2026-05-15 · Mermaid.js v10</p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "dark",
+    flowchart: { curve: "basis", padding: 20 },
+    themeVariables: {
+      background:          "#0f172a",
+      mainBkg:             "#1e293b",
+      nodeBorder:          "#334155",
+      clusterBkg:          "#0f172a",
+      clusterBorder:       "#1e293b",
+      titleColor:          "#f8fafc",
+      edgeLabelBackground: "#0f172a",
+      lineColor:           "#475569",
+      fontFamily:          '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontSize:            "13px",
+    },
+  });
+</script>
+</body>
+</html>

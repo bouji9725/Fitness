@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitsler — C4 System Design</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #020617;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(129, 140, 248, 0.22);
+      --accent: #818cf8;
+      --accent-dim: rgba(129, 140, 248, 0.12);
+      --emerald: #34d399;
+      --emerald-dim: rgba(52, 211, 153, 0.1);
+      --text: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --radius-md: 1rem;
+      --radius-lg: 1.25rem;
+      --radius-xl: 1.5rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      padding: 4rem 1.5rem 8rem;
+    }
+
+    /* ─── Page Header ─────────────────────────────────── */
+    .page-header {
+      max-width: 860px;
+      margin: 0 auto 5rem;
+    }
+
+    .eyebrow {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .page-title {
+      margin-top: 0.85rem;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .page-desc {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      max-width: 580px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── Section ─────────────────────────────────────── */
+    .section {
+      max-width: 1140px;
+      margin: 0 auto 6rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-current {
+      background: var(--accent-dim);
+      color: #a5b4fc;
+      border: 1px solid var(--border-accent);
+    }
+
+    .badge-future {
+      background: var(--emerald-dim);
+      color: #6ee7b7;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .diagram-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ─── Diagram Card ────────────────────────────────── */
+    .diagram-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .diagram-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .level-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.65rem;
+      border-radius: 0.5rem;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--border-accent);
+    }
+
+    .diagram-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .diagram-card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .diagram-body {
+      padding: 2rem 1.5rem;
+      overflow-x: auto;
+    }
+
+    .diagram-body .mermaid {
+      display: flex;
+      justify-content: center;
+      min-width: 560px;
+    }
+
+    /* ─── Separator ───────────────────────────────────── */
+    .sep {
+      max-width: 1140px;
+      margin: 0 auto 5rem;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    /* ─── Footer ──────────────────────────────────────── */
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+
+    footer strong { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════ PAGE HEADER ════════════════════════ -->
+  <header class="page-header">
+    <p class="eyebrow">Architecture · C4 Model</p>
+    <h1 class="page-title">Fitsler System Design</h1>
+    <p class="page-desc">
+      Two-state architecture overview following the C4 model. Level 1 (System Context) shows who
+      uses Fitsler and what external systems it depends on. Level 2 (Container) zooms in on the
+      deployable units inside the system and how they communicate.
+    </p>
+
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#4f85d1"></span>
+        Person / User
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#818cf8"></span>
+        Internal System / Container
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#64748b"></span>
+        External System / Person
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#0ea5e9"></span>
+        Database
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ═══════════════════════════ SECTION 1: CURRENT ════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="badge badge-current">Current State</span>
+      <h2 class="section-title">Today's Architecture</h2>
+    </div>
+
+    <div class="diagram-stack">
+
+      <!-- L1 Current -->
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="level-pill">L1</span>
+          <span class="diagram-card-title">System Context</span>
+          <span class="diagram-card-subtitle">Who uses Fitsler and what it connects to</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+C4Context
+    title Fitsler — Current State · System Context
+
+    Person(user, "Fitness User", "Tracks workouts, body stats, and nutrition goals via the web app")
+    Person_Ext(coach, "Coach", "Reviews progress summaries exported by the user")
+
+    System(fitsler, "Fitsler", "Personal fitness tracking web app. Workout logging, body progress, macro calculation, and coach sharing.")
+    SystemDb_Ext(db, "PostgreSQL", "Cloud-hosted relational database (db.prisma.io). Stores profiles, workouts, body stats, and nutrition summaries.")
+
+    Rel(user, fitsler, "Logs workouts, tracks body stats, calculates nutrition", "HTTPS")
+    Rel(fitsler, coach, "Exports progress report to", "PDF / Clipboard")
+    Rel(fitsler, db, "Reads and writes all user data", "Prisma 7 / TLS")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+          </div>
+        </div>
+      </div>
+
+      <!-- L2 Current -->
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="level-pill">L2</span>
+          <span class="diagram-card-title">Container Diagram</span>
+          <span class="diagram-card-subtitle">Deployable units inside Fitsler and how they communicate</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+C4Container
+    title Fitsler — Current State · Container
+
+    Person(user, "Fitness User", "Uses the web app via browser")
+    Person_Ext(coach, "Coach", "Receives exported summaries")
+
+    Container_Boundary(app, "Fitsler  —  Next.js 16") {
+        Container(browser, "Browser App", "React 19 · Next.js Client Components", "Workout logging, dashboard, progress tracking, nutrition calculator, profile settings, coach share view")
+        Container(proxy, "Proxy", "proxy.ts · NextAuth.js v5", "JWT auth guard — validates session, redirects unauthenticated requests to /login")
+        Container(api, "API Routes", "Next.js Route Handlers", "/api/profile  /api/nutrition  /api/progress  /api/workout-sessions  /api/workout-templates")
+        Container(actions, "Server Actions", "Next.js Server Actions", "loginAction  registerAction  signOutAction via NextAuth.js v5 Credentials provider")
+    }
+
+    ContainerDb(db, "PostgreSQL", "Prisma 7 · db.prisma.io", "User · UserProfile · WorkoutSession · WorkoutSessionRecord · BodyStatsEntry · NutritionSummary")
+
+    Rel(user, browser, "Uses", "HTTPS")
+    Rel(browser, proxy, "All requests routed through", "Next.js internal")
+    Rel(proxy, api, "Forwards authenticated requests", "Internal")
+    Rel(proxy, actions, "Forwards auth form submissions", "Internal")
+    Rel(api, db, "Reads and writes", "Prisma 7")
+    Rel(actions, db, "Reads and writes", "Prisma 7")
+    Rel(browser, coach, "Exports report to", "PDF · jspdf")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- ══════════════════════════ SECTION 2: FUTURE ══════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="badge badge-future">Post-Roadmap</span>
+      <h2 class="section-title">Future Architecture</h2>
+    </div>
+
+    <div class="diagram-stack">
+
+      <!-- L1 Future -->
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="level-pill">L1</span>
+          <span class="diagram-card-title">System Context</span>
+          <span class="diagram-card-subtitle">Extended system context after all roadmap features ship</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+C4Context
+    title Fitsler — Post-Roadmap · System Context
+
+    Person(user, "Fitness User", "Tracks workouts with custom templates, InBody scans, progress photos, nutrition history, and personal records")
+    Person_Ext(coach, "Coach", "Accesses live progress via a shareable coach URL or receives PDF exports")
+
+    System(fitsler, "Fitsler", "Full-featured personal fitness platform: custom workout templates, PR tracker, body charts, InBody scan input, progress photos, nutrition history, meal breakdowns, and coach sharing via URL.")
+    SystemDb_Ext(db, "PostgreSQL", "Cloud-hosted relational database for all structured user data")
+    System_Ext(storage, "Object Storage", "S3-compatible storage service for user progress photo uploads")
+
+    Rel(user, fitsler, "Logs all fitness and nutrition data", "HTTPS")
+    Rel(fitsler, coach, "Shares via coach URL or exports report", "HTTPS / PDF / Clipboard")
+    Rel(fitsler, db, "Reads and writes all structured data", "Prisma / TLS")
+    Rel(fitsler, storage, "Uploads and retrieves progress photos", "S3 API / TLS")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+          </div>
+        </div>
+      </div>
+
+      <!-- L2 Future -->
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="level-pill">L2</span>
+          <span class="diagram-card-title">Container Diagram</span>
+          <span class="diagram-card-subtitle">Expanded containers after all roadmap features ship</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+C4Container
+    title Fitsler — Post-Roadmap · Container
+
+    Person(user, "Fitness User")
+    Person_Ext(coach, "Coach")
+
+    Container_Boundary(app, "Fitsler  —  Next.js 16") {
+        Container(browser, "Browser App", "React 19 · Next.js Client Components", "Custom template builder · Exercise library · Rest timer · PR tracker · Volume and frequency charts · Muscle-group breakdown · Body stats charts · InBody scan input · Progress photo gallery · Nutrition history · Meal breakdown · Metric/imperial toggle · Loading skeletons · Toast notifications · Empty states")
+        Container(proxy, "Proxy", "proxy.ts · NextAuth.js v5", "JWT auth guard — validates session and redirects unauthenticated requests")
+        Container(api, "API Routes", "Next.js Route Handlers", "/api/profile  /api/nutrition (+ history, meals)  /api/progress (+ photos)  /api/workout-sessions (+ notes, pagination)  /api/workout-templates (+ custom)  /api/exercise-library  /api/personal-records  /api/share/[token]")
+        Container(actions, "Server Actions", "Next.js Server Actions", "loginAction  registerAction  signOutAction  generateCoachShareTokenAction")
+    }
+
+    ContainerDb(db, "PostgreSQL", "Prisma 7 · db.prisma.io", "User · UserProfile (+ unitPreference) · WorkoutSession (+ notes) · ExerciseLibrary · PersonalRecord · BodyStatsEntry (+ inBodyData) · NutritionSummary · NutritionLog · MealEntry · CoachShareToken")
+    ContainerDb(storage, "Object Storage", "S3-compatible", "Progress photos stored per userId and date. Signed URLs issued via API for secure in-browser display.")
+
+    Rel(user, browser, "Uses", "HTTPS")
+    Rel(browser, proxy, "All requests routed through", "Next.js internal")
+    Rel(proxy, api, "Forwards authenticated requests", "Internal")
+    Rel(proxy, actions, "Forwards form submissions", "Internal")
+    Rel(api, db, "Reads and writes", "Prisma 7")
+    Rel(actions, db, "Reads and writes", "Prisma 7")
+    Rel(api, storage, "Uploads photos · retrieves signed URLs", "S3 API")
+    Rel(browser, coach, "Exports report to", "PDF · jspdf")
+    Rel(coach, api, "Reads progress via share token", "HTTPS")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════ FOOTER ════════════════════════════ -->
+  <footer>
+    <p><strong>Fitsler</strong> · C4 Architecture Diagrams (Level 1 + Level 2) · 2026-05-15</p>
+  </footer>
+
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      themeVariables: {
+        background: "#0f172a",
+        mainBkg: "#1e293b",
+        nodeBorder: "#334155",
+        clusterBkg: "#0f172a",
+        clusterBorder: "#334155",
+        titleColor: "#f8fafc",
+        edgeLabelBackground: "#1e293b",
+        lineColor: "#475569",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: "13px",
+      },
+    });
+  </script>
+</body>
+</html>
