@@ -1,9 +1,9 @@
-import { workoutStore } from "@/lib/server/workout-store";
+import { workoutStore } from "@backend/stores/workout-store";
 import {
   apiErrorResponse,
   apiSuccessResponse,
-} from "@/lib/server/api-response";
-import { validateWorkoutSessionPayload } from "@/lib/server/workout-validation";
+} from "@backend/responses/api-response";
+import { validateWorkoutSessionPayload } from "@backend/validation/workout-validation";
 
 type RouteContext = {
   params: Promise<{

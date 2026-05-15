@@ -1,33 +1,9 @@
-import { profileStore } from "@/lib/server/profile-store";
+import { profileStore } from "@backend/stores/profile-store";
 import {
   apiErrorResponse,
   apiSuccessResponse,
-} from "@/lib/server/api-response";
-import type { UserProfile } from "@/types/profile";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function validateProfilePayload(body: unknown): UserProfile | null {
-  if (!isRecord(body)) return null;
-
-  if (typeof body.name !== "string") return null;
-  if (typeof body.coachSharingEnabled !== "boolean") return null;
-
-  return {
-    id: typeof body.id === "string" ? body.id : "user-1",
-    name: body.name,
-    age: typeof body.age === "number" ? body.age : undefined,
-    heightCm: typeof body.heightCm === "number" ? body.heightCm : undefined,
-    goal:
-      typeof body.goal === "string"
-        ? (body.goal as UserProfile["goal"])
-        : undefined,
-    coachSharingEnabled: body.coachSharingEnabled,
-    coachName: typeof body.coachName === "string" ? body.coachName : undefined,
-  };
-}
+} from "@backend/responses/api-response";
+import { validateProfilePayload } from "@backend/validation/profile-validation";
 
 export async function GET() {
   try {

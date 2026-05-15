@@ -1,39 +1,9 @@
-import { nutritionStore } from "@/lib/server/nutrition-store";
+import { nutritionStore } from "@backend/stores/nutrition-store";
 import {
   apiErrorResponse,
   apiSuccessResponse,
-} from "@/lib/server/api-response";
-import type { NutritionResults } from "@/types/nutrition";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function validateNutritionSummaryPayload(body: unknown): NutritionResults | null {
-  if (!isRecord(body)) return null;
-
-  const requiredNumberFields = [
-    "fatFreeMassKg",
-    "fatFreeMassLbs",
-    "proteinFactor",
-    "proteinTargetGrams",
-    "proteinCalories",
-    "calorieTarget",
-    "fatPercent",
-    "fatCalories",
-    "fatTargetGrams",
-    "carbCalories",
-    "carbsTargetGrams",
-  ];
-
-  for (const field of requiredNumberFields) {
-    if (typeof body[field] !== "number" || !Number.isFinite(body[field] as number)) {
-      return null;
-    }
-  }
-
-  return body as NutritionResults;
-}
+} from "@backend/responses/api-response";
+import { validateNutritionSummaryPayload } from "@backend/validation/nutrition-validation";
 
 export async function GET() {
   try {

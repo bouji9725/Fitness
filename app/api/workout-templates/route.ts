@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { workoutStore } from "@/lib/server/workout-store";
+import { workoutStore } from "@backend/stores/workout-store";
 
 // GET /api/workout-templates
 // Returns all available workout templates.

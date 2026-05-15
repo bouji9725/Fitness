@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/server/prisma";
+import { prisma } from "@backend/prisma/prisma";
 
-/**
- * GET /api/health/db
- *
- * Developer health check.
- * This proves that the Next.js API layer can talk to PostgreSQL through Prisma.
- */
 export async function GET() {
   try {
     const userProfileCount = await prisma.userProfile.count();

@@ -1,7 +1,7 @@
-import Link from "next/link";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
+﻿import Link from "next/link";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
 
 export default function HomePage() {
   const modules = [

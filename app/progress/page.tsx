@@ -1,22 +1,22 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
-import BodyStatsForm from "@/components/profile/BodyStatsForm";
-import MonthlyComparisonCard from "@/components/progress/MonthlyComparisonCard";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
+import BodyStatsForm from "@frontend/components/profile/BodyStatsForm";
+import MonthlyComparisonCard from "@frontend/components/progress/MonthlyComparisonCard";
 import {
   addProgressEntry,
   listProgressEntries,
-} from "@/lib/api/progress-api";
+} from "@frontend/api/progress-api";
 import {
   calculateBodyStatsDifference,
   getLatestBodyStats,
   getPreviousBodyStats,
-} from "@/lib/calculations/progress";
-import type { BodyStatsEntry } from "@/types/progress";
+} from "@shared/calculations/progress";
+import type { BodyStatsEntry } from "@shared/types/progress";
 
 export default function ProgressPage() {
   const [entries, setEntries] = useState<BodyStatsEntry[]>([]);

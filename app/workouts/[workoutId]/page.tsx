@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
-import WorkoutSession from "@/components/workout/WorkoutSession";
-import type { WorkoutTemplate } from "@/types/workout";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
+import WorkoutSession from "@frontend/components/workout/WorkoutSession";
+import type { WorkoutTemplate } from "@shared/types/workout";
 
 // Workout session page.
 // This is the highest-value workflow in the product.

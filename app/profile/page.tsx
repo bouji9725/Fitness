@@ -1,25 +1,25 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
-import UserProfileCard from "@/components/profile/UserProfileCard";
-import ShareCoachCard from "@/components/profile/ShareCoachCard";
-import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import FormField from "@/components/ui/FormField";
-import { getProfile, updateProfile } from "@/lib/api/profile-api";
-import { listProgressEntries } from "@/lib/api/progress-api";
-import { getNutritionSummary } from "@/lib/api/nutrition-api";
-import { calculateNutritionResults } from "@/lib/calculations/nutrition";
-import { getLatestBodyStats } from "@/lib/calculations/progress";
-import { parseNumberInput } from "@/lib/utils/number";
-import type { UserProfile } from "@/types/profile";
-import type { BodyStatsEntry } from "@/types/progress";
-import type { NutritionGoal, NutritionResults } from "@/types/nutrition";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
+import UserProfileCard from "@frontend/components/profile/UserProfileCard";
+import ShareCoachCard from "@frontend/components/profile/ShareCoachCard";
+import Card from "@frontend/components/ui/Card";
+import Button from "@frontend/components/ui/Button";
+import Input from "@frontend/components/ui/Input";
+import Select from "@frontend/components/ui/Select";
+import FormField from "@frontend/components/ui/FormField";
+import { getProfile, updateProfile } from "@frontend/api/profile-api";
+import { listProgressEntries } from "@frontend/api/progress-api";
+import { getNutritionSummary } from "@frontend/api/nutrition-api";
+import { calculateNutritionResults } from "@shared/calculations/nutrition";
+import { getLatestBodyStats } from "@shared/calculations/progress";
+import { parseNumberInput } from "@shared/utils/number";
+import type { UserProfile } from "@shared/types/profile";
+import type { BodyStatsEntry } from "@shared/types/progress";
+import type { NutritionGoal, NutritionResults } from "@shared/types/nutrition";
 
 function mapProfileGoalToNutritionGoal(
   goal?: UserProfile["goal"]

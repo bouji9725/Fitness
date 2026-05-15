@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
-import { listWorkoutTemplates } from "@/lib/api/workouts-api";
-import type { WorkoutTemplate } from "@/types/workout";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
+import { listWorkoutTemplates } from "@frontend/api/workouts-api";
+import type { WorkoutTemplate } from "@shared/types/workout";
 
 export default function WorkoutsPage() {
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);

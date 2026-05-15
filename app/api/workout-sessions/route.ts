@@ -1,9 +1,9 @@
-import { workoutStore } from "@/lib/server/workout-store";
+import { workoutStore } from "@backend/stores/workout-store";
 import {
   apiErrorResponse,
   apiSuccessResponse,
-} from "@/lib/server/api-response";
-import { validateCreateWorkoutSessionPayload } from "@/lib/server/workout-validation";
+} from "@backend/responses/api-response";
+import { validateCreateWorkoutSessionPayload } from "@backend/validation/workout-validation";
 
 export async function GET() {
   try {

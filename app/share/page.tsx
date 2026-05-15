@@ -1,8 +1,8 @@
-import Link from "next/link";
-import AppShell from "@/components/layout/AppShell";
-import PageContainer from "@/components/layout/PageContainer";
-import PageHeader from "@/components/layout/PageHeader";
-import ShareOverview from "@/components/share/ShareOverview";
+﻿import Link from "next/link";
+import AppShell from "@frontend/components/layout/AppShell";
+import PageContainer from "@frontend/components/layout/PageContainer";
+import PageHeader from "@frontend/components/layout/PageHeader";
+import ShareOverview from "@frontend/components/share/ShareOverview";
 
 export default function SharePage() {
   return (
