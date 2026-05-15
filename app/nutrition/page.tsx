@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -11,7 +11,7 @@ export default function NutritionPage() {
         <PageHeader
           eyebrow="Nutrition planning"
           title="Nutrition"
-          description="Estimate calories, protein, fats, and carbs from your current body data and fitness goal."
+          description="Follow three steps: enter your body data, choose your goal and activity level, then review your calorie and macro targets."
           actions={
             <Link
               href="/profile"
@@ -22,24 +22,7 @@ export default function NutritionPage() {
           }
         />
 
-        <section className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-            Calculator
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Build your nutrition target
-          </h2>
-
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            Adjust your inputs, choose a goal, and review a clear macro plan
-            that can be used across the rest of the app.
-          </p>
-
-          <div className="mt-6">
-            <NutritionCalculator />
-          </div>
-        </section>
+        <NutritionCalculator />
       </PageContainer>
     </AppShell>
   );

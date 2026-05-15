@@ -1,46 +1,85 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useState } from "react";
-import StatCard from "@frontend/components/ui/StatCard";
-import RecentWorkoutsList from "./RecentWorkoutsList";
-import WorkoutInsightCard from "./WorkoutInsightCard";
-import { getDashboardMetrics } from "@shared/calculations/dashboard";
+import { useEffect, useMemo, useState } from "react";
+import { getProfile } from "@frontend/api/profile-api";
+import { getNutritionSummary } from "@frontend/api/nutrition-api";
+import { listProgressEntries } from "@frontend/api/progress-api";
 import { listSavedWorkoutSessions } from "@frontend/api/workouts-api";
+import { getLatestBodyStats } from "@shared/calculations/progress";
+import DashboardHero from "./DashboardHero";
+import SetupChecklistCard from "./SetupChecklistCard";
+import NextActionCard from "./NextActionCard";
+import DashboardMetricGrid from "./DashboardMetricGrid";
+import RecentActivityCard from "./RecentActivityCard";
+import RecentWorkoutsList from "./RecentWorkoutsList";
+import type { UserProfile } from "@shared/types/profile";
+import type { NutritionResults } from "@shared/types/nutrition";
+import type { BodyStatsEntry } from "@shared/types/progress";
+import type { WorkoutSessionRecord } from "@shared/types/workout";
 
-// Main dashboard overview.
-// Reads saved workout data through the API client.
 export default function DashboardOverview() {
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [nutritionSummary, setNutritionSummary] =
+    useState<NutritionResults | null>(null);
+  const [progressEntries, setProgressEntries] = useState<BodyStatsEntry[]>([]);
+  const [savedSessions, setSavedSessions] = useState<WorkoutSessionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [metrics, setMetrics] = useState(() => getDashboardMetrics([]));
 
   useEffect(() => {
-    async function loadDashboardData() {
+    async function loadDashboard() {
       try {
         setError(null);
-
-        const sessions = await listSavedWorkoutSessions();
-        const nextMetrics = getDashboardMetrics(sessions);
-
-        setMetrics(nextMetrics);
+        const [profileData, nutritionData, progressData, sessionsData] =
+          await Promise.all([
+            getProfile(),
+            getNutritionSummary(),
+            listProgressEntries(),
+            listSavedWorkoutSessions(),
+          ]);
+        setProfile(profileData);
+        setNutritionSummary(nutritionData);
+        setProgressEntries(progressData);
+        setSavedSessions(sessionsData);
       } catch (err) {
         setError(
           err instanceof Error
             ? err.message
-            : "Something went wrong while loading dashboard data."
+            : "Something went wrong loading the dashboard."
         );
       } finally {
-        setHasHydrated(true);
+        setLoading(false);
       }
     }
 
-    loadDashboardData();
+    loadDashboard();
   }, []);
 
-  if (!hasHydrated) {
+  const latestBodyStats = useMemo(
+    () => getLatestBodyStats(progressEntries),
+    [progressEntries]
+  );
+
+  const lastTrainingDay = useMemo(() => {
+    if (savedSessions.length === 0) return null;
+    return [...savedSessions].sort(
+      (a, b) =>
+        new Date(b.session.performedAt).getTime() -
+        new Date(a.session.performedAt).getTime()
+    )[0].session.performedAt;
+  }, [savedSessions]);
+
+  const hasProfile = Boolean(
+    profile?.name?.trim() &&
+      profile?.age &&
+      profile?.heightCm &&
+      profile?.sex
+  );
+
+  if (loading) {
     return (
       <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-        Loading dashboard insights...
+        Loading dashboard...
       </section>
     );
   }
@@ -53,90 +92,49 @@ export default function DashboardOverview() {
     );
   }
 
-  const averageExercisesPerWorkout =
-    metrics.totalSavedWorkouts > 0
-      ? (metrics.totalExercisesLogged / metrics.totalSavedWorkouts).toFixed(1)
-      : "0";
-
-  const averageSetsPerWorkout =
-    metrics.totalSavedWorkouts > 0
-      ? (metrics.totalCompletedSets / metrics.totalSavedWorkouts).toFixed(1)
-      : "0";
-
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Saved workouts"
-          value={metrics.totalSavedWorkouts}
-          helperText="Completed sessions stored in your history."
+      {/* Personalised welcome card */}
+      <DashboardHero
+        profile={profile}
+        latestBodyStats={latestBodyStats}
+        nutritionSummary={nutritionSummary}
+        recentWorkout={savedSessions[0] ?? null}
+      />
+
+      {/* Key metrics: nutrition target · weight · workouts */}
+      <DashboardMetricGrid
+        nutritionSummary={nutritionSummary}
+        latestBodyStats={latestBodyStats}
+        savedWorkoutsCount={savedSessions.length}
+        lastTrainingDay={lastTrainingDay}
+      />
+
+      {/* Next recommended action + setup checklist */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <NextActionCard
+          profile={profile}
+          latestBodyStats={latestBodyStats}
+          nutritionSummary={nutritionSummary}
+          savedWorkouts={savedSessions}
         />
-        <StatCard
-          label="Exercises logged"
-          value={metrics.totalExercisesLogged}
-          helperText="Total exercise entries across saved sessions."
+        <SetupChecklistCard
+          hasProfile={hasProfile}
+          hasProgressEntry={progressEntries.length > 0}
+          hasNutritionPlan={nutritionSummary !== null}
+          hasWorkout={savedSessions.length > 0}
+          hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
         />
-        <StatCard
-          label="Completed sets"
-          value={metrics.totalCompletedSets}
-          helperText="Sets marked as completed in your saved history."
+      </div>
+
+      {/* Recent activity + full workouts list */}
+      <div className="grid gap-6 xl:grid-cols-[1fr_1.25fr]">
+        <RecentActivityCard
+          latestBodyStats={latestBodyStats}
+          recentWorkouts={savedSessions.slice(0, 3)}
         />
-        <StatCard
-          label="Total volume"
-          value={metrics.totalVolume}
-          helperText="Combined training volume across saved workouts."
-        />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-3">
-        <WorkoutInsightCard
-          title="Training consistency"
-          description="A simple view of how much history has already been built."
-          value={metrics.totalSavedWorkouts}
-          helperText="Each saved session strengthens your training history."
-        />
-
-        <WorkoutInsightCard
-          title="Average exercises"
-          description="How dense your typical saved workout currently is."
-          value={averageExercisesPerWorkout}
-          helperText="Exercises per saved workout session."
-        />
-
-        <WorkoutInsightCard
-          title="Average completed sets"
-          description="How much work gets completed in a typical workout."
-          value={averageSetsPerWorkout}
-          helperText="Completed sets per saved workout session."
-        />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-            Summary
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Workout history snapshot
-          </h2>
-
-          <p className="mt-3 text-sm leading-7 text-slate-300">
-            Use this overview to understand how much training data has been
-            captured so far and how active your recent workout history looks.
-          </p>
-
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-slate-400">Recent workout entries</p>
-            <p className="mt-2 text-3xl font-semibold text-white">
-              {metrics.recentWorkouts.length}
-            </p>
-            
-          </div>
-        </div>
-
-        <RecentWorkoutsList items={metrics.recentWorkouts} />
-      </section>
+        <RecentWorkoutsList items={savedSessions.slice(0, 5)} />
+      </div>
     </div>
   );
 }

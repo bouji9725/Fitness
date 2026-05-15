@@ -11,7 +11,7 @@ export default function DashboardPage() {
         <PageHeader
           eyebrow="Training overview"
           title="Dashboard"
-          description="Review saved sessions, training volume, completed sets, and recent workout activity from one clear overview."
+          description="Your command center — see key metrics, your next recommended action, and recent training and progress activity at a glance."
           actions={
             <Link
               href="/workouts"

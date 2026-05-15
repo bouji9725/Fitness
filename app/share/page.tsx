@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -11,7 +11,7 @@ export default function SharePage() {
         <PageHeader
           eyebrow="Coach summary"
           title="Share"
-          description="Review the profile, progress, nutrition, and workout data prepared for a clear coach-facing summary."
+          description="Check your report readiness, preview what gets shared, then export to clipboard, PDF, or JSON."
           actions={
             <Link
               href="/profile"
@@ -22,24 +22,7 @@ export default function SharePage() {
           }
         />
 
-        <section className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-            Review
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Coach-ready summary
-          </h2>
-
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            This view combines your latest profile, progress, nutrition, and
-            workout information into one structured summary.
-          </p>
-
-          <div className="mt-6">
-            <ShareOverview />
-          </div>
-        </section>
+        <ShareOverview />
       </PageContainer>
     </AppShell>
   );
