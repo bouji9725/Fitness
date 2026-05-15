@@ -11,7 +11,7 @@ export function validateProfilePayload(body: unknown): UserProfile | null {
   if (typeof body.coachSharingEnabled !== "boolean") return null;
 
   return {
-    id: typeof body.id === "string" ? body.id : "user-1",
+    id: typeof body.id === "string" ? body.id : "",
     name: body.name,
     age: typeof body.age === "number" ? body.age : undefined,
     heightCm: typeof body.heightCm === "number" ? body.heightCm : undefined,

@@ -1,18 +1,6 @@
 import { prisma } from "@backend/prisma/prisma";
 import type { UserProfile } from "@shared/types/profile";
 
-const DEFAULT_ID = "user-1";
-
-const defaultProfile: UserProfile = {
-  id: DEFAULT_ID,
-  name: "User",
-  age: 25,
-  heightCm: 180,
-  goal: "gain-muscle",
-  coachSharingEnabled: false,
-  coachName: "",
-};
-
 function rowToProfile(row: {
   id: string;
   name: string;
@@ -34,15 +22,19 @@ function rowToProfile(row: {
 }
 
 export const profileStore = {
-  async getProfile(): Promise<UserProfile> {
-    const row = await prisma.userProfile.findUnique({
-      where: { id: DEFAULT_ID },
-    });
+  async getProfile(userId: string): Promise<UserProfile> {
+    const row = await prisma.userProfile.findUnique({ where: { id: userId } });
 
-    return row ? rowToProfile(row) : defaultProfile;
+    return row
+      ? rowToProfile(row)
+      : {
+          id: userId,
+          name: "",
+          coachSharingEnabled: false,
+        };
   },
 
-  async saveProfile(profile: UserProfile): Promise<UserProfile> {
+  async saveProfile(userId: string, profile: UserProfile): Promise<UserProfile> {
     const data = {
       name: profile.name,
       age: profile.age ?? null,
@@ -53,8 +45,8 @@ export const profileStore = {
     };
 
     const row = await prisma.userProfile.upsert({
-      where: { id: DEFAULT_ID },
-      create: { id: DEFAULT_ID, ...data },
+      where: { id: userId },
+      create: { id: userId, ...data },
       update: data,
     });
 

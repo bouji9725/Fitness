@@ -37,7 +37,6 @@ function rowToSession(row: {
 }
 
 export const workoutStore = {
-  // Template methods stay synchronous — static seed data, no DB needed.
   listTemplates(): WorkoutTemplate[] {
     return workoutTemplates;
   },
@@ -46,7 +45,7 @@ export const workoutStore = {
     return workoutTemplates.find((t) => t.id === templateId) ?? null;
   },
 
-  async createSession(templateId: string): Promise<WorkoutSession | null> {
+  async createSession(userId: string, templateId: string): Promise<WorkoutSession | null> {
     const template = this.getTemplateById(templateId);
     if (!template) return null;
 
@@ -55,6 +54,7 @@ export const workoutStore = {
     await prisma.workoutSession.create({
       data: {
         id: session.id,
+        userId,
         templateId: session.templateId,
         templateName: session.templateName,
         performedAt: session.performedAt,
@@ -68,20 +68,21 @@ export const workoutStore = {
     return session;
   },
 
-  async getSession(sessionId: string): Promise<WorkoutSession | null> {
-    const row = await prisma.workoutSession.findUnique({
-      where: { id: sessionId },
+  async getSession(userId: string, sessionId: string): Promise<WorkoutSession | null> {
+    const row = await prisma.workoutSession.findFirst({
+      where: { id: sessionId, userId },
     });
 
     return row ? rowToSession(row) : null;
   },
 
   async saveSession(
+    userId: string,
     sessionId: string,
     session: WorkoutSession
   ): Promise<WorkoutSessionRecord | null> {
-    const exists = await prisma.workoutSession.findUnique({
-      where: { id: sessionId },
+    const exists = await prisma.workoutSession.findFirst({
+      where: { id: sessionId, userId },
       select: { id: true },
     });
 
@@ -108,8 +109,9 @@ export const workoutStore = {
     return { session: nextSession, savedAt };
   },
 
-  async listSavedSessions(): Promise<WorkoutSessionRecord[]> {
+  async listSavedSessions(userId: string): Promise<WorkoutSessionRecord[]> {
     const records = await prisma.workoutSessionRecord.findMany({
+      where: { session: { userId } },
       include: { session: true },
       orderBy: { savedAt: "desc" },
     });

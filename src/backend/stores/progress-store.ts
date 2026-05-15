@@ -20,18 +20,20 @@ function rowToEntry(row: {
 }
 
 export const progressStore = {
-  async listEntries(): Promise<BodyStatsEntry[]> {
+  async listEntries(userId: string): Promise<BodyStatsEntry[]> {
     const rows = await prisma.bodyStatsEntry.findMany({
+      where: { userId },
       orderBy: { date: "desc" },
     });
 
     return rows.map(rowToEntry);
   },
 
-  async addEntry(entry: BodyStatsEntry): Promise<BodyStatsEntry[]> {
+  async addEntry(userId: string, entry: BodyStatsEntry): Promise<BodyStatsEntry[]> {
     await prisma.bodyStatsEntry.create({
       data: {
         id: entry.id,
+        userId,
         date: entry.date,
         weightKg: entry.weightKg,
         bodyFatPercent: entry.bodyFatPercent,
@@ -40,6 +42,6 @@ export const progressStore = {
       },
     });
 
-    return this.listEntries();
+    return this.listEntries(userId);
   },
 };

@@ -30,7 +30,7 @@ function mapProfileGoalToNutritionGoal(
 }
 
 const fallbackProfile: UserProfile = {
-  id: "user-1",
+  id: "",
   name: "",
   age: undefined,
   heightCm: undefined,

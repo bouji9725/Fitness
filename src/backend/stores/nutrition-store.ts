@@ -1,12 +1,10 @@
 import { prisma } from "@backend/prisma/prisma";
 import type { NutritionResults } from "@shared/types/nutrition";
 
-const SINGLETON_ID = "singleton";
-
 export const nutritionStore = {
-  async getSummary(): Promise<NutritionResults | null> {
+  async getSummary(userId: string): Promise<NutritionResults | null> {
     const row = await prisma.nutritionSummary.findUnique({
-      where: { id: SINGLETON_ID },
+      where: { id: userId },
     });
 
     if (!row) return null;
@@ -26,10 +24,10 @@ export const nutritionStore = {
     };
   },
 
-  async saveSummary(summary: NutritionResults): Promise<NutritionResults> {
+  async saveSummary(userId: string, summary: NutritionResults): Promise<NutritionResults> {
     await prisma.nutritionSummary.upsert({
-      where: { id: SINGLETON_ID },
-      create: { id: SINGLETON_ID, ...summary },
+      where: { id: userId },
+      create: { id: userId, ...summary },
       update: { ...summary },
     });
 

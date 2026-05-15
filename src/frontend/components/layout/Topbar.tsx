@@ -1,13 +1,12 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import { signOutAction } from "@backend/auth/actions";
 
 type TopbarProps = {
   onMenuToggle: () => void;
 };
 
-// Lightweight top application bar.
-// Keep this global and product-facing.
 export default function Topbar({ onMenuToggle }: TopbarProps) {
   return (
     <header className="sticky top-0 z-20 border-b app-hairline bg-slate-950/55 backdrop-blur-xl">
@@ -47,6 +46,15 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
           >
             Profile
           </Link>
+
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
     </header>

@@ -5,21 +5,25 @@ import {
 } from "@backend/responses/api-response";
 import { validateProgressEntryPayload } from "@backend/validation/progress-validation";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { getAuthUserId } from "@backend/auth/session";
 
 export async function GET() {
+  const userId = await getAuthUserId();
+  if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
+
   try {
-    const entries = await progressStore.listEntries();
+    const entries = await progressStore.listEntries(userId);
     return apiSuccessResponse(entries);
   } catch (error) {
     console.error("Failed to load progress entries:", error);
-    return apiErrorResponse({
-      status: 500,
-      message: "Failed to load progress entries.",
-    });
+    return apiErrorResponse({ status: 500, message: "Failed to load progress entries." });
   }
 }
 
 export async function POST(request: Request) {
+  const userId = await getAuthUserId();
+  if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
+
   try {
     const body = await request.json().catch(() => null);
     const entry = validateProgressEntryPayload(body);
@@ -31,7 +35,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const entries = await progressStore.addEntry(entry);
+    const entries = await progressStore.addEntry(userId, entry);
     return apiSuccessResponse(entries, 201);
   } catch (error) {
     if (
@@ -44,9 +48,6 @@ export async function POST(request: Request) {
       });
     }
     console.error("Failed to add progress entry:", error);
-    return apiErrorResponse({
-      status: 500,
-      message: "Failed to add progress entry.",
-    });
+    return apiErrorResponse({ status: 500, message: "Failed to add progress entry." });
   }
 }
