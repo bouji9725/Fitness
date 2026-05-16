@@ -43,7 +43,7 @@ const workoutRecord: WorkoutSessionRecord = {
     templateId: "push-day",
     templateName: "Push Day",
     performedAt: "2026-05-10T10:00:00Z",
-    status: "saved",
+    status: "completed",
     exercises: [],
     createdAt: "2026-05-10T10:00:00Z",
     updatedAt: "2026-05-10T10:00:00Z",

@@ -6,6 +6,7 @@ import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
 import BodyStatsForm from "@frontend/components/profile/BodyStatsForm";
+import BodyStatsChart from "@frontend/components/progress/BodyStatsChart";
 import MonthlyComparisonCard from "@frontend/components/progress/MonthlyComparisonCard";
 import {
   addProgressEntry,
@@ -193,6 +194,20 @@ export default function ProgressPage() {
                     </p>
                   </section>
                 )}
+              </div>
+            </section>
+
+            <section className="app-surface rounded-[var(--radius-xl)] p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+                Trends
+              </p>
+
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                Weight &amp; body fat over time
+              </h2>
+
+              <div className="mt-6">
+                <BodyStatsChart entries={entries} />
               </div>
             </section>
 
