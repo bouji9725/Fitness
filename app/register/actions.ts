@@ -22,13 +22,18 @@ export async function registerAction(
     return { error: "Password must be at least 8 characters." };
   }
 
-  const existing = await userStore.findByEmail(email);
-  if (existing) {
-    return { error: "An account with this email already exists." };
-  }
+  try {
+    const existing = await userStore.findByEmail(email);
+    if (existing) {
+      return { error: "An account with this email already exists." };
+    }
 
-  const passwordHash = await bcrypt.hash(password, 12);
-  await userStore.create(email, passwordHash, name);
+    const passwordHash = await bcrypt.hash(password, 12);
+    await userStore.create(email, passwordHash, name);
+  } catch (err) {
+    console.error("[register] database error:", err);
+    return { error: "Could not create your account. Please try again later." };
+  }
 
   redirect("/login");
 }

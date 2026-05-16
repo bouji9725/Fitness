@@ -18,7 +18,9 @@
       "Bash(grep -v \"^$\")",
       "Bash(curl -s http://localhost:3000/api/health/db -b /tmp/fit_cookies.txt)",
       "Bash(npm test *)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(dir \"src\\\\backend\\\\validation\\\\__tests__\")",
+      "Bash(npx vitest *)"
     ]
   }
 }
