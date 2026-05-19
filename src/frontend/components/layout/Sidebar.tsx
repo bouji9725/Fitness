@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOutAction } from "@backend/auth/actions";
 
 const links = [
   { href: "/", label: "Home" },
@@ -75,7 +76,7 @@ function SidebarContent({ onClose }: SidebarContentProps) {
         </ul>
       </nav>
 
-      <div className="border-t app-hairline px-5 py-4">
+      <div className="border-t app-hairline px-5 py-4 space-y-3">
         <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
           Track your workout
         </p>
@@ -83,10 +84,19 @@ function SidebarContent({ onClose }: SidebarContentProps) {
         <Link
           href="/workouts"
           onClick={onClose}
-          className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-4 text-sm font-medium text-white transition hover:bg-indigo-500/25"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-4 text-sm font-medium text-white transition hover:bg-indigo-500/25"
         >
           Start workout
         </Link>
+
+        <form action={signOutAction} className="lg:hidden">
+          <button
+            type="submit"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+          >
+            Sign out
+          </button>
+        </form>
       </div>
     </div>
   );

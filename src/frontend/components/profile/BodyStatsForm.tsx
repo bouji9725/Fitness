@@ -15,9 +15,9 @@ type BodyStatsFormProps = {
 
 export default function BodyStatsForm({ onAddEntry }: BodyStatsFormProps) {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [weightKg, setWeightKg] = useState<number | undefined>(80);
-  const [bodyFatPercent, setBodyFatPercent] = useState<number | undefined>(15);
-  const [muscleMassKg, setMuscleMassKg] = useState<number | undefined>(35);
+  const [weightKg, setWeightKg] = useState<number | undefined>(undefined);
+  const [bodyFatPercent, setBodyFatPercent] = useState<number | undefined>(undefined);
+  const [muscleMassKg, setMuscleMassKg] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
   function handleSubmit() {

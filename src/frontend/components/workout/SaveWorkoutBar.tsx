@@ -17,7 +17,7 @@ export default function SaveWorkoutBar({
   lastSavedAt,
 }: SaveWorkoutBarProps) {
   return (
-    <Card className="flex flex-col gap-4 border border-white/10 bg-slate-950/70 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="sticky top-[4.5rem] z-10 flex flex-col gap-4 border border-white/10 bg-slate-950/80 p-5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
           Workout session

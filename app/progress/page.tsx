@@ -220,7 +220,7 @@ export default function ProgressPage() {
                 </div>
               ) : (
                 <div className="mt-5 overflow-x-auto">
-                  <table className="min-w-full border-separate border-spacing-y-3">
+                  <table className="min-w-[560px] w-full border-separate border-spacing-y-3">
                     <thead>
                       <tr className="text-left text-xs uppercase tracking-[0.16em] text-slate-400">
                         <th className="px-3 py-2 font-medium">Date</th>

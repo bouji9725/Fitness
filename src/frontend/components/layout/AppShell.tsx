@@ -50,10 +50,6 @@ export default function AppShell({ children }: AppShellProps) {
       </div>
 
       <div className="flex min-h-screen">
-        {/* Desktop sidebar */}
-        <Sidebar isMobileOpen={false} onClose={() => setIsMobileSidebarOpen(false)} />
-
-        {/* Mobile sidebar / overlay */}
         <Sidebar
           isMobileOpen={isMobileSidebarOpen}
           onClose={() => setIsMobileSidebarOpen(false)}
