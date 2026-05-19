@@ -16,6 +16,7 @@ import {
   createWorkoutSession,
   updateWorkoutSession,
 } from "@frontend/api/workouts-api";
+import { useToast } from "@frontend/context/ToastContext";
 
 type WorkoutSessionProps = {
   template: WorkoutTemplate;
@@ -30,13 +31,14 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
   const [sessionState, dispatch] = useReducer(workoutSessionReducer, null);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function createSession() {
       try {
         setHasHydrated(false);
-        setError(null);
+        setInitError(null);
 
         const session = await createWorkoutSession(template.id);
 
@@ -47,7 +49,7 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
         });
         setLastSavedAt(null);
       } catch (err) {
-        setError(
+        setInitError(
           err instanceof Error
             ? err.message
             : "Something went wrong while creating the workout session."
@@ -69,8 +71,6 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
     if (!sessionState) return;
 
     try {
-      setError(null);
-
       const savedRecord = await updateWorkoutSession(sessionState);
 
       setBaseSession(savedRecord.session);
@@ -80,11 +80,12 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
         type: "RESET_WORKOUT",
         initialWorkout: savedRecord.session,
       });
+
+      toast("Workout saved!", "success");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong while saving the workout session."
+      toast(
+        err instanceof Error ? err.message : "Could not save workout — try again",
+        "error"
       );
     }
   }
@@ -118,10 +119,10 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
     );
   }
 
-  if (error) {
+  if (initError) {
     return (
       <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6">
-        <p className="text-sm font-medium text-red-100">{error}</p>
+        <p className="text-sm font-medium text-red-100">{initError}</p>
       </section>
     );
   }

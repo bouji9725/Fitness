@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Skeleton from "@frontend/components/ui/Skeleton";
+import { useToast } from "@frontend/context/ToastContext";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -23,23 +24,18 @@ import type { BodyStatsEntry } from "@shared/types/progress";
 export default function ProgressPage() {
   const [entries, setEntries] = useState<BodyStatsEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function loadProgressEntries() {
       try {
         setLoading(true);
-        setError(null);
-
         const savedEntries = await listProgressEntries();
-
         setEntries(savedEntries);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Something went wrong while loading progress data."
+        toast(
+          err instanceof Error ? err.message : "Could not load progress data",
+          "error"
         );
       } finally {
         setLoading(false);
@@ -47,24 +43,18 @@ export default function ProgressPage() {
     }
 
     loadProgressEntries();
-  }, []);
+  }, [toast]);
 
   async function handleAddEntry(entry: BodyStatsEntry) {
     try {
-      setSaving(true);
-      setError(null);
-
       const updatedEntries = await addProgressEntry(entry);
-
       setEntries(updatedEntries);
+      toast("Progress entry saved", "success");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong while saving progress data."
+      toast(
+        err instanceof Error ? err.message : "Could not save progress entry",
+        "error"
       );
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -91,12 +81,6 @@ export default function ProgressPage() {
             </Link>
           }
         />
-
-        {error ? (
-          <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">
-            {error}
-          </section>
-        ) : null}
 
         {loading ? (
           <div className="space-y-6">
@@ -131,11 +115,6 @@ export default function ProgressPage() {
                   <BodyStatsForm onAddEntry={handleAddEntry} />
                 </div>
 
-                {saving ? (
-                  <p className="mt-4 text-sm text-slate-300">
-                    Saving progress entry...
-                  </p>
-                ) : null}
               </div>
 
               <div className="space-y-6">

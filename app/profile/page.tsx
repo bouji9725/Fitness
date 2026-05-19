@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Skeleton from "@frontend/components/ui/Skeleton";
+import { useToast } from "@frontend/context/ToastContext";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -42,13 +43,12 @@ export default function ProfilePage() {
   const [nutritionSummary, setNutritionSummary] =
     useState<NutritionResults | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
-        setError(null);
         const [savedProfile, bodyStatsEntries, nutrition] = await Promise.all([
           getProfile(),
           listProgressEntries(),
@@ -58,21 +58,19 @@ export default function ProfilePage() {
         setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
         setNutritionSummary(nutrition);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Something went wrong loading the profile."
+        toast(
+          err instanceof Error ? err.message : "Could not load profile",
+          "error"
         );
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, []);
+  }, [toast]);
 
   async function handleSaveProfile() {
     try {
-      setError(null);
       const savedProfile = await updateProfile(profile);
       const [bodyStatsEntries, nutrition] = await Promise.all([
         listProgressEntries(),
@@ -82,11 +80,11 @@ export default function ProfilePage() {
       setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
       setNutritionSummary(nutrition);
       setIsEditOpen(false);
+      toast("Profile saved", "success");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong saving the profile."
+      toast(
+        err instanceof Error ? err.message : "Could not save profile",
+        "error"
       );
     }
   }
@@ -123,12 +121,6 @@ export default function ProfilePage() {
               <Skeleton className="h-36 rounded-[var(--radius-xl)]" />
             </div>
           </div>
-        )}
-
-        {error && (
-          <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">
-            {error}
-          </section>
         )}
 
         {!loading && (

@@ -15,6 +15,7 @@ import { saveNutritionSummaryApi } from "@frontend/api/nutrition-api";
 import { getProfile } from "@frontend/api/profile-api";
 import { listProgressEntries } from "@frontend/api/progress-api";
 import { parseNumberInput } from "@shared/utils/number";
+import { useToast } from "@frontend/context/ToastContext";
 import NutritionSummaryCard from "./NutritionSummaryCard";
 import ProteinRecommendationCard from "./ProteinRecommendationCard";
 import NutritionPlanCard from "./NutritionPlanCard";
@@ -60,9 +61,7 @@ export default function NutritionCalculator() {
 
   // ── UI state ────────────────────────────────────────────────────────
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
+  const { toast } = useToast();
 
   // Pre-fill all body inputs from profile + latest progress entry on mount.
   useEffect(() => {
@@ -144,11 +143,10 @@ export default function NutritionCalculator() {
 
     async function persist() {
       try {
-        setSaveStatus("saving");
         await saveNutritionSummaryApi(results);
-        if (!cancelled) setSaveStatus("saved");
+        if (!cancelled) toast("Nutrition plan saved", "success");
       } catch {
-        if (!cancelled) setSaveStatus("error");
+        if (!cancelled) toast("Could not save plan — try again", "error");
       }
     }
 
@@ -157,7 +155,7 @@ export default function NutritionCalculator() {
     return () => {
       cancelled = true;
     };
-  }, [results]);
+  }, [results, toast]);
 
   const showIntensity = goal !== "maintenance";
 
@@ -320,15 +318,6 @@ export default function NutritionCalculator() {
             Step 3
           </p>
           <p className="text-xs text-slate-400">Your nutrition plan</p>
-          <p className="ml-auto text-xs text-slate-400">
-            {saveStatus === "saving" && "Saving plan..."}
-            {saveStatus === "saved" && (
-              <span className="text-emerald-400">Plan saved</span>
-            )}
-            {saveStatus === "error" && (
-              <span className="text-red-400">Could not save</span>
-            )}
-          </p>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-3">

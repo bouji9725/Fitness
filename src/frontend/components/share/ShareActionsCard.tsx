@@ -1,5 +1,7 @@
 ﻿"use client";
 
+"use client";
+
 import Card from "@frontend/components/ui/Card";
 import Button from "@frontend/components/ui/Button";
 import type { SharePayload } from "@shared/types/share";
@@ -9,24 +11,33 @@ import {
   downloadPDFReport,
   formatShareText,
 } from "@frontend/export/share-export";
+import { useToast } from "@frontend/context/ToastContext";
 
 type ShareActionsCardProps = {
   payload: SharePayload;
 };
 
 export default function ShareActionsCard({ payload }: ShareActionsCardProps) {
+  const { toast } = useToast();
+
   async function handleCopy() {
-    const text = formatShareText(payload);
-    await copyToClipboard(text);
-    alert("Copied to clipboard!");
+    try {
+      const text = formatShareText(payload);
+      await copyToClipboard(text);
+      toast("Copied to clipboard!", "success");
+    } catch {
+      toast("Could not copy — try again", "error");
+    }
   }
 
   function handleDownloadJSON() {
     downloadJSON(payload, "fitness-progress.json");
+    toast("JSON downloaded", "success");
   }
 
   function handleDownloadPDF() {
     downloadPDFReport(payload);
+    toast("PDF downloaded", "success");
   }
 
   return (
