@@ -6,6 +6,7 @@ import { listProgressEntries } from "@frontend/api/progress-api";
 import { getNutritionSummary } from "@frontend/api/nutrition-api";
 import { listSavedWorkoutSessions } from "@frontend/api/workouts-api";
 import { getLatestBodyStats } from "@shared/calculations/progress";
+import Skeleton from "@frontend/components/ui/Skeleton";
 import ShareReadinessCard from "./ShareReadinessCard";
 import CoachReportPreview from "./CoachReportPreview";
 import ShareActionsCard from "./ShareActionsCard";
@@ -83,9 +84,11 @@ export default function ShareOverview() {
 
   if (loading) {
     return (
-      <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-        Loading share summary...
-      </section>
+      <div className="space-y-6">
+        <Skeleton className="h-40 rounded-[var(--radius-xl)]" />
+        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
+        <Skeleton className="h-32 rounded-[var(--radius-xl)]" />
+      </div>
     );
   }
 

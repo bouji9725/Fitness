@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import Skeleton from "@frontend/components/ui/Skeleton";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -98,9 +99,17 @@ export default function ProgressPage() {
         ) : null}
 
         {loading ? (
-          <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-            Loading progress data...
-          </section>
+          <div className="space-y-6">
+            <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+              <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
+              <div className="space-y-6">
+                <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
+                <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
+              </div>
+            </section>
+            <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
+            <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
+          </div>
         ) : (
           <>
             <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">

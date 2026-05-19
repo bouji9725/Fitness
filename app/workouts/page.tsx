@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
+import Skeleton from "@frontend/components/ui/Skeleton";
 import { listWorkoutTemplates } from "@frontend/api/workouts-api";
 import type { WorkoutTemplate } from "@shared/types/workout";
 
@@ -53,8 +54,20 @@ export default function WorkoutsPage() {
         />
 
         {loading ? (
-          <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-            Loading workout templates...
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="app-surface rounded-[var(--radius-xl)] p-5 space-y-4">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-7 w-40" />
+                <Skeleton className="h-4 w-48" />
+                <div className="space-y-2">
+                  <Skeleton className="h-12" />
+                  <Skeleton className="h-12" />
+                  <Skeleton className="h-12" />
+                </div>
+                <Skeleton className="h-11 w-32" />
+              </div>
+            ))}
           </section>
         ) : error ? (
           <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">

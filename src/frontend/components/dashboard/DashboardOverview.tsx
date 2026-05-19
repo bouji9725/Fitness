@@ -12,6 +12,7 @@ import NextActionCard from "./NextActionCard";
 import DashboardMetricGrid from "./DashboardMetricGrid";
 import RecentActivityCard from "./RecentActivityCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
+import Skeleton from "@frontend/components/ui/Skeleton";
 import type { UserProfile } from "@shared/types/profile";
 import type { NutritionResults } from "@shared/types/nutrition";
 import type { BodyStatsEntry } from "@shared/types/progress";
@@ -78,9 +79,27 @@ export default function DashboardOverview() {
 
   if (loading) {
     return (
-      <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-        Loading dashboard...
-      </section>
+      <div className="space-y-6">
+        {/* Hero */}
+        <Skeleton className="h-40 rounded-[var(--radius-xl)]" />
+        {/* Metric grid */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
+          <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
+          <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
+          <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
+        </div>
+        {/* Next action + setup checklist */}
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
+          <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
+        </div>
+        {/* Recent activity + workouts list */}
+        <div className="grid gap-6 xl:grid-cols-[1fr_1.25fr]">
+          <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
+          <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
+        </div>
+      </div>
     );
   }
 

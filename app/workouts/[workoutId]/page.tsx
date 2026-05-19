@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
+import Skeleton from "@frontend/components/ui/Skeleton";
 import WorkoutSession from "@frontend/components/workout/WorkoutSession";
 import type { WorkoutTemplate } from "@shared/types/workout";
 
@@ -84,9 +85,19 @@ export default function WorkoutDetailsPage() {
         />
 
         {loading ? (
-          <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-            Loading workout...
-          </section>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="app-surface rounded-[var(--radius-xl)] p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-36" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+                <Skeleton className="h-14" />
+                <Skeleton className="h-14" />
+                <Skeleton className="h-14" />
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6">
             <p className="text-sm font-medium text-red-100">{error}</p>

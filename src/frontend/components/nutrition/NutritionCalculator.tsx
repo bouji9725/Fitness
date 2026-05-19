@@ -136,8 +136,10 @@ export default function NutritionCalculator() {
   const computedTdee =
     safeBmr > 0 ? Math.round(safeBmr * activityMultiplier) : 0;
 
-  // Auto-save whenever results change (same as before — side effect is stable).
+  // Auto-save whenever results change — only when the user has entered real data.
   useEffect(() => {
+    if (safeWeightKg === 0 && safeBmr === 0) return;
+
     let cancelled = false;
 
     async function persist() {
