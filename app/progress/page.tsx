@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Skeleton from "@frontend/components/ui/Skeleton";
+import EmptyState from "@frontend/components/ui/EmptyState";
 import { useToast } from "@frontend/context/ToastContext";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
@@ -153,10 +154,12 @@ export default function ProgressPage() {
                       </article>
                     </div>
                   ) : (
-                    <p className="mt-4 text-sm leading-7 text-slate-300">
-                      No progress entries yet. Add your first check-in to start
-                      tracking changes.
-                    </p>
+                    <div className="mt-5">
+                      <EmptyState
+                        title="No check-ins yet"
+                        description="Add your first entry using the form on the left to start tracking changes."
+                      />
+                    </div>
                   )}
                 </section>
 
@@ -209,9 +212,12 @@ export default function ProgressPage() {
               </h2>
 
               {entries.length === 0 ? (
-                <p className="mt-4 text-sm leading-7 text-slate-300">
-                  No entries saved yet.
-                </p>
+                <div className="mt-5">
+                  <EmptyState
+                    title="No history yet"
+                    description="Your saved check-ins will appear here."
+                  />
+                </div>
               ) : (
                 <div className="mt-5 overflow-x-auto">
                   <table className="min-w-full border-separate border-spacing-y-3">

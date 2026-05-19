@@ -101,7 +101,6 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
       initialWorkout: resetSession,
     });
     setLastSavedAt(null);
-    setError(null);
   }
 
   function handleAddExercise(exercise: SessionExercise) {

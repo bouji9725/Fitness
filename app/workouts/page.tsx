@@ -6,6 +6,7 @@ import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
 import Skeleton from "@frontend/components/ui/Skeleton";
+import EmptyState from "@frontend/components/ui/EmptyState";
 import { listWorkoutTemplates } from "@frontend/api/workouts-api";
 import type { WorkoutTemplate } from "@shared/types/workout";
 
@@ -74,9 +75,10 @@ export default function WorkoutsPage() {
             {error}
           </section>
         ) : templates.length === 0 ? (
-          <section className="app-surface rounded-[var(--radius-xl)] p-6 text-sm text-slate-300">
-            No workout templates are available yet.
-          </section>
+          <EmptyState
+            title="No templates available"
+            description="Workout templates will appear here once they are added."
+          />
         ) : (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {templates.map((template) => {

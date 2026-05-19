@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Card from "@frontend/components/ui/Card";
+import EmptyState from "@frontend/components/ui/EmptyState";
 import type { BodyStatsEntry } from "@shared/types/progress";
 import type { WorkoutSessionRecord } from "@shared/types/workout";
 
@@ -26,10 +27,10 @@ export default function RecentActivityCard({
       </div>
 
       {!hasData ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-          No activity yet. Add a progress entry or log your first workout to see
-          recent data here.
-        </div>
+        <EmptyState
+          title="No activity yet"
+          description="Add a progress entry or log a workout to see recent data here."
+        />
       ) : (
         <div className="space-y-3">
           {latestBodyStats && (

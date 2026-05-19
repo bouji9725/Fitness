@@ -1,4 +1,6 @@
-﻿import Card from "@frontend/components/ui/Card";
+﻿import Link from "next/link";
+import Card from "@frontend/components/ui/Card";
+import EmptyState from "@frontend/components/ui/EmptyState";
 import type { WorkoutSessionRecord } from "@shared/types/workout";
 
 type RecentWorkoutsListProps = {
@@ -27,9 +29,18 @@ export default function RecentWorkoutsList({
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-          No saved workouts yet. Save a session to see it here.
-        </div>
+        <EmptyState
+          title="No workouts yet"
+          description="Save a session to see it here."
+          action={
+            <Link
+              href="/workouts"
+              className="inline-flex min-h-9 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-4 text-sm font-medium text-white transition hover:bg-indigo-500/25"
+            >
+              Start a workout
+            </Link>
+          }
+        />
       ) : (
         <div className="space-y-3">
           {items.map((item) => {

@@ -1,7 +1,5 @@
 ﻿"use client";
 
-"use client";
-
 import Card from "@frontend/components/ui/Card";
 import Button from "@frontend/components/ui/Button";
 import type { SharePayload } from "@shared/types/share";
