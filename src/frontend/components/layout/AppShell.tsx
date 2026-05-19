@@ -61,7 +61,7 @@ export default function AppShell({ children }: AppShellProps) {
 
           {/* Main content region.
              Keep route-specific content inside PageContainer, not here. */}
-          <main className="flex-1">
+          <main id="main-content" className="flex-1">
             {children}
           </main>
         </div>

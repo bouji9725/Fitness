@@ -91,6 +91,8 @@ export default function SetupChecklistCard({
           <Link
             key={item.label}
             href={item.href}
+            aria-disabled={item.done ? "true" : undefined}
+            tabIndex={item.done ? -1 : undefined}
             className={[
               "flex items-center gap-4 rounded-2xl border px-4 py-3 text-sm transition",
               item.done

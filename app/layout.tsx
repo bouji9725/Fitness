@@ -50,7 +50,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased`}
       >
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-2xl focus:border focus:border-indigo-400/30 focus:bg-indigo-500/20 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:outline-none"
+          >
+            Skip to main content
+          </a>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

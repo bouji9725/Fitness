@@ -350,6 +350,7 @@ export default function NutritionCalculator() {
       <Card className="space-y-4">
         <button
           type="button"
+          aria-expanded={isAdvancedOpen}
           onClick={() => setIsAdvancedOpen((prev) => !prev)}
           className="flex w-full items-center justify-between text-left"
         >

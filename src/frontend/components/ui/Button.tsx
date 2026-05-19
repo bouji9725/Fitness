@@ -16,7 +16,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseClasses =
-    "inline-flex min-h-11 items-center justify-center rounded-2xl px-4 text-sm font-medium transition focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-11 items-center justify-center rounded-2xl px-4 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-indigo-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60";
 
   const variantClasses = {
     primary:

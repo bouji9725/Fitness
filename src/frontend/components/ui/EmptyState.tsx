@@ -9,6 +9,7 @@ export default function EmptyState({ title, description, action }: EmptyStatePro
     <div className="flex flex-col items-center justify-center rounded-[var(--radius-xl)] border border-dashed border-white/15 bg-white/[0.03] px-6 py-12 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
         <svg
+          aria-hidden="true"
           className="h-5 w-5 text-slate-500"
           fill="none"
           viewBox="0 0 24 24"
