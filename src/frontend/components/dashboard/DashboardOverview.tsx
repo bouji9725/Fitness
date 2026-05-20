@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getProfile } from "@frontend/api/profile-api";
 import { getNutritionSummary } from "@frontend/api/nutrition-api";
 import { listProgressEntries } from "@frontend/api/progress-api";
-import { listSavedWorkoutSessions } from "@frontend/api/workouts-api";
+import { listActiveWorkoutSessions, listSavedWorkoutSessions } from "@frontend/api/workouts-api";
 import { getLatestBodyStats } from "@shared/calculations/progress";
 import DashboardHero from "./DashboardHero";
 import SetupChecklistCard from "./SetupChecklistCard";
@@ -12,11 +12,12 @@ import NextActionCard from "./NextActionCard";
 import DashboardMetricGrid from "./DashboardMetricGrid";
 import RecentActivityCard from "./RecentActivityCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
+import ResumeSessionBanner from "./ResumeSessionBanner";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import type { UserProfile } from "@shared/types/profile";
 import type { NutritionResults } from "@shared/types/nutrition";
 import type { BodyStatsEntry } from "@shared/types/progress";
-import type { WorkoutSessionRecord } from "@shared/types/workout";
+import type { WorkoutSession, WorkoutSessionRecord } from "@shared/types/workout";
 
 export default function DashboardOverview() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -24,6 +25,7 @@ export default function DashboardOverview() {
     useState<NutritionResults | null>(null);
   const [progressEntries, setProgressEntries] = useState<BodyStatsEntry[]>([]);
   const [savedSessions, setSavedSessions] = useState<WorkoutSessionRecord[]>([]);
+  const [activeSessions, setActiveSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,17 +33,19 @@ export default function DashboardOverview() {
     async function loadDashboard() {
       try {
         setError(null);
-        const [profileData, nutritionData, progressData, sessionsData] =
+        const [profileData, nutritionData, progressData, sessionsData, activeData] =
           await Promise.all([
             getProfile(),
             getNutritionSummary(),
             listProgressEntries(),
             listSavedWorkoutSessions(),
+            listActiveWorkoutSessions(),
           ]);
         setProfile(profileData);
         setNutritionSummary(nutritionData);
         setProgressEntries(progressData);
         setSavedSessions(sessionsData);
+        setActiveSessions(activeData);
       } catch (err) {
         setError(
           err instanceof Error
@@ -133,6 +137,9 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
+      {/* Resume session banner — shown when the user has an unsaved active session */}
+      <ResumeSessionBanner sessions={activeSessions} />
+
       {/* Personalised welcome card */}
       <DashboardHero
         profile={profile}

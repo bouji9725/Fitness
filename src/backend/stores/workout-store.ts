@@ -109,6 +109,15 @@ export const workoutStore = {
     return { session: nextSession, savedAt };
   },
 
+  async listActiveSessions(userId: string): Promise<WorkoutSession[]> {
+    const rows = await prisma.workoutSession.findMany({
+      where: { userId, record: null },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+    });
+    return rows.map(rowToSession);
+  },
+
   async listSavedSessions(userId: string): Promise<WorkoutSessionRecord[]> {
     const records = await prisma.workoutSessionRecord.findMany({
       where: { session: { userId } },

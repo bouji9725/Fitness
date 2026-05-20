@@ -102,3 +102,12 @@ export async function listSavedWorkoutSessions(): Promise<
 
   return parseApiResponse<WorkoutSessionRecord[]>(response);
 }
+
+export async function listActiveWorkoutSessions(): Promise<WorkoutSession[]> {
+  const response = await fetch("/api/workout-sessions?active=true", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  return parseApiResponse<WorkoutSession[]>(response);
+}

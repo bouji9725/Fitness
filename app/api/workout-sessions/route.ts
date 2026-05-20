@@ -6,11 +6,18 @@ import {
 import { validateCreateWorkoutSessionPayload } from "@backend/validation/workout-validation";
 import { getAuthUserId } from "@backend/auth/session";
 
-export async function GET() {
+export async function GET(request: Request) {
   const userId = await getAuthUserId();
   if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
 
+  const { searchParams } = new URL(request.url);
+
   try {
+    if (searchParams.get("active") === "true") {
+      const sessions = await workoutStore.listActiveSessions(userId);
+      return apiSuccessResponse(sessions);
+    }
+
     const sessions = await workoutStore.listSavedSessions(userId);
     return apiSuccessResponse(sessions);
   } catch (error) {
