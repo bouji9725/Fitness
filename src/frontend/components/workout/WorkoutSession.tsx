@@ -145,14 +145,20 @@ export default function WorkoutSession({ template }: WorkoutSessionProps) {
 
       <SessionSummary workout={sessionState} />
 
-      <section className="space-y-6">
-        {sessionState.exercises.map((exercise) => (
-          <ExerciseCard
-            key={exercise.id}
-            exercise={exercise}
-            dispatch={dispatch}
-          />
-        ))}
+      <section className="space-y-4">
+        {sessionState.exercises.map((exercise, index) => {
+          const firstIncompleteIndex = sessionState.exercises.findIndex(
+            (e) => !e.isCompleted
+          );
+          return (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              dispatch={dispatch}
+              isActive={index === firstIncompleteIndex}
+            />
+          );
+        })}
       </section>
 
       <AddExerciseForm onAddExercise={handleAddExercise} />
