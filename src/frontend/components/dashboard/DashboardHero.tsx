@@ -23,6 +23,24 @@ function formatGoal(goal?: UserProfile["goal"]): string {
   return labels[goal] ?? "Not set";
 }
 
+const FEATURE_TILES = [
+  {
+    label: "Track workouts",
+    desc: "Log sets, track volume, save sessions",
+    href: "/workouts",
+  },
+  {
+    label: "Monitor progress",
+    desc: "Record body stats, compare check-ins",
+    href: "/progress",
+  },
+  {
+    label: "Plan nutrition",
+    desc: "Calculate calorie and macro targets",
+    href: "/nutrition",
+  },
+];
+
 export default function DashboardHero({
   profile,
   latestBodyStats,
@@ -56,18 +74,27 @@ export default function DashboardHero({
         </h2>
         {snippets.length === 0 && (
           <p className="mt-3 text-sm leading-7 text-slate-300">
-            Complete your profile to see personalized insights.{" "}
-            <Link
-              href="/profile"
-              className="text-indigo-400 underline-offset-2 hover:underline"
-            >
-              Set up your profile →
-            </Link>
+            Complete the setup steps below to unlock personalized metrics, calorie targets, and training insights.
           </p>
         )}
       </div>
 
-      {snippets.length > 0 && (
+      {snippets.length === 0 ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          {FEATURE_TILES.map(({ label, desc, href }) => (
+            <Link
+              key={label}
+              href={href}
+              className="group rounded-2xl border border-white/10 bg-white/5 px-4 py-4 transition hover:border-indigo-400/30 hover:bg-indigo-500/10"
+            >
+              <p className="text-sm font-medium text-slate-200 transition group-hover:text-white">
+                {label}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">{desc}</p>
+            </Link>
+          ))}
+        </div>
+      ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {snippets.map(({ label, value }) => (
             <div

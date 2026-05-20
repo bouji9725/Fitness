@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
@@ -36,8 +36,8 @@ export default function HomePage() {
       <PageContainer>
         <PageHeader
           eyebrow="Fitness tracker"
-          title="Train, Track, progress."
-          description="Fitsler helps you organize workouts."
+          title="Train, track, progress."
+          description="Fitsler brings workouts, nutrition, and progress tracking into one place."
           actions={
             <Link
               href="/workouts"
@@ -51,16 +51,16 @@ export default function HomePage() {
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="app-panel rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-             
+              How it works
             </p>
 
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Plan your workout, Nutrition intake.
+              Pick a template, log your sets, track your results.
             </h2>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-              Pick a training template, record your sets, save the session, and
-              let the dashboard, progress, and calculate your macronutrition daily intake.
+              Choose a training template, record your sets and weights, save the session, and let the dashboard
+              show your volume over time. Add body stats and run the nutrition calculator to get a full picture.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -82,14 +82,14 @@ export default function HomePage() {
 
           <aside className="app-surface rounded-[var(--radius-xl)] p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-300">
-              App Provides
+              What&apos;s included
             </p>
 
             <div className="mt-5 space-y-4">
               {[
-                "Workout logging with saved session history",
-                "Dashboard metrics based on completed training data",
-                "Progress and nutrition views connected to user inputs",
+                "Workout logging with full session history",
+                "Dashboard metrics based on your real training data",
+                "Body stats tracking, nutrition targets, and coach sharing",
               ].map((item) => (
                 <div
                   key={item}
@@ -108,9 +108,7 @@ export default function HomePage() {
               key={module.title}
               className="app-surface rounded-[var(--radius-lg)] p-5 transition hover:border-indigo-400/30"
             >
-              
-
-              <h3 className="mt-3 text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-white">
                 {module.title}
               </h3>
 

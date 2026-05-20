@@ -58,6 +58,8 @@ export default function SetupChecklistCard({
 
   const doneCount = items.filter((i) => i.done).length;
   const allDone = doneCount === items.length;
+  const progressPercent = Math.round((doneCount / items.length) * 100);
+  const firstIncompleteIndex = items.findIndex((i) => !i.done);
 
   return (
     <Card className="space-y-5">
@@ -86,75 +88,100 @@ export default function SetupChecklistCard({
         </div>
       </div>
 
+      {/* Progress bar */}
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+        <div
+          className="h-full rounded-full bg-indigo-500/70 transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
       <div className="space-y-2">
-        {items.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            aria-disabled={item.done ? "true" : undefined}
-            tabIndex={item.done ? -1 : undefined}
-            className={[
-              "flex items-center gap-4 rounded-2xl border px-4 py-3 text-sm transition",
-              item.done
-                ? "border-emerald-400/20 bg-emerald-500/10 cursor-default pointer-events-none"
-                : "border-white/10 bg-white/5 hover:bg-white/10",
-            ].join(" ")}
-          >
-            <span
+        {items.map((item, index) => {
+          const isNext = !allDone && index === firstIncompleteIndex;
+
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              aria-disabled={item.done ? "true" : undefined}
+              tabIndex={item.done ? -1 : undefined}
               className={[
-                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                "flex items-center gap-4 rounded-2xl border px-4 py-3 text-sm transition",
                 item.done
-                  ? "border-emerald-400 bg-emerald-400/20"
-                  : "border-slate-600",
+                  ? "border-emerald-400/20 bg-emerald-500/10 cursor-default pointer-events-none"
+                  : isNext
+                    ? "border-indigo-400/40 bg-indigo-500/10 hover:bg-indigo-500/15"
+                    : "border-white/10 bg-white/5 hover:bg-white/10",
               ].join(" ")}
             >
-              {item.done && (
+              <span
+                className={[
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                  item.done
+                    ? "border-emerald-400 bg-emerald-400/20"
+                    : isNext
+                      ? "border-indigo-400 bg-indigo-400/10"
+                      : "border-slate-600",
+                ].join(" ")}
+              >
+                {item.done && (
+                  <svg
+                    aria-hidden="true"
+                    className="h-2.5 w-2.5 text-emerald-400"
+                    fill="none"
+                    viewBox="0 0 10 10"
+                  >
+                    <path
+                      d="M1.5 5l2.5 2.5 4.5-4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p
+                  className={
+                    item.done
+                      ? "text-slate-400 line-through"
+                      : isNext
+                        ? "font-medium text-white"
+                        : "font-medium text-slate-200"
+                  }
+                >
+                  {item.label}
+                </p>
+                {!item.done && (
+                  <p className="text-xs text-slate-400">{item.description}</p>
+                )}
+              </div>
+              {isNext && (
+                <span className="shrink-0 rounded-full border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-0.5 text-xs font-medium text-indigo-300">
+                  Up next
+                </span>
+              )}
+              {!item.done && !isNext && (
                 <svg
-                  className="h-2.5 w-2.5 text-emerald-400"
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500"
                   fill="none"
-                  viewBox="0 0 10 10"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
                   <path
-                    d="M1.5 5l2.5 2.5 4.5-4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
                   />
                 </svg>
               )}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p
-                className={
-                  item.done
-                    ? "text-slate-400 line-through"
-                    : "font-medium text-slate-200"
-                }
-              >
-                {item.label}
-              </p>
-              {!item.done && (
-                <p className="text-xs text-slate-400">{item.description}</p>
-              )}
-            </div>
-            {!item.done && (
-              <svg
-                className="h-4 w-4 shrink-0 text-slate-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )}
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </Card>
   );

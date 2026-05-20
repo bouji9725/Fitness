@@ -77,6 +77,8 @@ export default function DashboardOverview() {
       profile?.sex
   );
 
+  const isNewUser = !hasProfile && progressEntries.length === 0 && savedSessions.length === 0;
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -111,6 +113,24 @@ export default function DashboardOverview() {
     );
   }
 
+  const setupSection = (
+    <div className="grid gap-6 xl:grid-cols-2">
+      <NextActionCard
+        profile={profile}
+        latestBodyStats={latestBodyStats}
+        nutritionSummary={nutritionSummary}
+        savedWorkouts={savedSessions}
+      />
+      <SetupChecklistCard
+        hasProfile={hasProfile}
+        hasProgressEntry={progressEntries.length > 0}
+        hasNutritionPlan={nutritionSummary !== null}
+        hasWorkout={savedSessions.length > 0}
+        hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Personalised welcome card */}
@@ -121,6 +141,9 @@ export default function DashboardOverview() {
         recentWorkout={savedSessions[0] ?? null}
       />
 
+      {/* New users see the setup/next-action before the metric grid */}
+      {isNewUser && setupSection}
+
       {/* Key metrics: nutrition target · weight · workouts */}
       <DashboardMetricGrid
         nutritionSummary={nutritionSummary}
@@ -129,22 +152,8 @@ export default function DashboardOverview() {
         lastTrainingDay={lastTrainingDay}
       />
 
-      {/* Next recommended action + setup checklist */}
-      <div className="grid gap-6 xl:grid-cols-2">
-        <NextActionCard
-          profile={profile}
-          latestBodyStats={latestBodyStats}
-          nutritionSummary={nutritionSummary}
-          savedWorkouts={savedSessions}
-        />
-        <SetupChecklistCard
-          hasProfile={hasProfile}
-          hasProgressEntry={progressEntries.length > 0}
-          hasNutritionPlan={nutritionSummary !== null}
-          hasWorkout={savedSessions.length > 0}
-          hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
-        />
-      </div>
+      {/* Returning users see setup after the metric grid */}
+      {!isNewUser && setupSection}
 
       {/* Recent activity + full workouts list */}
       <div className="grid gap-6 xl:grid-cols-[1fr_1.25fr]">
