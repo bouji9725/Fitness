@@ -19,6 +19,7 @@ import { useToast } from "@frontend/context/ToastContext";
 import NutritionSummaryCard from "./NutritionSummaryCard";
 import ProteinRecommendationCard from "./ProteinRecommendationCard";
 import NutritionPlanCard from "./NutritionPlanCard";
+import EmptyState from "@frontend/components/ui/EmptyState";
 import type { NutritionGoal, RecompDirection } from "@shared/types/nutrition";
 
 // Activity level → TDEE multiplier mapping
@@ -320,30 +321,37 @@ export default function NutritionCalculator() {
           <p className="text-xs text-slate-400">Your nutrition plan</p>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-3">
-          <NutritionSummaryCard
-            weightKg={safeWeightKg}
-            bodyFatPercent={safeBodyFatPercent}
-            fatFreeMassKg={results.fatFreeMassKg}
-            fatFreeMassLbs={results.fatFreeMassLbs}
+        {safeWeightKg === 0 && safeBmr === 0 ? (
+          <EmptyState
+            title="No body data yet"
+            description="Enter your weight above — and make sure your profile has age, height, and sex — to see your calorie target and macro split here."
           />
+        ) : (
+          <div className="grid gap-6 xl:grid-cols-3">
+            <NutritionSummaryCard
+              weightKg={safeWeightKg}
+              bodyFatPercent={safeBodyFatPercent}
+              fatFreeMassKg={results.fatFreeMassKg}
+              fatFreeMassLbs={results.fatFreeMassLbs}
+            />
 
-          <ProteinRecommendationCard
-            proteinFactor={results.proteinFactor}
-            proteinTargetGrams={results.proteinTargetGrams}
-          />
+            <ProteinRecommendationCard
+              proteinFactor={results.proteinFactor}
+              proteinTargetGrams={results.proteinTargetGrams}
+            />
 
-          <NutritionPlanCard
-            calorieTarget={results.calorieTarget}
-            fatPercent={results.fatPercent}
-            proteinTargetGrams={results.proteinTargetGrams}
-            fatTargetGrams={results.fatTargetGrams}
-            carbsTargetGrams={results.carbsTargetGrams}
-            proteinCalories={results.proteinCalories}
-            fatCalories={results.fatCalories}
-            carbCalories={results.carbCalories}
-          />
-        </div>
+            <NutritionPlanCard
+              calorieTarget={results.calorieTarget}
+              fatPercent={results.fatPercent}
+              proteinTargetGrams={results.proteinTargetGrams}
+              fatTargetGrams={results.fatTargetGrams}
+              carbsTargetGrams={results.carbsTargetGrams}
+              proteinCalories={results.proteinCalories}
+              fatCalories={results.fatCalories}
+              carbCalories={results.carbCalories}
+            />
+          </div>
+        )}
       </div>
 
       {/* ── Advanced details (collapsible) ───────────────────────── */}
