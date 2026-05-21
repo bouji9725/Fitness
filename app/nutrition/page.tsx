@@ -3,6 +3,7 @@ import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
 import NutritionCalculator from "@frontend/components/nutrition/NutritionCalculator";
+import MealBreakdownSection from "@frontend/components/nutrition/MealBreakdownSection";
 
 export default function NutritionPage() {
   return (
@@ -23,6 +24,10 @@ export default function NutritionPage() {
         />
 
         <NutritionCalculator />
+
+        <div className="mt-12">
+          <MealBreakdownSection />
+        </div>
       </PageContainer>
     </AppShell>
   );
