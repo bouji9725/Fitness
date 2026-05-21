@@ -8,15 +8,17 @@ datasource db {
 }
 
 model User {
-  id           String             @id @default(cuid())
-  email        String             @unique
-  passwordHash String
-  name         String             @default("")
-  createdAt    DateTime           @default(now())
-  profile      UserProfile?
-  nutrition    NutritionSummary?
-  bodyStats    BodyStatsEntry[]
-  workouts     WorkoutSession[]
+  id              String             @id @default(cuid())
+  email           String             @unique
+  passwordHash    String
+  name            String             @default("")
+  createdAt       DateTime           @default(now())
+  profile         UserProfile?
+  nutrition       NutritionSummary?
+  bodyStats       BodyStatsEntry[]
+  workouts        WorkoutSession[]
+  mealPreference  MealPreference?
+  mealLogs        MealLogEntry[]
 }
 
 // id is the same as User.id (1-to-1, PK = FK)
@@ -82,4 +84,27 @@ model WorkoutSessionRecord {
   sessionId String         @unique
   session   WorkoutSession @relation(fields: [sessionId], references: [id])
   savedAt   String
+}
+
+// id is the same as User.id (1-to-1, PK = FK)
+model MealPreference {
+  id                 String  @id
+  user               User    @relation(fields: [id], references: [id])
+  structure          String
+  dayType            String
+  workoutTime        String?
+  fastingWindowStart String?
+}
+
+model MealLogEntry {
+  id           String  @id
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
+  date         String
+  slotIndex    Int
+  calories     Float
+  proteinGrams Float
+  carbsGrams   Float
+  fatGrams     Float
+  notes        String?
 }
