@@ -18,6 +18,7 @@ import RecentActivityCard from "./RecentActivityCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
 import ResumeSessionBanner from "./ResumeSessionBanner";
 import PersonalRecordsCard from "./PersonalRecordsCard";
+import TodayNutritionCard from "./TodayNutritionCard";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import type { UserProfile } from "@shared/types/profile";
 import type { NutritionResults } from "@shared/types/nutrition";
@@ -198,7 +199,10 @@ export default function DashboardOverview() {
         />
       </div>
 
-      <PersonalRecordsCard sessions={sessions} />
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_1fr]">
+        <PersonalRecordsCard sessions={sessions} />
+        <TodayNutritionCard />
+      </div>
     </div>
   );
 }

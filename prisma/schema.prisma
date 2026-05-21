@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id              String             @id @default(cuid())
-  email           String             @unique
-  passwordHash    String
-  name            String             @default("")
-  createdAt       DateTime           @default(now())
-  profile         UserProfile?
-  nutrition       NutritionSummary?
-  bodyStats       BodyStatsEntry[]
-  workouts        WorkoutSession[]
-  mealPreference  MealPreference?
-  mealLogs        MealLogEntry[]
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  passwordHash         String
+  name                 String                @default("")
+  createdAt            DateTime              @default(now())
+  profile              UserProfile?
+  nutrition            NutritionSummary?
+  bodyStats            BodyStatsEntry[]
+  workouts             WorkoutSession[]
+  mealPreference       MealPreference?
+  mealLogs             MealLogEntry[]
+  dailyTargetOverrides DailyTargetOverride[]
 }
 
 // id is the same as User.id (1-to-1, PK = FK)
@@ -107,4 +108,17 @@ model MealLogEntry {
   carbsGrams   Float
   fatGrams     Float
   notes        String?
+}
+
+model DailyTargetOverride {
+  id           String  @id
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
+  date         String
+  calories     Float?
+  proteinGrams Float?
+  carbsGrams   Float?
+  fatGrams     Float?
+
+  @@unique([userId, date])
 }

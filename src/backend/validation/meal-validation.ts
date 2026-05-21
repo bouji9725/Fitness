@@ -85,6 +85,33 @@ export function validateMealPreferencePayload(
 
 export type MealLogPayload = Omit<MealLogEntry, "id">;
 
+export type DailyTargetOverridePayload = {
+  calories?: number;
+  proteinGrams?: number;
+  carbsGrams?: number;
+  fatGrams?: number;
+};
+
+export function validateDailyTargetOverridePayload(
+  body: unknown
+): { ok: true; data: DailyTargetOverridePayload } | { ok: false; message: string; details?: unknown } {
+  if (!isRecord(body)) {
+    return { ok: false, message: "Request body must be a JSON object." };
+  }
+
+  const result: DailyTargetOverridePayload = {};
+
+  for (const field of ["calories", "proteinGrams", "carbsGrams", "fatGrams"] as const) {
+    if (body[field] === undefined || body[field] === null) continue;
+    if (!isNonNegativeNumber(body[field])) {
+      return { ok: false, message: `${field} must be a non-negative number.`, details: { field } };
+    }
+    result[field] = body[field] as number;
+  }
+
+  return { ok: true, data: result };
+}
+
 export function validateMealLogPayload(
   body: unknown
 ): ValidationResult<MealLogPayload> {

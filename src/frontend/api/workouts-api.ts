@@ -134,6 +134,15 @@ export async function listActiveWorkoutSessions(): Promise<WorkoutSession[]> {
   return parseApiResponse<WorkoutSession[]>(response);
 }
 
+export async function hasWorkoutSessionForDate(date: string): Promise<boolean> {
+  const response = await fetch(
+    `/api/workout-sessions?date=${encodeURIComponent(date)}`,
+    { method: "GET", cache: "no-store" }
+  );
+  const data = await parseApiResponse<{ hasSession: boolean }>(response);
+  return data.hasSession;
+}
+
 export async function deleteWorkoutSession(sessionId: string): Promise<void> {
   const response = await fetch(`/api/workout-sessions/${sessionId}`, {
     method: "DELETE",

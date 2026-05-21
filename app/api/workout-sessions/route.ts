@@ -18,6 +18,15 @@ export async function GET(request: Request) {
       return apiSuccessResponse(sessions);
     }
 
+    const date = searchParams.get("date");
+    if (date) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return apiErrorResponse({ status: 400, message: "Query param ?date= must be a YYYY-MM-DD string." });
+      }
+      const hasSession = await workoutStore.hasSessionForDate(userId, date);
+      return apiSuccessResponse({ hasSession });
+    }
+
     const limitParam = searchParams.get("limit");
     const offsetParam = searchParams.get("offset");
     const limit = limitParam ? Math.max(1, parseInt(limitParam, 10)) : undefined;

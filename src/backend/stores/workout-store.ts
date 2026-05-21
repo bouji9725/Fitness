@@ -182,6 +182,13 @@ export const workoutStore = {
     };
   },
 
+  async hasSessionForDate(userId: string, date: string): Promise<boolean> {
+    const count = await prisma.workoutSession.count({
+      where: { userId, performedAt: { startsWith: date } },
+    });
+    return count > 0;
+  },
+
   async deleteSession(userId: string, sessionId: string): Promise<boolean> {
     const exists = await prisma.workoutSession.findFirst({
       where: { id: sessionId, userId },
