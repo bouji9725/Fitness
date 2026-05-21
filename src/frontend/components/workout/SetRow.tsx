@@ -1,4 +1,4 @@
-﻿import type { SetEntry } from "@shared/types/workout";
+import type { SetEntry } from "@shared/types/workout";
 import type { WorkoutSessionAction } from "@frontend/workout-session-reducer";
 import Button from "@frontend/components/ui/Button";
 import Input from "@frontend/components/ui/Input";
@@ -11,9 +11,16 @@ type SetRowProps = {
   dispatch: React.Dispatch<WorkoutSessionAction>;
 };
 
-// Single editable set row.
-// Keep editing controls compact and easy to scan.
 export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
+  function adjustWeight(delta: number) {
+    dispatch({
+      type: "UPDATE_SET_WEIGHT",
+      exerciseId,
+      setId: set.id,
+      weight: Math.max(0, (set.weight ?? 0) + delta),
+    });
+  }
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto]">
@@ -23,6 +30,7 @@ export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
             id={`reps-${set.id}`}
             type="number"
             value={set.reps ?? ""}
+            onFocus={(e) => e.target.select()}
             onChange={(e) =>
               dispatch({
                 type: "UPDATE_SET_REPS",
@@ -35,20 +43,41 @@ export default function SetRow({ exerciseId, set, dispatch }: SetRowProps) {
         </div>
 
         <div>
-          <Label htmlFor={`weight-${set.id}`}>Weight</Label>
-          <Input
-            id={`weight-${set.id}`}
-            type="number"
-            value={set.weight ?? ""}
-            onChange={(e) =>
-              dispatch({
-                type: "UPDATE_SET_WEIGHT",
-                exerciseId,
-                setId: set.id,
-                weight: parseNumberInput(e.target.value),
-              })
-            }
-          />
+          <Label htmlFor={`weight-${set.id}`}>Weight (kg)</Label>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => adjustWeight(-2)}
+              aria-label="Decrease weight by 2 kg"
+              className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-slate-300 transition hover:bg-white/10 active:scale-95"
+            >
+              −2
+            </button>
+
+            <Input
+              id={`weight-${set.id}`}
+              type="number"
+              value={set.weight ?? ""}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) =>
+                dispatch({
+                  type: "UPDATE_SET_WEIGHT",
+                  exerciseId,
+                  setId: set.id,
+                  weight: parseNumberInput(e.target.value),
+                })
+              }
+            />
+
+            <button
+              type="button"
+              onClick={() => adjustWeight(2)}
+              aria-label="Increase weight by 2 kg"
+              className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-slate-300 transition hover:bg-white/10 active:scale-95"
+            >
+              +2
+            </button>
+          </div>
         </div>
 
         <div className="flex items-end">

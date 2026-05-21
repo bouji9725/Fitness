@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getProfile } from "@frontend/api/profile-api";
 import { getNutritionSummary } from "@frontend/api/nutrition-api";
 import { listProgressEntries } from "@frontend/api/progress-api";
-import { listActiveWorkoutSessions, listSavedWorkoutSessions } from "@frontend/api/workouts-api";
+import {
+  listActiveWorkoutSessions,
+  deleteWorkoutSession,
+  listSavedWorkoutSessions,
+} from "@frontend/api/workouts-api";
 import { getLatestBodyStats } from "@shared/calculations/progress";
 import DashboardHero from "./DashboardHero";
 import SetupChecklistCard from "./SetupChecklistCard";
@@ -13,19 +17,24 @@ import DashboardMetricGrid from "./DashboardMetricGrid";
 import RecentActivityCard from "./RecentActivityCard";
 import RecentWorkoutsList from "./RecentWorkoutsList";
 import ResumeSessionBanner from "./ResumeSessionBanner";
+import PersonalRecordsCard from "./PersonalRecordsCard";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import type { UserProfile } from "@shared/types/profile";
 import type { NutritionResults } from "@shared/types/nutrition";
 import type { BodyStatsEntry } from "@shared/types/progress";
 import type { WorkoutSession, WorkoutSessionRecord } from "@shared/types/workout";
 
+const PAGE_SIZE = 10;
+
 export default function DashboardOverview() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [nutritionSummary, setNutritionSummary] =
     useState<NutritionResults | null>(null);
   const [progressEntries, setProgressEntries] = useState<BodyStatsEntry[]>([]);
-  const [savedSessions, setSavedSessions] = useState<WorkoutSessionRecord[]>([]);
+  const [sessions, setSessions] = useState<WorkoutSessionRecord[]>([]);
   const [activeSessions, setActiveSessions] = useState<WorkoutSession[]>([]);
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,18 +42,19 @@ export default function DashboardOverview() {
     async function loadDashboard() {
       try {
         setError(null);
-        const [profileData, nutritionData, progressData, sessionsData, activeData] =
+        const [profileData, nutritionData, progressData, sessionsPage, activeData] =
           await Promise.all([
             getProfile(),
             getNutritionSummary(),
             listProgressEntries(),
-            listSavedWorkoutSessions(),
+            listSavedWorkoutSessions({ limit: PAGE_SIZE, offset: 0 }),
             listActiveWorkoutSessions(),
           ]);
         setProfile(profileData);
         setNutritionSummary(nutritionData);
         setProgressEntries(progressData);
-        setSavedSessions(sessionsData);
+        setSessions(sessionsPage.data);
+        setTotalSessions(sessionsPage.total);
         setActiveSessions(activeData);
       } catch (err) {
         setError(
@@ -60,19 +70,39 @@ export default function DashboardOverview() {
     loadDashboard();
   }, []);
 
+  const handleLoadMore = useCallback(async () => {
+    try {
+      setLoadingMore(true);
+      const page = await listSavedWorkoutSessions({
+        limit: PAGE_SIZE,
+        offset: sessions.length,
+      });
+      setSessions((prev) => [...prev, ...page.data]);
+      setTotalSessions(page.total);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [sessions.length]);
+
+  const handleDelete = useCallback(async (sessionId: string) => {
+    await deleteWorkoutSession(sessionId);
+    setSessions((prev) => prev.filter((s) => s.session.id !== sessionId));
+    setTotalSessions((prev) => prev - 1);
+  }, []);
+
   const latestBodyStats = useMemo(
     () => getLatestBodyStats(progressEntries),
     [progressEntries]
   );
 
   const lastTrainingDay = useMemo(() => {
-    if (savedSessions.length === 0) return null;
-    return [...savedSessions].sort(
+    if (sessions.length === 0) return null;
+    return [...sessions].sort(
       (a, b) =>
         new Date(b.session.performedAt).getTime() -
         new Date(a.session.performedAt).getTime()
     )[0].session.performedAt;
-  }, [savedSessions]);
+  }, [sessions]);
 
   const hasProfile = Boolean(
     profile?.name?.trim() &&
@@ -81,26 +111,23 @@ export default function DashboardOverview() {
       profile?.sex
   );
 
-  const isNewUser = !hasProfile && progressEntries.length === 0 && savedSessions.length === 0;
+  const isNewUser = !hasProfile && progressEntries.length === 0 && totalSessions === 0;
+  const hasMore = sessions.length < totalSessions;
 
   if (loading) {
     return (
       <div className="space-y-6">
-        {/* Hero */}
         <Skeleton className="h-40 rounded-[var(--radius-xl)]" />
-        {/* Metric grid */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
           <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
           <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
           <Skeleton className="h-28 rounded-[var(--radius-xl)]" />
         </div>
-        {/* Next action + setup checklist */}
         <div className="grid gap-6 xl:grid-cols-2">
           <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
           <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
         </div>
-        {/* Recent activity + workouts list */}
         <div className="grid gap-6 xl:grid-cols-[1fr_1.25fr]">
           <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
           <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
@@ -123,13 +150,13 @@ export default function DashboardOverview() {
         profile={profile}
         latestBodyStats={latestBodyStats}
         nutritionSummary={nutritionSummary}
-        savedWorkouts={savedSessions}
+        savedWorkouts={sessions}
       />
       <SetupChecklistCard
         hasProfile={hasProfile}
         hasProgressEntry={progressEntries.length > 0}
         hasNutritionPlan={nutritionSummary !== null}
-        hasWorkout={savedSessions.length > 0}
+        hasWorkout={totalSessions > 0}
         hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
       />
     </div>
@@ -137,39 +164,41 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
-      {/* Resume session banner — shown when the user has an unsaved active session */}
       <ResumeSessionBanner sessions={activeSessions} />
 
-      {/* Personalised welcome card */}
       <DashboardHero
         profile={profile}
         latestBodyStats={latestBodyStats}
         nutritionSummary={nutritionSummary}
-        recentWorkout={savedSessions[0] ?? null}
+        recentWorkout={sessions[0] ?? null}
       />
 
-      {/* New users see the setup/next-action before the metric grid */}
       {isNewUser && setupSection}
 
-      {/* Key metrics: nutrition target · weight · workouts */}
       <DashboardMetricGrid
         nutritionSummary={nutritionSummary}
         latestBodyStats={latestBodyStats}
-        savedWorkoutsCount={savedSessions.length}
+        savedWorkoutsCount={totalSessions}
         lastTrainingDay={lastTrainingDay}
       />
 
-      {/* Returning users see setup after the metric grid */}
       {!isNewUser && setupSection}
 
-      {/* Recent activity + full workouts list */}
       <div className="grid gap-6 xl:grid-cols-[1fr_1.25fr]">
         <RecentActivityCard
           latestBodyStats={latestBodyStats}
-          recentWorkouts={savedSessions.slice(0, 3)}
+          recentWorkouts={sessions.slice(0, 3)}
         />
-        <RecentWorkoutsList items={savedSessions.slice(0, 5)} />
+        <RecentWorkoutsList
+          items={sessions}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={handleLoadMore}
+          onDelete={handleDelete}
+        />
       </div>
+
+      <PersonalRecordsCard sessions={sessions} />
     </div>
   );
 }

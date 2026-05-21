@@ -74,3 +74,22 @@ export async function PATCH(request: Request, context: RouteContext) {
     return apiErrorResponse({ status: 500, message: "Failed to save workout session." });
   }
 }
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const userId = await getAuthUserId();
+  if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
+
+  try {
+    const { sessionId } = await context.params;
+    const deleted = await workoutStore.deleteSession(userId, sessionId);
+
+    if (!deleted) {
+      return apiErrorResponse({ status: 404, message: "Workout session not found.", details: { sessionId } });
+    }
+
+    return apiSuccessResponse({ deleted: true });
+  } catch (error) {
+    console.error("Failed to delete workout session:", error);
+    return apiErrorResponse({ status: 500, message: "Failed to delete workout session." });
+  }
+}

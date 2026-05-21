@@ -18,8 +18,13 @@ export async function GET(request: Request) {
       return apiSuccessResponse(sessions);
     }
 
-    const sessions = await workoutStore.listSavedSessions(userId);
-    return apiSuccessResponse(sessions);
+    const limitParam = searchParams.get("limit");
+    const offsetParam = searchParams.get("offset");
+    const limit = limitParam ? Math.max(1, parseInt(limitParam, 10)) : undefined;
+    const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10)) : 0;
+
+    const page = await workoutStore.listSavedSessions(userId, { limit, offset });
+    return apiSuccessResponse(page);
   } catch (error) {
     console.error("Failed to list workout sessions:", error);
     return apiErrorResponse({ status: 500, message: "Failed to load workout sessions." });
@@ -42,14 +47,18 @@ export async function POST(request: Request) {
       });
     }
 
-    const session = await workoutStore.createSession(userId, validation.data.templateId);
-
-    if (!session) {
-      return apiErrorResponse({
-        status: 404,
-        message: "Workout template not found.",
-        details: { templateId: validation.data.templateId },
-      });
+    let session;
+    if (validation.data.kind === "custom") {
+      session = await workoutStore.createCustomSession(userId, validation.data.name);
+    } else {
+      session = await workoutStore.createSession(userId, validation.data.templateId);
+      if (!session) {
+        return apiErrorResponse({
+          status: 404,
+          message: "Workout template not found.",
+          details: { templateId: validation.data.templateId },
+        });
+      }
     }
 
     return apiSuccessResponse(session, 201);

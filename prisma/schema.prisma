@@ -71,6 +71,7 @@ model WorkoutSession {
   performedAt  String
   status       String                @default("draft")
   exercises    String
+  notes        String?
   createdAt    String
   updatedAt    String
   record       WorkoutSessionRecord?

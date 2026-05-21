@@ -27,33 +27,29 @@ function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
 
-// Validates the create-session request body.
-// We keep this intentionally lightweight until Zod is introduced.
+export type CreateSessionPayload =
+  | { kind: "template"; templateId: string }
+  | { kind: "custom"; name: string };
+
 export function validateCreateWorkoutSessionPayload(
   body: unknown
-): ValidationResult<{ templateId: string }> {
+): ValidationResult<CreateSessionPayload> {
   if (!isRecord(body)) {
-    return {
-      ok: false,
-      message: "Request body must be a JSON object.",
-    };
+    return { ok: false, message: "Request body must be a JSON object." };
   }
 
-  if (!isString(body.templateId)) {
-    return {
-      ok: false,
-      message: "templateId is required and must be a non-empty string.",
-      details: {
-        field: "templateId",
-      },
-    };
+  if (isString(body.templateId)) {
+    return { ok: true, data: { kind: "template", templateId: body.templateId } };
+  }
+
+  if (isString(body.name)) {
+    return { ok: true, data: { kind: "custom", name: body.name } };
   }
 
   return {
-    ok: true,
-    data: {
-      templateId: body.templateId,
-    },
+    ok: false,
+    message: "Provide either templateId or name as a non-empty string.",
+    details: { fields: ["templateId", "name"] },
   };
 }
 

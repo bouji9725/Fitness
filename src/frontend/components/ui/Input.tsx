@@ -1,4 +1,4 @@
-﻿import type { InputHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes } from "react";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   hasError?: boolean;
@@ -11,16 +11,17 @@ const sizeClasses = {
   lg: "min-h-13 text-base",
 };
 
-// Shared input primitive.
-// Keep visual states predictable across forms.
-export default function Input({
-  className = "",
-  hasError = false,
-  inputSize = "md",
-  disabled = false,
-  type = "text",
-  ...props
-}: InputProps) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    className = "",
+    hasError = false,
+    inputSize = "md",
+    disabled = false,
+    type = "text",
+    ...props
+  },
+  ref
+) {
   const baseClasses =
     "w-full rounded-2xl border px-3 outline-none transition shadow-inner backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
@@ -28,16 +29,17 @@ export default function Input({
     ? "border-red-400/40 bg-red-500/10 text-red-50 placeholder:text-red-200/50 focus:border-red-400"
     : "border-white/10 bg-slate-900/60 text-slate-100 placeholder:text-slate-400 focus:border-indigo-400/50";
 
-  const disabledClasses = disabled
-    ? "cursor-not-allowed opacity-60"
-    : "";
+  const disabledClasses = disabled ? "cursor-not-allowed opacity-60" : "";
 
   return (
     <input
+      ref={ref}
       type={type}
       disabled={disabled}
       className={`${baseClasses} ${sizeClasses[inputSize]} ${stateClasses} ${disabledClasses} ${className}`}
       {...props}
     />
   );
-}
+});
+
+export default Input;

@@ -56,11 +56,22 @@ export async function createWorkoutSession(
 ): Promise<WorkoutSession> {
   const response = await fetch("/api/workout-sessions", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
     body: JSON.stringify({ templateId }),
+  });
+
+  return parseApiResponse<WorkoutSession>(response);
+}
+
+export async function createCustomWorkoutSession(
+  name: string
+): Promise<WorkoutSession> {
+  const response = await fetch("/api/workout-sessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ name }),
   });
 
   return parseApiResponse<WorkoutSession>(response);
@@ -92,15 +103,26 @@ export async function updateWorkoutSession(
   return parseApiResponse<WorkoutSessionRecord>(response);
 }
 
-export async function listSavedWorkoutSessions(): Promise<
-  WorkoutSessionRecord[]
-> {
-  const response = await fetch("/api/workout-sessions", {
-    method: "GET",
-    cache: "no-store",
-  });
+export type SessionsPage = {
+  data: WorkoutSessionRecord[];
+  total: number;
+};
 
-  return parseApiResponse<WorkoutSessionRecord[]>(response);
+export async function listSavedWorkoutSessions(options?: {
+  limit?: number;
+  offset?: number;
+}): Promise<SessionsPage> {
+  const params = new URLSearchParams();
+  if (options?.limit != null) params.set("limit", String(options.limit));
+  if (options?.offset != null) params.set("offset", String(options.offset));
+  const qs = params.toString();
+
+  const response = await fetch(
+    `/api/workout-sessions${qs ? `?${qs}` : ""}`,
+    { method: "GET", cache: "no-store" }
+  );
+
+  return parseApiResponse<SessionsPage>(response);
 }
 
 export async function listActiveWorkoutSessions(): Promise<WorkoutSession[]> {
@@ -110,4 +132,13 @@ export async function listActiveWorkoutSessions(): Promise<WorkoutSession[]> {
   });
 
   return parseApiResponse<WorkoutSession[]>(response);
+}
+
+export async function deleteWorkoutSession(sessionId: string): Promise<void> {
+  const response = await fetch(`/api/workout-sessions/${sessionId}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+
+  await parseApiResponse<{ deleted: boolean }>(response);
 }

@@ -1,27 +1,36 @@
-﻿import Button from "@frontend/components/ui/Button";
+import Button from "@frontend/components/ui/Button";
 import Card from "@frontend/components/ui/Card";
 
 type SaveWorkoutBarProps = {
   onSave: () => void;
   onReset: () => void;
   isDirty: boolean;
+  isAllComplete: boolean;
   lastSavedAt: string | null;
 };
 
-// Sticky-style action bar for the workout session.
-// Keep the actions simple and high-signal.
 export default function SaveWorkoutBar({
   onSave,
   onReset,
   isDirty,
+  isAllComplete,
   lastSavedAt,
 }: SaveWorkoutBarProps) {
+  const canSave = isDirty || isAllComplete;
+
   return (
     <Card className="sticky top-[4.5rem] z-10 flex flex-col gap-4 border border-white/10 bg-slate-950/80 p-5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-          Workout session
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+            Workout session
+          </p>
+          {isAllComplete && (
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
+              All done
+            </span>
+          )}
+        </div>
 
         <p className="mt-2 text-sm leading-6 text-slate-300">
           {lastSavedAt
@@ -35,8 +44,8 @@ export default function SaveWorkoutBar({
           Reset to template
         </Button>
 
-        <Button onClick={onSave} disabled={!isDirty}>
-          Save workout
+        <Button onClick={onSave} disabled={!canSave}>
+          {isAllComplete ? "Complete workout" : "Save workout"}
         </Button>
       </div>
     </Card>

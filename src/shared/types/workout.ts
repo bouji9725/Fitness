@@ -43,6 +43,7 @@ export type WorkoutSession = {
   performedAt: string;
   status: WorkoutSessionStatus;
   exercises: SessionExercise[];
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -45,7 +45,7 @@ export default function ShareOverview() {
             getNutritionSummary(),
             listSavedWorkoutSessions(),
           ]);
-        setData({ profile, progressEntries, nutritionSummary, workoutHistory });
+        setData({ profile, progressEntries, nutritionSummary, workoutHistory: workoutHistory.data });
       } catch (err) {
         setError(
           err instanceof Error

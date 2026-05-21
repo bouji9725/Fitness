@@ -1,72 +1,61 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import AppShell from "@frontend/components/layout/AppShell";
 import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import WorkoutSession from "@frontend/components/workout/WorkoutSession";
-import type { WorkoutTemplate } from "@shared/types/workout";
+import { getWorkoutSession } from "@frontend/api/workouts-api";
+import type { WorkoutSession as WorkoutSessionType, WorkoutTemplate } from "@shared/types/workout";
 
-// Workout session page.
-// This is the highest-value workflow in the product.
-// Keep the experience focused:
-// - session context
-// - exercise tracking
-// - clear save/reset actions
 export default function WorkoutDetailsPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+
   const workoutId = useMemo(() => {
     const rawValue = params?.workoutId;
-
-    if (Array.isArray(rawValue)) {
-      return rawValue[0] ?? "";
-    }
-
-    return rawValue ?? "";
+    return Array.isArray(rawValue) ? (rawValue[0] ?? "") : (rawValue ?? "");
   }, [params]);
 
+  const isCustomSession = searchParams.get("s") === "1";
+
   const [template, setTemplate] = useState<WorkoutTemplate | null>(null);
+  const [initialSession, setInitialSession] = useState<WorkoutSessionType | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTemplate() {
+    if (!workoutId) return;
+
+    async function load() {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("/api/workout-templates");
-
-        if (!response.ok) {
-          throw new Error("Failed to load workout templates.");
+        if (isCustomSession) {
+          const session = await getWorkoutSession(workoutId);
+          setInitialSession(session);
+          setTemplate({ id: workoutId, name: session.templateName, exercises: [] });
+        } else {
+          const response = await fetch("/api/workout-templates");
+          if (!response.ok) throw new Error("Failed to load workout templates.");
+          const data: WorkoutTemplate[] = await response.json();
+          const matched = data.find((t) => t.id === workoutId) ?? null;
+          if (!matched) throw new Error("Workout template not found.");
+          setTemplate(matched);
         }
-
-        const data: WorkoutTemplate[] = await response.json();
-        const matchedTemplate = data.find((item) => item.id === workoutId) ?? null;
-
-        if (!matchedTemplate) {
-          throw new Error("Workout template not found.");
-        }
-
-        setTemplate(matchedTemplate);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Something went wrong while loading the workout."
-        );
+        setError(err instanceof Error ? err.message : "Something went wrong while loading the workout.");
       } finally {
         setLoading(false);
       }
     }
 
-    if (workoutId) {
-      fetchTemplate();
-    }
-  }, [workoutId]);
+    load();
+  }, [workoutId, isCustomSession]);
 
   return (
     <AppShell>
@@ -101,7 +90,6 @@ export default function WorkoutDetailsPage() {
         ) : error ? (
           <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6">
             <p className="text-sm font-medium text-red-100">{error}</p>
-
             <Link
               href="/workouts"
               className="mt-4 inline-flex text-sm font-medium text-red-50 underline underline-offset-4"
@@ -114,7 +102,7 @@ export default function WorkoutDetailsPage() {
             No workout session available.
           </section>
         ) : (
-          <WorkoutSession template={template} />
+          <WorkoutSession template={template} initialSession={initialSession} />
         )}
       </PageContainer>
     </AppShell>

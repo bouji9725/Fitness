@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { SessionExercise } from "@shared/types/workout";
+import type { PreviousBest, SessionExercise } from "@shared/types/workout";
 import type { WorkoutSessionAction } from "@frontend/workout-session-reducer";
 import Card from "@frontend/components/ui/Card";
 import Button from "@frontend/components/ui/Button";
@@ -12,22 +12,27 @@ import {
 import PreviousPerformance from "./PreviousPerformance";
 import OverloadBadge from "./OverloadBadge";
 import SetRow from "./SetRow";
+import RestTimer from "./RestTimer";
 
 type ExerciseCardProps = {
   exercise: SessionExercise;
   dispatch: React.Dispatch<WorkoutSessionAction>;
   isActive?: boolean;
+  previousBest?: PreviousBest;
 };
 
 export default function ExerciseCard({
   exercise,
   dispatch,
   isActive = false,
+  previousBest,
 }: ExerciseCardProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const [showTimer, setShowTimer] = useState(false);
 
   const firstCompletedSet = exercise.sets.find((set) => set.completed);
-  const previous = exercise.previousBest;
+  // Prefer live history-based PR over the template's previousBest
+  const previous = previousBest ?? exercise.previousBest;
 
   const improved =
     previous &&
@@ -49,7 +54,7 @@ export default function ExerciseCard({
 
   function handleToggleComplete() {
     dispatch({ type: "TOGGLE_EXERCISE_COMPLETED", exerciseId: exercise.id });
-    // Auto-collapse when marking done; keep open when un-marking
+    // Auto-collapse when marking done; stay open when un-marking
     if (!exercise.isCompleted) {
       setIsOpen(false);
     }
@@ -89,12 +94,8 @@ export default function ExerciseCard({
           variant="ghost"
           onClick={() => {
             setIsOpen(true);
-            // Un-mark complete so the user can edit
             if (exercise.isCompleted) {
-              dispatch({
-                type: "TOGGLE_EXERCISE_COMPLETED",
-                exerciseId: exercise.id,
-              });
+              dispatch({ type: "TOGGLE_EXERCISE_COMPLETED", exerciseId: exercise.id });
             }
           }}
         >
@@ -109,9 +110,7 @@ export default function ExerciseCard({
     <Card
       className={[
         "space-y-5 transition",
-        isActive && !exercise.isCompleted
-          ? "ring-1 ring-inset ring-indigo-400/25"
-          : "",
+        isActive && !exercise.isCompleted ? "ring-1 ring-inset ring-indigo-400/25" : "",
       ].join(" ")}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -154,8 +153,8 @@ export default function ExerciseCard({
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <PreviousPerformance
-          reps={exercise.previousBest?.reps}
-          weight={exercise.previousBest?.weight}
+          reps={previous?.reps}
+          weight={previous?.weight}
         />
       </div>
 
@@ -170,23 +169,26 @@ export default function ExerciseCard({
         ))}
       </div>
 
+      {showTimer && <RestTimer onClose={() => setShowTimer(false)} />}
+
       <div className="flex flex-col gap-4 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-300">
           Total volume:{" "}
           <span className="font-semibold text-white">{totalVolume}</span>
         </p>
 
-        <Button
-          variant="secondary"
-          onClick={() =>
-            dispatch({
-              type: "ADD_SET",
-              exerciseId: exercise.id,
-            })
-          }
-        >
-          Add set
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="secondary" onClick={() => setShowTimer((v) => !v)}>
+            {showTimer ? "Hide timer" : "Rest timer"}
+          </Button>
+
+          <Button
+            variant="secondary"
+            onClick={() => dispatch({ type: "ADD_SET", exerciseId: exercise.id })}
+          >
+            Add set
+          </Button>
+        </div>
       </div>
     </Card>
   );

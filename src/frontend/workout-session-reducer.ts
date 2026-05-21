@@ -45,7 +45,7 @@ export type WorkoutSessionAction =
 function createEmptySet(): SetEntry {
   return {
     id: createId("set"),
-    reps: 0,
+    reps: 10,
     weight: 0,
     completed: false,
   };
@@ -114,7 +114,10 @@ export function workoutSessionReducer(
         ),
       });
 
-    case "TOGGLE_EXERCISE_COMPLETED":
+    case "TOGGLE_EXERCISE_COMPLETED": {
+      const nextCompleted = !state.exercises.find(
+        (e) => e.id === action.exerciseId
+      )?.isCompleted;
       return touchWorkoutSession({
         ...state,
         exercises: state.exercises.map((exercise) =>
@@ -122,10 +125,15 @@ export function workoutSessionReducer(
             ? exercise
             : {
                 ...exercise,
-                isCompleted: !exercise.isCompleted,
+                isCompleted: nextCompleted,
+                sets: exercise.sets.map((set) => ({
+                  ...set,
+                  completed: nextCompleted,
+                })),
               }
         ),
       });
+    }
 
     case "ADD_SET":
       return touchWorkoutSession({
