@@ -16,6 +16,8 @@ model User {
   profile              UserProfile?
   nutrition            NutritionSummary?
   bodyStats            BodyStatsEntry[]
+  inBodyEntries        InBodyEntry[]
+  progressPhotos       ProgressPhoto[]
   workouts             WorkoutSession[]
   mealPreference       MealPreference?
   mealLogs             MealLogEntry[]
@@ -108,6 +110,27 @@ model MealLogEntry {
   carbsGrams   Float
   fatGrams     Float
   notes        String?
+}
+
+model InBodyEntry {
+  id                   String  @id
+  userId               String
+  user                 User    @relation(fields: [userId], references: [id])
+  date                 String
+  weightKg             Float
+  bodyFatPercent       Float
+  skeletalMuscleMassKg Float?
+  fatFreeMassKg        Float?
+  notes                String?
+}
+
+model ProgressPhoto {
+  id       String  @id
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  date     String
+  imageUrl String
+  label    String?
 }
 
 model DailyTargetOverride {

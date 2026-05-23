@@ -44,4 +44,38 @@ export const progressStore = {
 
     return this.listEntries(userId);
   },
+
+  async updateEntry(
+    userId: string,
+    id: string,
+    data: Omit<BodyStatsEntry, "id">
+  ): Promise<BodyStatsEntry | null> {
+    const exists = await prisma.bodyStatsEntry.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+    if (!exists) return null;
+
+    const row = await prisma.bodyStatsEntry.update({
+      where: { id },
+      data: {
+        date: data.date,
+        weightKg: data.weightKg,
+        bodyFatPercent: data.bodyFatPercent,
+        muscleMassKg: data.muscleMassKg ?? null,
+        notes: data.notes ?? null,
+      },
+    });
+    return rowToEntry(row);
+  },
+
+  async deleteEntry(userId: string, id: string): Promise<boolean> {
+    const exists = await prisma.bodyStatsEntry.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+    if (!exists) return false;
+    await prisma.bodyStatsEntry.delete({ where: { id } });
+    return true;
+  },
 };

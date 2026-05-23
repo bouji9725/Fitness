@@ -1,5 +1,5 @@
 import { ApiError } from "./api-error";
-import type { BodyStatsEntry } from "@shared/types/progress";
+import type { BodyStatsEntry, InBodyEntry, ProgressPhotoEntry } from "@shared/types/progress";
 
 type ApiErrorPayload = {
   error?: {
@@ -48,12 +48,80 @@ export async function addProgressEntry(
 ): Promise<BodyStatsEntry[]> {
   const response = await fetch("/api/progress", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
     body: JSON.stringify(entry),
   });
-
   return parseApiResponse<BodyStatsEntry[]>(response);
+}
+
+export async function updateProgressEntry(
+  id: string,
+  data: Omit<BodyStatsEntry, "id">
+): Promise<BodyStatsEntry> {
+  const response = await fetch(`/api/progress/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify(data),
+  });
+  return parseApiResponse<BodyStatsEntry>(response);
+}
+
+export async function deleteProgressEntry(id: string): Promise<void> {
+  const response = await fetch(`/api/progress/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  await parseApiResponse<{ deleted: boolean }>(response);
+}
+
+export async function listInBodyEntries(): Promise<InBodyEntry[]> {
+  const response = await fetch("/api/inbody", { method: "GET", cache: "no-store" });
+  return parseApiResponse<InBodyEntry[]>(response);
+}
+
+export async function addInBodyEntry(
+  data: Omit<InBodyEntry, "id">
+): Promise<InBodyEntry> {
+  const response = await fetch("/api/inbody", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify(data),
+  });
+  return parseApiResponse<InBodyEntry>(response);
+}
+
+export async function deleteInBodyEntry(id: string): Promise<void> {
+  const response = await fetch(`/api/inbody/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  await parseApiResponse<{ deleted: boolean }>(response);
+}
+
+export async function listProgressPhotos(): Promise<ProgressPhotoEntry[]> {
+  const response = await fetch("/api/progress-photos", { method: "GET", cache: "no-store" });
+  return parseApiResponse<ProgressPhotoEntry[]>(response);
+}
+
+export async function addProgressPhoto(
+  data: Omit<ProgressPhotoEntry, "id">
+): Promise<ProgressPhotoEntry> {
+  const response = await fetch("/api/progress-photos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify(data),
+  });
+  return parseApiResponse<ProgressPhotoEntry>(response);
+}
+
+export async function deleteProgressPhoto(id: string): Promise<void> {
+  const response = await fetch(`/api/progress-photos/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  await parseApiResponse<{ deleted: boolean }>(response);
 }
