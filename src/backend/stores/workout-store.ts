@@ -4,7 +4,9 @@ import {
   touchWorkoutSession,
 } from "@shared/services/workout-session-service";
 import { prisma } from "@backend/prisma/prisma";
+import { createId } from "@shared/utils/create-id";
 import type {
+  ExerciseTemplate,
   WorkoutSession,
   WorkoutSessionRecord,
   WorkoutTemplate,
@@ -52,6 +54,71 @@ export const workoutStore = {
     return workoutTemplates.find((t) => t.id === templateId) ?? null;
   },
 
+  async listUserTemplates(userId: string): Promise<WorkoutTemplate[]> {
+    const rows = await prisma.userWorkoutTemplate.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      exercises: JSON.parse(r.exercises) as ExerciseTemplate[],
+      isCustom: true,
+    }));
+  },
+
+  async createUserTemplate(
+    userId: string,
+    name: string,
+    exercises: ExerciseTemplate[]
+  ): Promise<WorkoutTemplate> {
+    const id = createId("tpl");
+    const createdAt = new Date().toISOString();
+    await prisma.userWorkoutTemplate.create({
+      data: { id, userId, name, exercises: JSON.stringify(exercises), createdAt },
+    });
+    return { id, name, exercises, isCustom: true };
+  },
+
+  async updateUserTemplate(
+    userId: string,
+    id: string,
+    name: string,
+    exercises: ExerciseTemplate[]
+  ): Promise<WorkoutTemplate | null> {
+    const existing = await prisma.userWorkoutTemplate.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+    if (!existing) return null;
+    await prisma.userWorkoutTemplate.update({
+      where: { id },
+      data: { name, exercises: JSON.stringify(exercises) },
+    });
+    return { id, name, exercises, isCustom: true };
+  },
+
+  async deleteUserTemplate(userId: string, id: string): Promise<boolean> {
+    const existing = await prisma.userWorkoutTemplate.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+    if (!existing) return false;
+    await prisma.userWorkoutTemplate.delete({ where: { id } });
+    return true;
+  },
+
+  async getUserTemplateById(userId: string, id: string): Promise<WorkoutTemplate | null> {
+    const row = await prisma.userWorkoutTemplate.findFirst({ where: { id, userId } });
+    if (!row) return null;
+    return {
+      id: row.id,
+      name: row.name,
+      exercises: JSON.parse(row.exercises) as ExerciseTemplate[],
+      isCustom: true,
+    };
+  },
+
   async createCustomSession(userId: string, name: string): Promise<WorkoutSession> {
     const now = new Date().toISOString();
     const session: WorkoutSession = {
@@ -83,7 +150,9 @@ export const workoutStore = {
   },
 
   async createSession(userId: string, templateId: string): Promise<WorkoutSession | null> {
-    const template = this.getTemplateById(templateId);
+    const template =
+      this.getTemplateById(templateId) ??
+      (await this.getUserTemplateById(userId, templateId));
     if (!template) return null;
 
     const session = createWorkoutSessionFromTemplate(template);

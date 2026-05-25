@@ -8,7 +8,14 @@ import PageContainer from "@frontend/components/layout/PageContainer";
 import PageHeader from "@frontend/components/layout/PageHeader";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import EmptyState from "@frontend/components/ui/EmptyState";
-import { listWorkoutTemplates, createCustomWorkoutSession } from "@frontend/api/workouts-api";
+import TemplateBuilder from "@frontend/components/workout/TemplateBuilder";
+import ExerciseLibrarySection from "@frontend/components/workout/ExerciseLibrarySection";
+import {
+  listWorkoutTemplates,
+  listUserWorkoutTemplates,
+  createCustomWorkoutSession,
+  createWorkoutSession,
+} from "@frontend/api/workouts-api";
 import type { WorkoutTemplate } from "@shared/types/workout";
 
 const BASE_MUSCLE_GROUPS = [
@@ -19,11 +26,13 @@ const BASE_MUSCLE_GROUPS = [
 
 export default function WorkoutsPage() {
   const router = useRouter();
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
+  const [staticTemplates, setStaticTemplates] = useState<WorkoutTemplate[]>([]);
+  const [userTemplates, setUserTemplates] = useState<WorkoutTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [startingId, setStartingId] = useState<string | null>(null);
 
   const [customName, setCustomName] = useState("");
   const [customMuscle, setCustomMuscle] = useState("");
@@ -31,20 +40,34 @@ export default function WorkoutsPage() {
   const [customError, setCustomError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTemplates() {
+    async function load() {
       try {
         setLoading(true);
         setError(null);
-        const data = await listWorkoutTemplates();
-        setTemplates(data);
+        const [statics, user] = await Promise.all([
+          listWorkoutTemplates(),
+          listUserWorkoutTemplates(),
+        ]);
+        setStaticTemplates(statics);
+        setUserTemplates(user);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong while loading workouts.");
       } finally {
         setLoading(false);
       }
     }
-    fetchTemplates();
+    load();
   }, []);
+
+  async function handleStartTemplate(templateId: string) {
+    setStartingId(templateId);
+    try {
+      const session = await createWorkoutSession(templateId);
+      router.push(`/workouts/${session.id}?s=1`);
+    } catch {
+      setStartingId(null);
+    }
+  }
 
   async function handleStartCustom() {
     const name = customName.trim();
@@ -64,7 +87,8 @@ export default function WorkoutsPage() {
     }
   }
 
-  const selectedTemplate = templates.find((t) => t.id === selectedId) ?? null;
+  const allTemplates = [...staticTemplates, ...userTemplates];
+  const selectedTemplate = allTemplates.find((t) => t.id === selectedId) ?? null;
 
   return (
     <AppShell>
@@ -72,7 +96,7 @@ export default function WorkoutsPage() {
         <PageHeader
           eyebrow="Workout plans"
           title="Workouts"
-          description="Pick one of your saved plans or start a fresh custom session."
+          description="Pick a saved plan, build your own template, or start a fresh custom session."
           actions={
             <Link
               href="/dashboard"
@@ -103,161 +127,178 @@ export default function WorkoutsPage() {
           <section className="rounded-[var(--radius-xl)] border border-red-400/25 bg-red-500/10 p-6 text-sm text-red-100">
             {error}
           </section>
-        ) : templates.length === 0 ? (
-          <EmptyState
-            title="No templates available"
-            description="Workout templates will appear here once they are added."
-          />
         ) : (
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="space-y-6">
 
-            {/* ── Card 1: saved templates ── */}
-            <section className="app-surface flex flex-col rounded-[var(--radius-xl)] p-5 sm:p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
-                Your plans
-              </p>
+            {/* ── Row 1: template picker + custom session ── */}
+            <div className="grid gap-6 xl:grid-cols-2">
 
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                Previous workout plans
-              </h2>
+              {/* Template picker */}
+              <section className="app-surface flex flex-col rounded-[var(--radius-xl)] p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">
+                  Your plans
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                  Start from a template
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  Select a plan to start a session pre-loaded with its exercises. Custom templates are marked with a badge.
+                </p>
 
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                Select a plan below to continue where you left off. Each plan comes pre-loaded with its exercises and your previous bests.
-              </p>
-
-              <div className="mt-5 flex-1 space-y-3">
-                {templates.map((template) => {
-                  const isSelected = selectedId === template.id;
-                  const muscleGroups = [
-                    ...new Set(template.exercises.map((e) => e.muscleGroup)),
-                  ];
-
-                  return (
-                    <button
-                      key={template.id}
-                      onClick={() => setSelectedId(isSelected ? null : template.id)}
-                      className={`w-full rounded-2xl border p-4 text-left transition ${
-                        isSelected
-                          ? "border-indigo-400/50 bg-indigo-500/15"
-                          : "border-white/10 bg-white/5 hover:border-indigo-400/25 hover:bg-white/8"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-base font-semibold text-white">
-                            {template.name}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-400">
-                            {template.exercises.length} exercise{template.exercises.length !== 1 ? "s" : ""}
-                            {muscleGroups.length > 0 && (
-                              <span className="ml-2 text-slate-500">
-                                · {muscleGroups.join(" · ")}
-                              </span>
-                            )}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 transition ${
-                            isSelected
-                              ? "border-indigo-400 bg-indigo-400"
-                              : "border-slate-600 bg-transparent"
-                          }`}
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6">
-                {selectedTemplate ? (
-                  <Link
-                    href={`/workouts/${selectedTemplate.id}`}
-                    className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-5 text-sm font-medium text-white transition hover:bg-indigo-500/25"
-                  >
-                    Start session — {selectedTemplate.name}
-                  </Link>
+                {allTemplates.length === 0 ? (
+                  <div className="mt-5">
+                    <EmptyState title="No templates yet" description="Create a custom template below." />
+                  </div>
                 ) : (
-                  <span className="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-medium text-slate-500">
-                    Select a plan first
-                  </span>
+                  <div className="mt-5 flex-1 space-y-3">
+                    {allTemplates.map((template) => {
+                      const isSelected = selectedId === template.id;
+                      const muscleGroups = [...new Set(template.exercises.map((e) => e.muscleGroup))];
+
+                      return (
+                        <button
+                          key={template.id}
+                          onClick={() => setSelectedId(isSelected ? null : template.id)}
+                          className={`w-full rounded-2xl border p-4 text-left transition ${
+                            isSelected
+                              ? "border-indigo-400/50 bg-indigo-500/15"
+                              : "border-white/10 bg-white/5 hover:border-indigo-400/25 hover:bg-white/8"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-base font-semibold text-white">
+                                  {template.name}
+                                </p>
+                                {template.isCustom && (
+                                  <span className="rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
+                                    Custom
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-sm text-slate-400">
+                                {template.exercises.length} exercise{template.exercises.length !== 1 ? "s" : ""}
+                                {muscleGroups.length > 0 && (
+                                  <span className="ml-2 text-slate-500">
+                                    · {muscleGroups.join(" · ")}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <span
+                              className={`mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 transition ${
+                                isSelected
+                                  ? "border-indigo-400 bg-indigo-400"
+                                  : "border-slate-600 bg-transparent"
+                              }`}
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
-              </div>
-            </section>
 
-            {/* ── Card 2: custom session ── */}
-            <section className="app-surface flex flex-col rounded-[var(--radius-xl)] p-5 sm:p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-                New session
-              </p>
-
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                Start something new
-              </h2>
-
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                Name your session, choose a muscle focus, and jump in. You&apos;ll add exercises once the session starts — all your personal bests will still be tracked.
-              </p>
-
-              <div className="mt-6 flex-1 space-y-4">
-                <div>
-                  <label
-                    htmlFor="custom-session-name"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400"
-                  >
-                    Session name
-                  </label>
-                  <input
-                    id="custom-session-name"
-                    type="text"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleStartCustom()}
-                    placeholder="e.g. Push Day, Full Body, Upper Body…"
-                    className="min-h-11 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  />
+                <div className="mt-6">
+                  {selectedTemplate ? (
+                    <button
+                      onClick={() => handleStartTemplate(selectedTemplate.id)}
+                      disabled={startingId === selectedTemplate.id}
+                      className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/15 px-5 text-sm font-medium text-white transition hover:bg-indigo-500/25 disabled:opacity-60"
+                    >
+                      {startingId === selectedTemplate.id
+                        ? "Starting…"
+                        : `Start session — ${selectedTemplate.name}`}
+                    </button>
+                  ) : (
+                    <span className="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-medium text-slate-500">
+                      Select a plan first
+                    </span>
+                  )}
                 </div>
+              </section>
 
-                <div>
-                  <label
-                    htmlFor="custom-session-muscle"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400"
-                  >
-                    Muscle focus <span className="font-normal normal-case text-slate-500">(optional)</span>
-                  </label>
-                  <select
-                    id="custom-session-muscle"
-                    value={customMuscle}
-                    onChange={(e) => setCustomMuscle(e.target.value)}
-                    className="min-h-11 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  >
-                    <option value="" className="bg-slate-900 text-slate-400">
-                      No specific focus
-                    </option>
-                    {BASE_MUSCLE_GROUPS.map((g) => (
-                      <option key={g} value={g} className="bg-slate-900">
-                        {g}
+              {/* Custom session */}
+              <section className="app-surface flex flex-col rounded-[var(--radius-xl)] p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+                  New session
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                  Start something new
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  Name your session, choose a muscle focus, and jump in. You&apos;ll add exercises once the session starts.
+                </p>
+
+                <div className="mt-6 flex-1 space-y-4">
+                  <div>
+                    <label
+                      htmlFor="custom-session-name"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400"
+                    >
+                      Session name
+                    </label>
+                    <input
+                      id="custom-session-name"
+                      type="text"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleStartCustom()}
+                      placeholder="e.g. Push Day, Full Body, Upper Body…"
+                      className="min-h-11 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="custom-session-muscle"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400"
+                    >
+                      Muscle focus <span className="font-normal normal-case text-slate-500">(optional)</span>
+                    </label>
+                    <select
+                      id="custom-session-muscle"
+                      value={customMuscle}
+                      onChange={(e) => setCustomMuscle(e.target.value)}
+                      className="min-h-11 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    >
+                      <option value="" className="bg-slate-900 text-slate-400">
+                        No specific focus
                       </option>
-                    ))}
-                  </select>
+                      {BASE_MUSCLE_GROUPS.map((g) => (
+                        <option key={g} value={g} className="bg-slate-900">
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {customError && (
+                    <p className="text-sm text-red-400">{customError}</p>
+                  )}
                 </div>
 
-                {customError && (
-                  <p className="text-sm text-red-400">{customError}</p>
-                )}
-              </div>
+                <div className="mt-6">
+                  <button
+                    onClick={handleStartCustom}
+                    disabled={starting || !customName.trim()}
+                    className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-5 text-sm font-medium text-white transition hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {starting ? "Starting…" : "Start session"}
+                  </button>
+                </div>
+              </section>
 
-              <div className="mt-6">
-                <button
-                  onClick={handleStartCustom}
-                  disabled={starting || !customName.trim()}
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-5 text-sm font-medium text-white transition hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {starting ? "Starting…" : "Start session"}
-                </button>
-              </div>
-            </section>
+            </div>
+
+            {/* ── Template builder ── */}
+            <TemplateBuilder
+              onTemplatesChange={(updated) => setUserTemplates(updated)}
+            />
+
+            {/* ── Exercise library ── */}
+            <ExerciseLibrarySection />
 
           </div>
         )}

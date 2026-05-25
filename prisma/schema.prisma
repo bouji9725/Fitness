@@ -19,6 +19,7 @@ model User {
   inBodyEntries        InBodyEntry[]
   progressPhotos       ProgressPhoto[]
   workouts             WorkoutSession[]
+  workoutTemplates     UserWorkoutTemplate[]
   mealPreference       MealPreference?
   mealLogs             MealLogEntry[]
   dailyTargetOverrides DailyTargetOverride[]
@@ -131,6 +132,15 @@ model ProgressPhoto {
   date     String
   imageUrl String
   label    String?
+}
+
+model UserWorkoutTemplate {
+  id        String @id
+  userId    String
+  user      User   @relation(fields: [userId], references: [id])
+  name      String
+  exercises String // JSON: ExerciseTemplate[]
+  createdAt String
 }
 
 model DailyTargetOverride {

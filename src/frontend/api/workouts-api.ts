@@ -1,5 +1,7 @@
 import { ApiError } from "./api-error";
 import type {
+  ExerciseCatalogEntry,
+  ExerciseTemplate,
   WorkoutSession,
   WorkoutSessionRecord,
   WorkoutTemplate,
@@ -150,4 +152,62 @@ export async function deleteWorkoutSession(sessionId: string): Promise<void> {
   });
 
   await parseApiResponse<{ deleted: boolean }>(response);
+}
+
+export async function listUserWorkoutTemplates(): Promise<WorkoutTemplate[]> {
+  const response = await fetch("/api/workout-templates/user", {
+    method: "GET",
+    cache: "no-store",
+  });
+  return parseApiResponse<WorkoutTemplate[]>(response);
+}
+
+export async function createUserWorkoutTemplate(
+  name: string,
+  exercises: ExerciseTemplate[]
+): Promise<WorkoutTemplate> {
+  const response = await fetch("/api/workout-templates/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ name, exercises }),
+  });
+  return parseApiResponse<WorkoutTemplate>(response);
+}
+
+export async function updateUserWorkoutTemplate(
+  id: string,
+  name: string,
+  exercises: ExerciseTemplate[]
+): Promise<WorkoutTemplate> {
+  const response = await fetch(`/api/workout-templates/user/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ name, exercises }),
+  });
+  return parseApiResponse<WorkoutTemplate>(response);
+}
+
+export async function deleteUserWorkoutTemplate(id: string): Promise<void> {
+  const response = await fetch(`/api/workout-templates/user/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  await parseApiResponse<{ deleted: boolean }>(response);
+}
+
+export async function searchExercises(options?: {
+  search?: string;
+  muscleGroup?: string;
+}): Promise<ExerciseCatalogEntry[]> {
+  const params = new URLSearchParams();
+  if (options?.search) params.set("search", options.search);
+  if (options?.muscleGroup) params.set("muscleGroup", options.muscleGroup);
+  const qs = params.toString();
+  const response = await fetch(`/api/exercises${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+  return parseApiResponse<ExerciseCatalogEntry[]>(response);
 }

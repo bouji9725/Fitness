@@ -1,3 +1,9 @@
+export type ExerciseCatalogEntry = {
+  id: string;
+  name: string;
+  muscleGroup: string;
+};
+
 export type SetEntry = {
   id: string;
   reps: number | undefined;
@@ -22,6 +28,7 @@ export type WorkoutTemplate = {
   id: string;
   name: string;
   exercises: ExerciseTemplate[];
+  isCustom?: boolean;
 };
 
 export type SessionExercise = {

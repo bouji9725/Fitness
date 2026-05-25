@@ -1,4 +1,4 @@
-import type { WorkoutSession } from "@shared/types/workout";
+import type { ExerciseTemplate, WorkoutSession } from "@shared/types/workout";
 
 type ValidationResult<T> =
   | {
@@ -50,6 +50,50 @@ export function validateCreateWorkoutSessionPayload(
     ok: false,
     message: "Provide either templateId or name as a non-empty string.",
     details: { fields: ["templateId", "name"] },
+  };
+}
+
+export type UserTemplatePayload = {
+  name: string;
+  exercises: ExerciseTemplate[];
+};
+
+export function validateUserTemplatePayload(
+  body: unknown
+): ValidationResult<UserTemplatePayload> {
+  if (!isRecord(body)) {
+    return { ok: false, message: "Request body must be a JSON object." };
+  }
+
+  if (!isString(body.name)) {
+    return { ok: false, message: "name is required and must be a non-empty string." };
+  }
+
+  if (!Array.isArray(body.exercises)) {
+    return { ok: false, message: "exercises must be an array." };
+  }
+
+  for (const [i, ex] of (body.exercises as unknown[]).entries()) {
+    if (!isRecord(ex)) {
+      return { ok: false, message: `Exercise at index ${i} must be an object.` };
+    }
+    if (!isString(ex.id) || !isString(ex.name) || !isString(ex.muscleGroup)) {
+      return {
+        ok: false,
+        message: `Exercise at index ${i} must have id, name, and muscleGroup as non-empty strings.`,
+      };
+    }
+    if (!Array.isArray(ex.defaultSets)) {
+      return { ok: false, message: `Exercise at index ${i} must have a defaultSets array.` };
+    }
+  }
+
+  return {
+    ok: true,
+    data: {
+      name: body.name as string,
+      exercises: body.exercises as ExerciseTemplate[],
+    },
   };
 }
 
