@@ -19,6 +19,7 @@ import RecentWorkoutsList from "./RecentWorkoutsList";
 import ResumeSessionBanner from "./ResumeSessionBanner";
 import PersonalRecordsCard from "./PersonalRecordsCard";
 import TodayNutritionCard from "./TodayNutritionCard";
+import DashboardChartsSection from "./DashboardChartsSection";
 import Skeleton from "@frontend/components/ui/Skeleton";
 import type { UserProfile } from "@shared/types/profile";
 import type { NutritionResults } from "@shared/types/nutrition";
@@ -203,6 +204,8 @@ export default function DashboardOverview() {
         <PersonalRecordsCard sessions={sessions} />
         <TodayNutritionCard />
       </div>
+
+      <DashboardChartsSection />
     </div>
   );
 }
