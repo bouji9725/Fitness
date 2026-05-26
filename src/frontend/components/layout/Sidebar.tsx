@@ -77,9 +77,7 @@ function SidebarContent({ onClose }: SidebarContentProps) {
       </nav>
 
       <div className="border-t app-hairline px-5 py-4 space-y-3">
-        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-          Track your workout
-        </p>
+        
 
         <Link
           href="/workouts"
