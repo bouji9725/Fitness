@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useToast } from "@frontend/context/ToastContext";
 import { getProfile } from "@frontend/api/profile-api";
 import { getNutritionSummary } from "@frontend/api/nutrition-api";
 import { listProgressEntries } from "@frontend/api/progress-api";
@@ -29,6 +30,7 @@ import type { WorkoutSession, WorkoutSessionRecord } from "@shared/types/workout
 const PAGE_SIZE = 10;
 
 export default function DashboardOverview() {
+  const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [nutritionSummary, setNutritionSummary] =
     useState<NutritionResults | null>(null);
@@ -116,6 +118,23 @@ export default function DashboardOverview() {
   const isNewUser = !hasProfile && progressEntries.length === 0 && totalSessions === 0;
   const hasMore = sessions.length < totalSessions;
 
+  const setupAllDone =
+    hasProfile &&
+    progressEntries.length > 0 &&
+    nutritionSummary !== null &&
+    totalSessions > 0 &&
+    Boolean(profile?.coachSharingEnabled);
+
+  const completionToastedRef = useRef(false);
+  useEffect(() => {
+    if (loading || !setupAllDone || completionToastedRef.current) return;
+    const STORAGE_KEY = "fitsler_setup_complete_shown";
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    localStorage.setItem(STORAGE_KEY, "1");
+    completionToastedRef.current = true;
+    toast("You're all set! All setup steps are complete.", "success");
+  }, [loading, setupAllDone, toast]);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -154,13 +173,15 @@ export default function DashboardOverview() {
         nutritionSummary={nutritionSummary}
         savedWorkouts={sessions}
       />
-      <SetupChecklistCard
-        hasProfile={hasProfile}
-        hasProgressEntry={progressEntries.length > 0}
-        hasNutritionPlan={nutritionSummary !== null}
-        hasWorkout={totalSessions > 0}
-        hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
-      />
+      {!setupAllDone && (
+        <SetupChecklistCard
+          hasProfile={hasProfile}
+          hasProgressEntry={progressEntries.length > 0}
+          hasNutritionPlan={nutritionSummary !== null}
+          hasWorkout={totalSessions > 0}
+          hasSharingEnabled={Boolean(profile?.coachSharingEnabled)}
+        />
+      )}
     </div>
   );
 

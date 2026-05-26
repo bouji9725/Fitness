@@ -71,16 +71,30 @@ export default function ProfilePage() {
 
   async function handleSaveProfile() {
     try {
-      const savedProfile = await updateProfile(profile);
-      const [bodyStatsEntries, nutrition] = await Promise.all([
+      const [savedProfile, bodyStatsEntries, nutrition] = await Promise.all([
+        updateProfile(profile),
         listProgressEntries(),
         getNutritionSummary(),
       ]);
+      const newBodyStats = getLatestBodyStats(bodyStatsEntries);
       setProfile(savedProfile);
-      setLatestBodyStats(getLatestBodyStats(bodyStatsEntries));
+      setLatestBodyStats(newBodyStats);
       setNutritionSummary(nutrition);
       setIsEditOpen(false);
-      toast("Profile saved", "success");
+
+      const nowAllDone = Boolean(
+        savedProfile.name?.trim() &&
+          savedProfile.age &&
+          savedProfile.sex &&
+          savedProfile.heightCm &&
+          savedProfile.goal &&
+          newBodyStats !== null &&
+          nutrition !== null
+      );
+      toast(
+        nowAllDone ? "Profile complete! All setup steps are done." : "Profile saved",
+        "success"
+      );
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Could not save profile",

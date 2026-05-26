@@ -46,6 +46,8 @@ export default function ProfileCompletenessCard({
   const pct = Math.round((doneCount / items.length) * 100);
   const allDone = doneCount === items.length;
 
+  if (allDone) return null;
+
   return (
     <Card className="space-y-5">
       <div className="flex items-start justify-between gap-4">
