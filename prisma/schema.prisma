@@ -155,3 +155,18 @@ model DailyTargetOverride {
 
   @@unique([userId, date])
 }
+
+model ExerciseLibrary {
+  id               String   @id
+  name             String
+  category         String
+  level            String
+  equipment        String?
+  force            String?
+  mechanic         String?
+  primaryMuscles   String[]
+  secondaryMuscles String[]
+  muscleGroupTag   String
+  instructions     String[]
+  images           String[]
+}
