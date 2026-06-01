@@ -2,6 +2,11 @@ export type ExerciseCatalogEntry = {
   id: string;
   name: string;
   muscleGroup: string;
+  category?: string;
+  level?: string;
+  equipment?: string | null;
+  force?: string | null;
+  mechanic?: string | null;
 };
 
 export type SetEntry = {
