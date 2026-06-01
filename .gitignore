@@ -47,3 +47,6 @@ dev.db
 dev.db-journal
 dev.db-wal
 dev.db-shm
+
+# External data repos (nested git repos — not submodules)
+/Workout DB/
