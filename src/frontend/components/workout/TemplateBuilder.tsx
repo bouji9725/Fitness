@@ -70,8 +70,8 @@ export default function TemplateBuilder({ onTemplatesChange }: Props) {
   useEffect(() => {
     if (!showBuilder) return;
     setPickerLoading(true);
-    searchExercises({ search: pickerSearch, muscleGroup: pickerMuscle })
-      .then(setPickerResults)
+    searchExercises({ search: pickerSearch, muscle: pickerMuscle, limit: 200 })
+      .then(({ data }) => setPickerResults(data))
       .catch(() => {})
       .finally(() => setPickerLoading(false));
   }, [pickerSearch, pickerMuscle, showBuilder]);

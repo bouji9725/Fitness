@@ -19,8 +19,8 @@ export default function ExerciseLibrarySection() {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
-    searchExercises({ search, muscleGroup })
-      .then(setExercises)
+    searchExercises({ search, muscle: muscleGroup, limit: 500 })
+      .then(({ data }) => setExercises(data))
       .catch(() => {})
       .finally(() => setLoading(false));
     return () => controller.abort();
