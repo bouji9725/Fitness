@@ -7,37 +7,78 @@ import { prisma } from "@backend/prisma/prisma";
 import { createId } from "@shared/utils/create-id";
 import type {
   ExerciseTemplate,
+  SessionExercise,
   WorkoutSession,
   WorkoutSessionRecord,
   WorkoutTemplate,
 } from "@shared/types/workout";
 
-function serializeExercises(session: WorkoutSession): string {
-  return JSON.stringify(session.exercises);
-}
+// ── Prisma include clause used everywhere a full session is needed ─────────
+const SESSION_INCLUDE = {
+  exercises: {
+    orderBy: { order: "asc" as const },
+    include: {
+      sets: { orderBy: { order: "asc" as const } },
+    },
+  },
+} as const;
 
-function rowToSession(row: {
-  id: string;
-  templateId: string;
-  templateName: string;
-  performedAt: string;
-  status: string;
-  exercises: string;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-}): WorkoutSession {
+type SessionRow = Awaited<
+  ReturnType<typeof prisma.workoutSession.findFirst<{ include: typeof SESSION_INCLUDE }>>
+>;
+
+// ── Map a Prisma row → WorkoutSession ──────────────────────────────────────
+function rowToSession(row: NonNullable<SessionRow>): WorkoutSession {
   return {
     id: row.id,
     templateId: row.templateId,
     templateName: row.templateName,
     performedAt: row.performedAt,
     status: row.status as WorkoutSession["status"],
-    exercises: JSON.parse(row.exercises),
+    exercises: row.exercises.map((ex) => ({
+      id: ex.id,
+      templateExerciseId: ex.templateExerciseId ?? undefined,
+      name: ex.name,
+      muscleGroup: ex.muscleGroup,
+      isCompleted: ex.isCompleted,
+      previousBest:
+        ex.previousBestReps != null && ex.previousBestWeight != null
+          ? { reps: ex.previousBestReps, weight: ex.previousBestWeight }
+          : undefined,
+      sets: ex.sets.map((s) => ({
+        id: s.id,
+        reps: s.reps ?? undefined,
+        weight: s.weight ?? undefined,
+        completed: s.completed,
+      })),
+    })),
     notes: row.notes ?? undefined,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
+}
+
+// ── Map SessionExercise[] → Prisma nested create data ─────────────────────
+function toExerciseCreateData(exercises: SessionExercise[]) {
+  return exercises.map((ex, exIdx) => ({
+    id: ex.id,
+    templateExerciseId: ex.templateExerciseId ?? null,
+    name: ex.name,
+    muscleGroup: ex.muscleGroup,
+    isCompleted: ex.isCompleted ?? false,
+    previousBestReps: ex.previousBest?.reps ?? null,
+    previousBestWeight: ex.previousBest?.weight ?? null,
+    order: exIdx,
+    sets: {
+      create: ex.sets.map((set, setIdx) => ({
+        id: set.id,
+        reps: set.reps ?? null,
+        weight: set.weight ?? null,
+        completed: set.completed,
+        order: setIdx,
+      })),
+    },
+  }));
 }
 
 export type SessionsPage = {
@@ -121,8 +162,23 @@ export const workoutStore = {
 
   async createCustomSession(userId: string, name: string): Promise<WorkoutSession> {
     const now = new Date().toISOString();
-    const session: WorkoutSession = {
-      id: `session-${crypto.randomUUID()}`,
+    const sessionId = `session-${crypto.randomUUID()}`;
+
+    await prisma.workoutSession.create({
+      data: {
+        id: sessionId,
+        userId,
+        templateId: "custom",
+        templateName: name,
+        performedAt: now,
+        status: "draft",
+        createdAt: now,
+        updatedAt: now,
+      },
+    });
+
+    return {
+      id: sessionId,
       templateId: "custom",
       templateName: name,
       performedAt: now,
@@ -131,22 +187,6 @@ export const workoutStore = {
       createdAt: now,
       updatedAt: now,
     };
-
-    await prisma.workoutSession.create({
-      data: {
-        id: session.id,
-        userId,
-        templateId: session.templateId,
-        templateName: session.templateName,
-        performedAt: session.performedAt,
-        status: session.status,
-        exercises: serializeExercises(session),
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-      },
-    });
-
-    return session;
   },
 
   async createSession(userId: string, templateId: string): Promise<WorkoutSession | null> {
@@ -165,9 +205,9 @@ export const workoutStore = {
         templateName: session.templateName,
         performedAt: session.performedAt,
         status: session.status,
-        exercises: serializeExercises(session),
         createdAt: session.createdAt,
         updatedAt: session.updatedAt,
+        exercises: { create: toExerciseCreateData(session.exercises) },
       },
     });
 
@@ -177,8 +217,8 @@ export const workoutStore = {
   async getSession(userId: string, sessionId: string): Promise<WorkoutSession | null> {
     const row = await prisma.workoutSession.findFirst({
       where: { id: sessionId, userId },
+      include: SESSION_INCLUDE,
     });
-
     return row ? rowToSession(row) : null;
   },
 
@@ -191,19 +231,21 @@ export const workoutStore = {
       where: { id: sessionId, userId },
       select: { id: true },
     });
-
     if (!exists) return null;
 
     const nextSession = touchWorkoutSession({ ...session, id: sessionId });
     const savedAt = new Date().toISOString();
 
+    // Delete existing exercises — sets cascade via onDelete: Cascade
+    await prisma.workoutSessionExercise.deleteMany({ where: { sessionId } });
+
     await prisma.workoutSession.update({
       where: { id: sessionId },
       data: {
         status: nextSession.status,
-        exercises: serializeExercises(nextSession),
         notes: session.notes ?? null,
         updatedAt: nextSession.updatedAt,
+        exercises: { create: toExerciseCreateData(nextSession.exercises) },
       },
     });
 
@@ -221,6 +263,7 @@ export const workoutStore = {
       where: { userId, record: null },
       orderBy: { updatedAt: "desc" },
       take: 5,
+      include: SESSION_INCLUDE,
     });
     return rows.map(rowToSession);
   },
@@ -232,7 +275,9 @@ export const workoutStore = {
     const [records, total] = await Promise.all([
       prisma.workoutSessionRecord.findMany({
         where: { session: { userId } },
-        include: { session: true },
+        include: {
+          session: { include: SESSION_INCLUDE },
+        },
         orderBy: { savedAt: "desc" },
         take: options?.limit,
         skip: options?.offset ?? 0,
@@ -263,13 +308,11 @@ export const workoutStore = {
       where: { id: sessionId, userId },
       select: { id: true },
     });
-
     if (!exists) return false;
 
-    // Delete record first (FK constraint), then the session.
-    await prisma.workoutSessionRecord.deleteMany({ where: { sessionId } });
+    // Deleting the session cascades to WorkoutSessionRecord,
+    // WorkoutSessionExercise, and WorkoutSet.
     await prisma.workoutSession.delete({ where: { id: sessionId } });
-
     return true;
   },
 };
