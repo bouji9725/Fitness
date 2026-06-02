@@ -199,15 +199,23 @@ export async function deleteUserWorkoutTemplate(id: string): Promise<void> {
 
 export async function searchExercises(options?: {
   search?: string;
-  muscleGroup?: string;
-}): Promise<ExerciseCatalogEntry[]> {
+  muscle?: string;
+  category?: string;
+  level?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ data: ExerciseCatalogEntry[]; total: number }> {
   const params = new URLSearchParams();
   if (options?.search) params.set("search", options.search);
-  if (options?.muscleGroup) params.set("muscleGroup", options.muscleGroup);
+  if (options?.muscle) params.set("muscle", options.muscle);
+  if (options?.category) params.set("category", options.category);
+  if (options?.level) params.set("level", options.level);
+  if (options?.limit != null) params.set("limit", String(options.limit));
+  if (options?.offset != null) params.set("offset", String(options.offset));
   const qs = params.toString();
   const response = await fetch(`/api/exercises${qs ? `?${qs}` : ""}`, {
     method: "GET",
     cache: "no-store",
   });
-  return parseApiResponse<ExerciseCatalogEntry[]>(response);
+  return parseApiResponse<{ data: ExerciseCatalogEntry[]; total: number }>(response);
 }
