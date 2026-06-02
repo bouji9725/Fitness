@@ -66,28 +66,50 @@ model NutritionSummary {
   carbCalories       Float
 }
 
-// exercises is stored as a JSON string (SessionExercise[]).
-// This avoids a three-table join while keeping the API boundary identical.
 model WorkoutSession {
-  id           String                @id
+  id           String                   @id
   userId       String
-  user         User                  @relation(fields: [userId], references: [id])
+  user         User                     @relation(fields: [userId], references: [id])
   templateId   String
   templateName String
   performedAt  String
-  status       String                @default("draft")
-  exercises    String
+  status       String                   @default("draft")
   notes        String?
   createdAt    String
   updatedAt    String
   record       WorkoutSessionRecord?
+  exercises    WorkoutSessionExercise[]
 }
 
 model WorkoutSessionRecord {
   id        String         @id @default(cuid())
   sessionId String         @unique
-  session   WorkoutSession @relation(fields: [sessionId], references: [id])
+  session   WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   savedAt   String
+}
+
+model WorkoutSessionExercise {
+  id                 String         @id
+  sessionId          String
+  session            WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  templateExerciseId String?
+  name               String
+  muscleGroup        String
+  isCompleted        Boolean        @default(false)
+  previousBestReps   Float?
+  previousBestWeight Float?
+  order              Int
+  sets               WorkoutSet[]
+}
+
+model WorkoutSet {
+  id         String                 @id
+  exerciseId String
+  exercise   WorkoutSessionExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  reps       Int?
+  weight     Float?
+  completed  Boolean                @default(false)
+  order      Int
 }
 
 // id is the same as User.id (1-to-1, PK = FK)
