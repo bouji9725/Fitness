@@ -17,46 +17,72 @@ Build: `npm run build`
 ## Directory structure
 
 ```
-app/                   Next.js App Router pages + API routes
+app/                        Next.js App Router pages + API routes
   api/
-    nutrition/         GET/PATCH  — nutrition summary
-    profile/           GET/PATCH  — user profile
-    progress/          GET/POST   — body stats entries
-    workout-sessions/  GET/POST   — sessions list + create
-    workout-sessions/[sessionId]/  GET/PATCH — session detail + save
-    workout-templates/  GET       — static template list
-  dashboard/           Saved-session metrics view
-  nutrition/           Macro/calorie calculator
-  profile/             User settings + coach sharing toggle
-  progress/            Body stats history + monthly comparison
-  share/               Coach-facing progress export (PDF, clipboard, JSON)
-  workouts/            Template picker
-  workouts/[workoutId]/ Active workout session logging
+    exercises/              GET — exercise library (search, filter, pagination)
+    nutrition/              GET/PATCH — nutrition summary
+    profile/                GET/PATCH — user profile
+    progress/               GET/POST — body stats entries
+    workout-sessions/       GET/POST — sessions list + create
+    workout-sessions/[id]/  GET/PATCH/DELETE — session detail, save, delete
+    workout-templates/      GET — static template list
+    workout-templates/user/ GET/POST/PATCH/DELETE — user custom templates
+    meal-logs/              GET/POST/DELETE — meal log entries
+    meal-preference/        GET/PATCH — meal structure preference
+    daily-target-override/  GET/PATCH — per-day calorie overrides
+  dashboard/                Saved-session metrics view
+  login/ register/          Auth pages
+  nutrition/                Macro/calorie calculator
+  profile/                  User settings + coach sharing toggle
+  progress/                 Body stats history + monthly comparison
+  share/                    Coach-facing progress export (PDF, clipboard, JSON)
+  workouts/                 Template picker + exercise library browser
+  workouts/[workoutId]/     Active workout session logging
 
-components/
-  dashboard/           DashboardOverview, RecentWorkoutsList, WorkoutInsightCard
-  layout/              AppShell, Sidebar, Topbar, PageContainer, PageHeader
-  nutrition/           NutritionCalculator, NutritionPlanCard, NutritionSummaryCard, ProteinRecommendationCard
-  profile/             BodyStatsForm, ProfileInfoRow, ShareCoachCard, UserProfileCard
-  progress/            MonthlyComparisonCard (also components/progress/page.tsx)
-  share/               ShareOverview, ShareActionsCard, SharePermissionCard, SharePreviewCard,
-                        ShareSummaryCard, ShareBodyStatsSummary, ShareNutritionSummary, ShareWorkoutSummary
-  ui/                  Button, Card, FormField, Input, Label, Select, StatCard, Textarea, Typography
-  workout/             WorkoutSession, ExerciseCard, SetRow, AddExerciseForm, SaveWorkoutBar,
-                        SessionSummary, PreviousPerformance, OverloadBadge, WorkoutTemplateDay
+src/
+  backend/
+    auth/                   session.ts — getAuthUserId(), actions.ts — signOutAction
+    data/                   workout-templates.ts — static seeded templates
+    prisma/                 prisma.ts — PrismaClient singleton (dev: no globalThis; prod: globalThis)
+    responses/              api-response.ts — apiSuccessResponse / apiErrorResponse
+    stores/                 *-store.ts — Prisma-backed data access (profile, nutrition, progress, workout, meal, etc.)
+    validation/             workout-validation.ts — session payload validation
+  frontend/
+    api/                    Client-side fetch wrappers (workouts-api, nutrition-api, profile-api, etc.)
+    components/
+      auth/                 AuthBrandPanel
+      dashboard/            DashboardOverview, RecentWorkoutsList, PersonalRecordsCard, ResumeSessionBanner
+      layout/               AppShell, Sidebar, Topbar, PageContainer, PageHeader
+      nutrition/            NutritionCalculator, NutritionPlanCard, NutritionSummaryCard
+      profile/              BodyStatsForm, ProfileInfoRow, ShareCoachCard, UserProfileCard
+      progress/             MonthlyComparisonCard
+      share/                ShareOverview, ShareActionsCard, SharePreviewCard, ShareSummaryCard, …
+      ui/                   Button, Card, FormField, Input, Label, Select, StatCard, Textarea, Typography, Skeleton, EmptyState
+      workout/              WorkoutSession, ExerciseCard, SetRow, AddExerciseForm, ExerciseLibraryPicker,
+                            ExerciseLibrarySection, TemplateBuilder, SaveWorkoutBar, SessionSummary,
+                            PreviousPerformance, OverloadBadge, RestTimer, WorkoutTemplateDay
+    context/                ToastContext
+    export/                 share-export.ts — PDF, clipboard, JSON export
+    theme/                  theme.ts — design token constants
+  shared/
+    services/               workout-session-service.ts — session creation + lifecycle helpers
+    types/                  nutrition.ts, profile.ts, progress.ts, share.ts, workout.ts
+    utils/                  create-id.ts, number.ts
+
+prisma/
+  schema.prisma             PostgreSQL schema (13 models incl. ExerciseLibrary, WorkoutSessionExercise, WorkoutSet)
+  migrations/               Migration history
 
 lib/
-  api/                 Client-side fetch wrappers (nutrition-api, profile-api, progress-api, workouts-api)
-  calculations/        Pure functions: dashboard.ts, nutrition.ts, progress.ts, workouts.ts
-  data/                Static seed data: workout-templates.ts, nutrition.ts, profile.ts, progress.ts, share.ts, workouts.ts
-  export/              share-export.ts — copyToClipboard, downloadJSON, downloadPDFReport, formatShareText
-  server/              Server-only: *-store.ts (in-memory stores), api-response.ts, workout-validation.ts
-  services/            workout-session-service.ts — session creation + touch (updatedAt bump)
-  utils/               create-id.ts, number.ts
-  theme.ts             Design token constants mirroring globals.css
-  workout-session-reducer.ts  useReducer actions for live session state
+  generated/                Auto-generated Prisma client — gitignored, rebuilt by postinstall
 
-types/                 Shared TypeScript types: nutrition.ts, profile.ts, progress.ts, share.ts, workout.ts
+data/
+  exercises/                exercises.json — 873-exercise source, used only by seed:exercises script
+
+scripts/
+  seed-exercises.ts         npm run seed:exercises — seeds ExerciseLibrary table (idempotent)
+  seed-test-user.ts         npm run seed:test-user — creates test@fitsler.dev account
+  lib/muscle-map.ts         Muscle group normalisation map used by seed-exercises
 ```
 
 ---
@@ -64,26 +90,30 @@ types/                 Shared TypeScript types: nutrition.ts, profile.ts, progre
 ## Architecture
 
 ### API-first pattern
-All data flows through API routes — pages and components never import from `lib/server/` or `lib/data/` directly. The boundary is:
+All data flows through API routes. The boundary is:
 
 ```
 UI / page ("use client")
-  → lib/api/*.ts       (client fetch wrappers)
-  → app/api/*/route.ts (Next.js Route Handlers)
-  → lib/server/*-store.ts  (in-memory stores, server-only)
+  → src/frontend/api/*.ts      (client fetch wrappers)
+  → app/api/*/route.ts         (Next.js Route Handlers)
+  → src/backend/stores/*.ts    (Prisma-backed stores)
+  → PostgreSQL via Prisma      (prisma.config.ts → db.prisma.io)
 ```
 
-### In-memory stores (temporary)
-All stores (`workoutStore`, `profileStore`, `nutritionStore`, `progressStore`) live in `lib/server/`. They use `globalThis.__fitness*` to survive Next.js hot-reload cycles in development. State resets on server restart. A Prisma/database layer is planned to replace these.
+### Prisma stores
+All stores live in `src/backend/stores/`. Each store wraps Prisma queries for one domain (workout, profile, nutrition, progress, meal, inbody, progress-photo). The `PrismaClient` singleton is in `src/backend/prisma/prisma.ts` — uses `globalThis` in production to avoid pool exhaustion; skips it in development so `prisma generate` changes are picked up without a server restart.
 
 ### Workout session lifecycle
 1. User picks a template → `POST /api/workout-sessions` → `workoutStore.createSession(templateId)`
-2. Session page loads → `GET /api/workout-sessions/[sessionId]`
+2. Session page loads → `GET /api/workout-sessions/[sessionId]` — returns session with nested `WorkoutSessionExercise[]` + `WorkoutSet[]`
 3. User edits sets in real time → `useReducer(workoutSessionReducer, null)` (client-only, no API call per keystroke)
-4. User saves → `PATCH /api/workout-sessions/[sessionId]` → `workoutStore.saveSession()`
+4. User saves → `PATCH /api/workout-sessions/[sessionId]` → `workoutStore.saveSession()` — deletes + recreates exercises relationally (sets cascade)
+
+### Exercise library
+873 exercises live in `ExerciseLibrary` table (seeded from `data/exercises/exercises.json`). `GET /api/exercises` exposes search, muscle, category, level filters with pagination. `AddExerciseForm` shows a Library/Custom two-tab picker in the active session view.
 
 ### Calculations are pure functions
-`lib/calculations/*` contains no side effects. They take typed inputs and return typed outputs. Pages compute results client-side using these, then optionally persist via API.
+`src/shared/` utilities contain no side effects. Pages compute results client-side, then optionally persist via API.
 
 ---
 
@@ -119,9 +149,9 @@ Every page wraps content in: `<AppShell> → <PageContainer> → <PageHeader> + 
 ## Conventions
 
 - `"use client"` at the top of any component that uses hooks, browser APIs, or event handlers. Server components are the exception — most pages are client components here.
-- Path alias `@/` maps to the project root (configured in `tsconfig.json`).
-- IDs generated with `createId(prefix)` from `lib/utils/create-id.ts`.
-- API responses always use `apiSuccessResponse` / `apiErrorResponse` from `lib/server/api-response.ts`.
+- Path aliases: `@/` → project root, `@backend/*` → `src/backend/*`, `@frontend/*` → `src/frontend/*`, `@shared/*` → `src/shared/*`.
+- IDs generated with `createId(prefix)` from `@shared/utils/create-id`.
+- API responses always use `apiSuccessResponse` / `apiErrorResponse` from `@backend/responses/api-response`.
 - No comments by default — only add one when the WHY is non-obvious.
 - No inline styles — use Tailwind utilities and CSS custom properties.
 - Tailwind v4 is imported via `@import "tailwindcss"` (not the v3 `@tailwind` directives).
@@ -131,18 +161,19 @@ Every page wraps content in: `<AppShell> → <PageContainer> → <PageHeader> + 
 ## Key types
 
 ```ts
-// types/workout.ts
-WorkoutTemplate  → { id, name, exercises: ExerciseTemplate[] }
-WorkoutSession   → { id, templateId, templateName, performedAt, status, exercises, createdAt, updatedAt }
-WorkoutSessionRecord → { session, savedAt }
-SessionExercise  → { id, name, muscleGroup, sets: SetEntry[], isCompleted? }
-SetEntry         → { id, reps, weight, completed }
+// src/shared/types/workout.ts
+ExerciseCatalogEntry → { id, name, muscleGroup, category?, level?, equipment?, force?, mechanic? }
+WorkoutTemplate      → { id, name, exercises: ExerciseTemplate[], isCustom? }
+WorkoutSession       → { id, templateId, templateName, performedAt, status, exercises, notes?, createdAt, updatedAt }
+WorkoutSessionRecord → { session: WorkoutSession, savedAt }
+SessionExercise      → { id, name, muscleGroup, sets: SetEntry[], isCompleted?, previousBest?, templateExerciseId? }
+SetEntry             → { id, reps, weight, completed }
 
-// types/profile.ts
-UserProfile      → { id, name, age?, heightCm?, goal?, coachSharingEnabled, coachName? }
+// src/shared/types/profile.ts
+UserProfile → { id, name, sex?, age?, heightCm?, goal?, coachSharingEnabled, coachName? }
 
-// types/nutrition.ts
-NutritionGoal    = "lose-weight" | "gain-muscle" | "body-recomp"
+// src/shared/types/nutrition.ts
+NutritionGoal    = "lose-weight" | "gain-muscle" | "body-recomp" | "maintenance"
 NutritionInputs  → { weightKg, bodyFatPercent, bmr, tdee, goal, adjustment, recompDirection }
 NutritionResults → { proteinTargetGrams, calorieTarget, fatTargetGrams, carbsTargetGrams, ... }
 ```
@@ -170,20 +201,23 @@ The `Stop` hook (`.claude/settings.json`) auto-patches the **Current branch stat
 
 ---
 
-## Current branch status (2026-05-10)
+## Database setup
 
-**Branch:** `styling`
+**Database:** Prisma Postgres (hosted at db.prisma.io). `DATABASE_URL` in `.env`.
 
-**Modified files:**
-```
-Clean — no uncommitted changes
+**First-time setup after clone:**
+```bash
+npm install          # also runs prisma generate via postinstall
+npm run db:setup     # prisma migrate deploy + seed:exercises (873 exercises)
+npm run seed:test-user  # optional: creates test@fitsler.dev / testpassword123
+npm run dev
 ```
 
-**Recent commits:**
+**During development:**
+```bash
+npm run db:migrate      # prisma migrate dev (interactive — creates + applies new migrations)
+npm run db:generate     # prisma generate (regenerate client after manual schema edits)
+npm run db:studio       # open Prisma Studio
 ```
-a1337a1 add CLAUDE.md with full codebase documentation and styling updates
-6c241f5 remove legacy local data access after API-first migration
-39ae1a3 feat: add API-first nutrition data boundary
-0274775 feat: add API-first progress data boundary
-3dfdfbd feat: add API-first profile data boundary
-```
+
+**Note:** After `prisma migrate dev` or `prisma generate`, the dev server picks up new models automatically (no restart needed) because the Prisma singleton skips `globalThis` in development.
