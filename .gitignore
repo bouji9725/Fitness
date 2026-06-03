@@ -42,11 +42,5 @@ next-env.d.ts
 
 /lib/generated/prisma
 
-# SQLite database files
-dev.db
-dev.db-journal
-dev.db-wal
-dev.db-shm
-
 # External data repos (nested git repos — not submodules)
 /Workout DB/
