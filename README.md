@@ -59,6 +59,8 @@ A full-stack fitness tracking application — workouts, progressive overload, nu
 
 ### Authentication
 - Email + password registration and login
+- Welcome email sent on registration (Resend)
+- Password reset flow: request link, verify token, set new password
 - JWT sessions via NextAuth
 - All data is scoped to the authenticated user — no cross-account access
 
@@ -389,4 +391,3 @@ DATABASE_URL="..." npm run seed:test-user
 - **Exercise images are not displayed.** The exercise library includes image paths from the source dataset, but the image files are not bundled. Only exercise metadata (name, muscles, equipment, instructions) is shown.
 - **The demo account is public.** Any visitor can log into `demo@fitsler.dev` and see or modify demo data. It is not isolated between visitors.
 - **No email verification.** Registration accepts any email address without confirmation.
-- **No password reset flow.** Forgotten passwords require direct database intervention.
