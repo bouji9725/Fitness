@@ -3,7 +3,8 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@backend/responses/api-response";
-import { validateProfilePayload } from "@backend/validation/profile-validation";
+import { profileUpdateSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 export async function GET() {
@@ -19,19 +20,26 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PATCH(request: Request) {
   const userId = await getAuthUserId();
   if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
 
   try {
     const body = await request.json().catch(() => null);
-    const profile = validateProfilePayload(body);
+    const validation = validate(profileUpdateSchema, body);
 
-    if (!profile) {
-      return apiErrorResponse({ status: 400, message: "Invalid profile payload." });
+    if (!validation.ok) {
+      return apiErrorResponse({
+        status: 400,
+        message: validation.error,
+        details: validation.details,
+      });
     }
 
-    const updated = await profileStore.saveProfile(userId, profile);
+    const updated = await profileStore.saveProfile(userId, {
+      id: userId,
+      ...validation.data,
+    });
     return apiSuccessResponse(updated);
   } catch (error) {
     console.error("Failed to update profile:", error);
