@@ -1,7 +1,8 @@
 import { workoutStore } from "@backend/stores/workout-store";
 import { apiErrorResponse, apiSuccessResponse } from "@backend/responses/api-response";
 import { getAuthUserId } from "@backend/auth/session";
-import { validateUserTemplatePayload } from "@backend/validation/workout-validation";
+import { userWorkoutTemplateSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 
 export async function GET() {
   const userId = await getAuthUserId();
@@ -22,9 +23,14 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    const validation = validateUserTemplatePayload(body);
+    const validation = validate(userWorkoutTemplateSchema, body);
+
     if (!validation.ok) {
-      return apiErrorResponse({ status: 400, message: validation.message });
+      return apiErrorResponse({
+        status: 400,
+        message: validation.error,
+        details: validation.details,
+      });
     }
 
     const template = await workoutStore.createUserTemplate(

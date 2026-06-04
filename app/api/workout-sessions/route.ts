@@ -3,7 +3,8 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@backend/responses/api-response";
-import { validateCreateWorkoutSessionPayload } from "@backend/validation/workout-validation";
+import { createSessionSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 export async function GET(request: Request) {
@@ -46,18 +47,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    const validation = validateCreateWorkoutSessionPayload(body);
+    const validation = validate(createSessionSchema, body);
 
     if (!validation.ok) {
       return apiErrorResponse({
         status: 400,
-        message: validation.message,
+        message: validation.error,
         details: validation.details,
       });
     }
 
     let session;
-    if (validation.data.kind === "custom") {
+    if ("name" in validation.data) {
       session = await workoutStore.createCustomSession(userId, validation.data.name);
     } else {
       session = await workoutStore.createSession(userId, validation.data.templateId);

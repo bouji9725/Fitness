@@ -3,7 +3,8 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@backend/responses/api-response";
-import { validateWorkoutSessionPayload } from "@backend/validation/workout-validation";
+import { workoutSessionSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 type RouteContext = {
@@ -40,12 +41,12 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { sessionId } = await context.params;
     const body = await request.json().catch(() => null);
-    const validation = validateWorkoutSessionPayload(body);
+    const validation = validate(workoutSessionSchema, body);
 
     if (!validation.ok) {
       return apiErrorResponse({
         status: 400,
-        message: validation.message,
+        message: validation.error,
         details: validation.details,
       });
     }
