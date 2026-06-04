@@ -107,13 +107,14 @@ export async function listProgressPhotos(): Promise<ProgressPhotoEntry[]> {
 }
 
 export async function addProgressPhoto(
-  data: Omit<ProgressPhotoEntry, "id">
+  data: FormData | Omit<ProgressPhotoEntry, "id">
 ): Promise<ProgressPhotoEntry> {
+  const isFormData = data instanceof FormData;
   const response = await fetch("/api/progress-photos", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    ...(isFormData ? {} : { headers: { "Content-Type": "application/json" } }),
     cache: "no-store",
-    body: JSON.stringify(data),
+    body: isFormData ? data : JSON.stringify(data),
   });
   return parseApiResponse<ProgressPhotoEntry>(response);
 }

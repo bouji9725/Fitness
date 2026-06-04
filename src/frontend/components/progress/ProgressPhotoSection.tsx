@@ -7,16 +7,7 @@ import { useToast } from "@frontend/context/ToastContext";
 import EmptyState from "@frontend/components/ui/EmptyState";
 import type { ProgressPhotoEntry } from "@shared/types/progress";
 
-const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
 type Props = {
   initialPhotos: ProgressPhotoEntry[];
@@ -29,37 +20,51 @@ export default function ProgressPhotoSection({ initialPhotos }: Props) {
   const [photos, setPhotos] = useState<ProgressPhotoEntry[]>(initialPhotos);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [label, setLabel] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    setSelectedFile(null);
     setPreview(null);
     setFileError(null);
     if (!file) return;
 
     if (file.size > MAX_BYTES) {
-      setFileError("Image must be under 2 MB. Please choose a smaller file.");
+      setFileError("Image must be under 5 MB. Please choose a smaller file.");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    const dataUrl = await readFileAsDataUrl(file);
-    setPreview(dataUrl);
+    if (!file.type.startsWith("image/")) {
+      setFileError("Please choose an image file.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
   }
 
   async function handleSave() {
-    if (!preview) return;
+    if (!selectedFile) return;
     setSaving(true);
     try {
-      const entry = await addProgressPhoto({
-        date,
-        imageUrl: preview,
-        label: label.trim() || undefined,
-      });
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("date", date);
+      if (label.trim()) {
+        formData.append("label", label.trim());
+      }
+
+      const entry = await addProgressPhoto(formData);
       setPhotos((prev) => [entry, ...prev]);
+      setSelectedFile(null);
       setPreview(null);
       setLabel("");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -139,7 +144,7 @@ export default function ProgressPhotoSection({ initialPhotos }: Props) {
             <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
-            {preview ? "Change photo" : "Choose a photo — max 2 MB"}
+            {preview ? "Change photo" : "Choose a photo — max 5 MB"}
             <input
               id="photo-file"
               ref={fileInputRef}
