@@ -3,7 +3,8 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@backend/responses/api-response";
-import { validateNutritionSummaryPayload } from "@backend/validation/nutrition-validation";
+import { nutritionSummarySchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 export async function GET() {
@@ -19,22 +20,23 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PATCH(request: Request) {
   const userId = await getAuthUserId();
   if (!userId) return apiErrorResponse({ status: 401, message: "Unauthorized." });
 
   try {
     const body = await request.json().catch(() => null);
-    const summary = validateNutritionSummaryPayload(body);
+    const validation = validate(nutritionSummarySchema, body);
 
-    if (!summary) {
+    if (!validation.ok) {
       return apiErrorResponse({
         status: 400,
-        message: "Valid nutrition summary payload is required.",
+        message: validation.error,
+        details: validation.details,
       });
     }
 
-    const saved = await nutritionStore.saveSummary(userId, summary);
+    const saved = await nutritionStore.saveSummary(userId, validation.data);
     return apiSuccessResponse(saved);
   } catch (error) {
     console.error("Failed to save nutrition summary:", error);

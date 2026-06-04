@@ -1,6 +1,7 @@
 import { dailyTargetOverrideStore } from "@backend/stores/daily-target-override-store";
 import { apiErrorResponse, apiSuccessResponse } from "@backend/responses/api-response";
-import { validateDailyTargetOverridePayload } from "@backend/validation/meal-validation";
+import { dailyTargetOverrideSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -38,10 +39,14 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    const validation = validateDailyTargetOverridePayload(body);
+    const validation = validate(dailyTargetOverrideSchema, body);
 
     if (!validation.ok) {
-      return apiErrorResponse({ status: 400, message: validation.message, details: validation.details });
+      return apiErrorResponse({
+        status: 400,
+        message: validation.error,
+        details: validation.details,
+      });
     }
 
     const saved = await dailyTargetOverrideStore.saveOverride(userId, date, validation.data);

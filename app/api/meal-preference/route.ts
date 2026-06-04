@@ -1,6 +1,7 @@
 import { mealStore } from "@backend/stores/meal-store";
 import { apiErrorResponse, apiSuccessResponse } from "@backend/responses/api-response";
-import { validateMealPreferencePayload } from "@backend/validation/meal-validation";
+import { mealPreferenceSchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 export async function GET() {
@@ -22,12 +23,12 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    const validation = validateMealPreferencePayload(body);
+    const validation = validate(mealPreferenceSchema, body);
 
     if (!validation.ok) {
       return apiErrorResponse({
         status: 400,
-        message: validation.message,
+        message: validation.error,
         details: validation.details,
       });
     }
