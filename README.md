@@ -134,9 +134,10 @@ All API write routes use **Zod validation** with strict input validation:
 - Referrer-Policy limits URL leakage
 
 **Data storage security:**
-- Progress photos stored in Vercel Blob (not base64 in DB)
-- All data encrypted in transit (TLS)
+- Progress photos stored in Vercel Blob with private access (not base64 in DB)
+- All data encrypted in transit (TLS) and in PostgreSQL
 - Per-user data scoping enforced on every API route
+- File uploads validated: type, size (max 5MB), and format
 
 ---
 
@@ -273,7 +274,7 @@ All endpoints require authentication. Unauthenticated requests return `401`.
 | `POST` | `/api/inbody` | Add InBody entry |
 | `DELETE` | `/api/inbody/:id` | Delete InBody entry |
 | `GET` | `/api/progress-photos` | List progress photos |
-| `POST` | `/api/progress-photos` | Upload progress photo (stored as base64 data URL, max 2 MB) |
+| `POST` | `/api/progress-photos` | Upload progress photo (multipart/form-data: file, date, label; stored in Vercel Blob, max 5 MB) |
 | `DELETE` | `/api/progress-photos/:id` | Delete progress photo |
 
 ### Nutrition
@@ -387,7 +388,6 @@ DATABASE_URL="..." npm run seed:test-user
 
 ## Known Limitations
 
-- **Progress photos are stored as base64 data URLs in PostgreSQL.** This works well for personal use but is not optimal at scale. A production system would use an object storage service (S3, Cloudinary, Vercel Blob).
 - **Exercise images are not displayed.** The exercise library includes image paths from the source dataset, but the image files are not bundled. Only exercise metadata (name, muscles, equipment, instructions) is shown.
 - **The demo account is public.** Any visitor can log into `demo@fitsler.dev` and see or modify demo data. It is not isolated between visitors.
 - **No email verification.** Registration accepts any email address without confirmation.
