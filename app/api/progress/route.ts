@@ -3,7 +3,8 @@ import {
   apiErrorResponse,
   apiSuccessResponse,
 } from "@backend/responses/api-response";
-import { validateProgressEntryPayload } from "@backend/validation/progress-validation";
+import { progressEntrySchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getAuthUserId } from "@backend/auth/session";
 
@@ -26,16 +27,17 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    const entry = validateProgressEntryPayload(body);
+    const validation = validate(progressEntrySchema, body);
 
-    if (!entry) {
+    if (!validation.ok) {
       return apiErrorResponse({
         status: 400,
-        message: "Valid progress entry payload is required.",
+        message: validation.error,
+        details: validation.details,
       });
     }
 
-    const entries = await progressStore.addEntry(userId, entry);
+    const entries = await progressStore.addEntry(userId, validation.data);
     return apiSuccessResponse(entries, 201);
   } catch (error) {
     if (

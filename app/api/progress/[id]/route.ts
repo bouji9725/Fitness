@@ -1,6 +1,7 @@
 import { progressStore } from "@backend/stores/progress-store";
 import { apiErrorResponse, apiSuccessResponse } from "@backend/responses/api-response";
-import { validateProgressEntryUpdatePayload } from "@backend/validation/progress-validation";
+import { progressEntrySchema } from "@backend/validation/schemas";
+import { validate } from "@backend/validation/validate";
 import { getAuthUserId } from "@backend/auth/session";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -12,13 +13,17 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
     const body = await request.json().catch(() => null);
-    const data = validateProgressEntryUpdatePayload(body);
+    const validation = validate(progressEntrySchema, body);
 
-    if (!data) {
-      return apiErrorResponse({ status: 400, message: "Valid progress entry payload is required." });
+    if (!validation.ok) {
+      return apiErrorResponse({
+        status: 400,
+        message: validation.error,
+        details: validation.details,
+      });
     }
 
-    const entry = await progressStore.updateEntry(userId, id, data);
+    const entry = await progressStore.updateEntry(userId, id, validation.data);
     if (!entry) return apiErrorResponse({ status: 404, message: "Progress entry not found." });
 
     return apiSuccessResponse(entry);
