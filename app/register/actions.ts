@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { userStore } from "@backend/stores/user-store";
+import { sendWelcomeEmail } from "@backend/email/send-email";
 
 export type RegisterState = { error: string } | null;
 
@@ -30,6 +31,11 @@ export async function registerAction(
 
     const passwordHash = await bcrypt.hash(password, 12);
     await userStore.create(email, passwordHash, name);
+
+    // Send welcome email (non-blocking, don't fail registration if email fails)
+    sendWelcomeEmail(email, name).catch((err) => {
+      console.error("[register] failed to send welcome email:", err);
+    });
   } catch (err) {
     console.error("[register] database error:", err);
     return { error: "Could not create your account. Please try again later." };
