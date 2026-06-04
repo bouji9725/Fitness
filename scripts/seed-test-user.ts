@@ -10,9 +10,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const TEST_EMAIL = "test@fitsler.dev";
-const TEST_PASSWORD = "testpassword123";
-const TEST_NAME = "Test User";
+const TEST_EMAIL = "demo@fitsler.dev";
+const TEST_PASSWORD = "demo1234";
+const TEST_NAME = "Demo User";
 
 async function main() {
   const existing = await prisma.user.findUnique({ where: { email: TEST_EMAIL } });

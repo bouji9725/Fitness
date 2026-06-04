@@ -5,9 +5,12 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 function createPrismaClient() {
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Keep dev pool small so brief module re-evaluations after
-    // `prisma generate` don't exhaust the connection limit.
-    max: process.env.NODE_ENV === "production" ? 10 : 2,
+    // DATABASE_URL points to Neon's PgBouncer pooler — it handles the
+    // actual PostgreSQL connections. Keep our pool small: 5 in production
+    // (serverless Vercel functions share the globalThis singleton within
+    // a warm instance) and 2 in development so prisma generate reloads
+    // don't exhaust Neon's connection limit.
+    max: process.env.NODE_ENV === "production" ? 5 : 2,
   });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
