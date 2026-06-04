@@ -58,16 +58,24 @@ export default function LoginPage() {
               />
             </FormField>
 
-            <FormField label="Password" htmlFor="login-password">
-              <Input
-                id="login-password"
-                name="password"
-                type="password"
-                required
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-            </FormField>
+            <div>
+              <FormField label="Password" htmlFor="login-password">
+                <Input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                />
+              </FormField>
+              <Link
+                href="/password-reset"
+                className="mt-2 inline-block text-sm text-slate-400 transition hover:text-indigo-300"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
             <Button type="submit" disabled={pending} className="w-full">
               {pending ? "Signing in…" : "Sign in"}
