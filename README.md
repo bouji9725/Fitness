@@ -318,11 +318,12 @@ Browser ("use client" components)
 5. Validated data is passed to stores, which use Prisma transactions
 
 **Validation architecture:**
-- All custom validation modules (`*-validation.ts`) have been replaced with unified Zod schemas
+- All custom validation modules (`*-validation.ts`) have been completely removed
 - Single source of truth: `src/backend/validation/schemas.ts` defines all payload types
 - `validate()` helper (in `src/backend/validation/validate.ts`) handles all validation errors consistently
-- Cleaner codebase: removed ~500 lines of custom validation logic
+- Cleaner codebase: removed ~1000+ lines of custom validation logic
 - Type-safe: inferred types from Zod schemas via `z.infer<typeof schema>`
+- Covers all endpoints: progress, nutrition, meals, workouts, templates, auth
 
 **Pattern for adding validation to a route:**
 ```ts
