@@ -72,8 +72,8 @@ export const nutritionSummarySchema = z.object({
 });
 
 export const mealPreferenceSchema = z.object({
-  structure: z.enum(["3-meals", "3-meals-snacks", "fasting-16-8", "custom"]),
-  dayType: z.enum(["weekday", "weekend", "all"]),
+  structure: z.enum(["3-meals", "3-meals-1-snack", "3-meals-2-snacks", "2-meals-1-snack", "intermittent-fasting-16-8", "training-day-split", "rest-day-split"]),
+  dayType: z.enum(["training", "rest"]),
   workoutTime: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM").optional(),
   fastingWindowStart: z.string().regex(/^\d{2}:\d{2}$/, "Time must be HH:MM").optional(),
 });
@@ -110,8 +110,8 @@ export const sessionExerciseSchema = z.object({
   muscleGroup: z.string().min(1, "Muscle group is required"),
   sets: z.array(z.object({
     id: z.string(),
-    reps: z.number().optional(),
-    weight: z.number().optional(),
+    reps: z.union([z.number(), z.undefined()]),
+    weight: z.union([z.number(), z.undefined()]),
     completed: z.boolean(),
   })),
   isCompleted: z.boolean().optional(),
@@ -137,8 +137,8 @@ export const userWorkoutTemplateSchema = z.object({
     muscleGroup: z.string().min(1),
     defaultSets: z.array(z.object({
       id: z.string(),
-      reps: z.number().optional(),
-      weight: z.number().optional(),
+      reps: z.union([z.number(), z.undefined()]),
+      weight: z.union([z.number(), z.undefined()]),
       completed: z.boolean(),
     })),
   })),

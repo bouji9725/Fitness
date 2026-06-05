@@ -1,6 +1,5 @@
 import { prisma } from "@backend/prisma/prisma";
 import type { MealLogEntry, MealPreference } from "@shared/types/nutrition";
-import type { MealLogPayload } from "@backend/validation/meal-validation";
 
 function rowToPreference(row: {
   structure: string;
@@ -70,7 +69,7 @@ export const mealStore = {
   },
 
   // Upserts by (userId, date, slotIndex) — one entry per slot per day.
-  async saveLog(userId: string, payload: MealLogPayload): Promise<MealLogEntry> {
+  async saveLog(userId: string, payload: Omit<MealLogEntry, 'id'>): Promise<MealLogEntry> {
     const existing = await prisma.mealLogEntry.findFirst({
       where: { userId, date: payload.date, slotIndex: payload.slotIndex },
     });
