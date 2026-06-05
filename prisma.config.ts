@@ -7,8 +7,6 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    directory: "./prisma/migrations",
-    skipGenerate: false,
   },
   datasource: {
     url: process.env["DIRECT_URL"] || process.env["DATABASE_URL"],
