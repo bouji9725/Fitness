@@ -114,30 +114,75 @@ All session exercises are stored relationally with full cascade deletes. Exercis
 
 ## Production Security
 
+### Input Validation (Zod)
 All API write routes use **Zod validation** with strict input validation:
-- Email format validation
-- Length constraints on text fields
+- Email format validation (RFC 5322 compliant)
+- Length constraints on text fields (prevents buffer overflow)
 - Type checking for numbers (age, weight, calories, etc.)
-- Enum validation for categorical fields
-- Detailed error messages for invalid payloads
+- Enum validation for categorical fields (prevents invalid states)
+- Date format validation (YYYY-MM-DD regex)
+- Detailed field-level error messages for debugging
+- Schemas centralized in `src/backend/validation/schemas.ts`
 
-**Rate limiting** protects authentication endpoints:
-- Login/register: max 5 attempts per 15 minutes per IP (Upstash Redis)
-- Password reset: max 3 attempts per 24 hours per email
+**Validation Coverage:**
+- ✅ Progress endpoints: body stats, InBody, photos
+- ✅ Nutrition endpoints: targets, meals, preferences, overrides
+- ✅ Workout endpoints: sessions, exercises, templates
+- ✅ Authentication: login, register, password reset
+- ✅ Profile updates
+- ✅ File uploads: type, size, format
+
+### Rate Limiting (Upstash Redis)
+Protects against brute force and abuse:
+- **Login/Register:** max 5 attempts per 15 minutes per IP
+- **Password Reset:** max 3 attempts per 24 hours per email
 - Automatic 429 (Too Many Requests) responses when limits exceeded
+- Fails open for availability (allows requests if Redis unavailable)
 
-**Security headers** prevent common web vulnerabilities:
-- Content Security Policy (CSP) restricts resource sources
-- X-Frame-Options prevents clickjacking
-- X-Content-Type-Options prevents MIME sniffing
-- Strict-Transport-Security enforces HTTPS
-- Referrer-Policy limits URL leakage
+### Security Headers (Next.js)
+Prevents common web vulnerabilities:
+- **Content Security Policy (CSP):** Restricts script, style, image, font sources
+- **X-Frame-Options:** DENY (prevents clickjacking)
+- **X-Content-Type-Options:** nosniff (prevents MIME sniffing)
+- **Strict-Transport-Security:** max-age=31536000 (enforces HTTPS)
+- **Referrer-Policy:** strict-origin-when-cross-origin (limits URL leakage)
+- **Permissions-Policy:** Disables geolocation, microphone, camera
 
-**Data storage security:**
-- Progress photos stored in Vercel Blob with private access (not base64 in DB)
-- All data encrypted in transit (TLS) and in PostgreSQL
-- Per-user data scoping enforced on every API route
-- File uploads validated: type, size (max 5MB), and format
+### File Upload Security
+Progress photos protected by multiple layers:
+- **Storage:** Vercel Blob with private access control (not base64 in DB)
+- **Type validation:** image/* only (checked on upload)
+- **Size validation:** Max 5MB per file
+- **Filename:** User ID + date + timestamp (prevents collisions)
+- **Access control:** Private Blob URLs, per-user scoping
+
+### Data Protection
+- **Transport:** All data encrypted in transit (TLS/HTTPS)
+- **Database:** PostgreSQL at rest encryption via Neon
+- **Scoping:** Per-user data access enforced on every API route
+- **Passwords:** Bcrypt hashing with 12 rounds (OWASP compliant)
+- **Sessions:** JWT via NextAuth v5 (secure, stateless)
+
+### Authentication & Authorization
+- **Strategy:** JWT via NextAuth v5 (Credentials provider)
+- **Password:** Min 8 characters, hashed with bcrypt-12
+- **Session:** Secure, httpOnly cookies with SameSite=Strict
+- **Reset Token:** 32-byte random token, 1-hour expiry
+- **Authorization:** All routes check `getAuthUserId()` first (401 if missing)
+
+### Security Audit Checklist
+- ✅ Input validation on all 12 write routes
+- ✅ Rate limiting on auth endpoints (5 attempts/15min, 3 attempts/24h)
+- ✅ Security headers configured (CSP, HSTS, X-Frame-Options, etc.)
+- ✅ File upload validation (type, size, format)
+- ✅ Vercel Blob private access enabled
+- ✅ Password hashing with bcrypt-12
+- ✅ JWT token security via NextAuth
+- ✅ Per-user data scoping enforced
+- ✅ TLS/HTTPS in transit
+- ✅ Database encryption at rest (Neon)
+- ✅ OWASP Top 10 protections in place
+- ✅ Error messages don't leak sensitive info
 
 ---
 
