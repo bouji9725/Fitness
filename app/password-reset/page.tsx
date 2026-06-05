@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Input from "@frontend/components/ui/Input";
@@ -13,7 +13,7 @@ import {
   type PasswordResetState,
 } from "./actions";
 
-export default function PasswordResetPage() {
+function PasswordResetContent() {
   const searchParams = useSearchParams();
   const resetToken = searchParams.get("resetToken");
   const [step, setStep] = useState<"request" | "confirm">(
@@ -229,5 +229,13 @@ function ConfirmStep({
         </p>
       </div>
     </div>
+  );
+}
+
+export default function PasswordResetPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <PasswordResetContent />
+    </Suspense>
   );
 }
