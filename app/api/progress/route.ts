@@ -5,6 +5,7 @@ import {
 } from "@backend/responses/api-response";
 import { progressEntrySchema } from "@backend/validation/schemas";
 import { validate } from "@backend/validation/validate";
+import { createId } from "@shared/utils/create-id";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getAuthUserId } from "@backend/auth/session";
 
@@ -37,7 +38,10 @@ export async function POST(request: Request) {
       });
     }
 
-    const entries = await progressStore.addEntry(userId, validation.data);
+    const entries = await progressStore.addEntry(userId, {
+      id: createId("prog"),
+      ...validation.data,
+    });
     return apiSuccessResponse(entries, 201);
   } catch (error) {
     if (
