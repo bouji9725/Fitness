@@ -46,7 +46,8 @@ describe("POST /api/workout-sessions", () => {
     const res = await POST(postRequest({}));
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error.message).toMatch(/templateId|name/i);
+    expect(json.error.message).toBe("Validation failed");
+    expect(json.error.details).toBeDefined();
   });
 
   it("returns 400 when body is not an object", async () => {
