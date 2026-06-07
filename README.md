@@ -108,7 +108,7 @@ Migrations are applied automatically on every Vercel deployment (`prisma migrate
 
 ## Database Schema
 
-15 models across two concern areas:
+16 models across two concern areas:
 
 **User & Auth**
 `User` → `UserProfile`
@@ -129,77 +129,21 @@ All session exercises are stored relationally with full cascade deletes. Exercis
 
 ---
 
-## Production Security
+## Security
 
-### Input Validation (Zod)
-All API write routes use **Zod validation** with strict input validation:
-- Email format validation (RFC 5322 compliant)
-- Length constraints on text fields (prevents buffer overflow)
-- Type checking for numbers (age, weight, calories, etc.)
-- Enum validation for categorical fields (prevents invalid states)
-- Date format validation (YYYY-MM-DD regex)
-- Detailed field-level error messages for debugging
-- Schemas centralized in `src/backend/validation/schemas.ts`
+Security-conscious implementation across the full stack:
 
-**Validation Coverage:**
-- ✅ Progress endpoints: body stats, InBody, photos
-- ✅ Nutrition endpoints: targets, meals, preferences, overrides
-- ✅ Workout endpoints: sessions, exercises, templates
-- ✅ Authentication: login, register, password reset
-- ✅ Profile updates
-- ✅ File uploads: type, size, format
+**Input validation** — All API write routes validate payloads with Zod schemas centralized in `src/backend/validation/schemas.ts`. Invalid requests return `400` with field-level error details. Covers all POST/PATCH routes: auth, profile, progress, nutrition, workouts, meals, and file uploads.
 
-### Rate Limiting (Upstash Redis)
-Protects against brute force and abuse:
-- **Login/Register:** max 5 attempts per 15 minutes per IP
-- **Password Reset:** max 3 attempts per 24 hours per email
-- Automatic 429 (Too Many Requests) responses when limits exceeded
-- Fails open for availability (allows requests if Redis unavailable)
+**Authentication** — JWT sessions via NextAuth v5. Passwords hashed with bcrypt (12 rounds). Reset tokens are 32-byte random values with a 1-hour expiry. All routes check `getAuthUserId()` and return `401` if unauthenticated.
 
-### Security Headers (Next.js)
-Prevents common web vulnerabilities:
-- **Content Security Policy (CSP):** Restricts script, style, image, font sources
-- **X-Frame-Options:** DENY (prevents clickjacking)
-- **X-Content-Type-Options:** nosniff (prevents MIME sniffing)
-- **Strict-Transport-Security:** max-age=31536000 (enforces HTTPS)
-- **Referrer-Policy:** strict-origin-when-cross-origin (limits URL leakage)
-- **Permissions-Policy:** Disables geolocation, microphone, camera
+**Rate limiting** — Upstash Redis limits login/register to 5 attempts per 15 minutes per IP and password reset to 3 attempts per 24 hours per email. Fails open if Redis is unavailable so auth still works.
 
-### File Upload Security
-Progress photos protected by multiple layers:
-- **Storage:** Vercel Blob with private access control (not base64 in DB)
-- **Type validation:** image/* only (checked on upload)
-- **Size validation:** Max 5MB per file
-- **Filename:** User ID + date + timestamp (prevents collisions)
-- **Access control:** Private Blob URLs, per-user scoping
+**Security headers** — Configured in `next.config.ts`: Content Security Policy, X-Frame-Options (DENY), X-Content-Type-Options (nosniff), Strict-Transport-Security, Referrer-Policy, and Permissions-Policy.
 
-### Data Protection
-- **Transport:** All data encrypted in transit (TLS/HTTPS)
-- **Database:** PostgreSQL at rest encryption via Neon
-- **Scoping:** Per-user data access enforced on every API route
-- **Passwords:** Bcrypt hashing with 12 rounds (OWASP compliant)
-- **Sessions:** JWT via NextAuth v5 (secure, stateless)
+**File uploads** — Progress photos validated for MIME type (`image/*`) and size (max 5 MB) before upload to Vercel Blob. Filenames include user ID + timestamp to prevent collisions. Per-user scoping enforced.
 
-### Authentication & Authorization
-- **Strategy:** JWT via NextAuth v5 (Credentials provider)
-- **Password:** Min 8 characters, hashed with bcrypt-12
-- **Session:** Secure, httpOnly cookies with SameSite=Strict
-- **Reset Token:** 32-byte random token, 1-hour expiry
-- **Authorization:** All routes check `getAuthUserId()` first (401 if missing)
-
-### Security Audit Checklist
-- ✅ Input validation on all 12 write routes
-- ✅ Rate limiting on auth endpoints (5 attempts/15min, 3 attempts/24h)
-- ✅ Security headers configured (CSP, HSTS, X-Frame-Options, etc.)
-- ✅ File upload validation (type, size, format)
-- ✅ Vercel Blob private access enabled
-- ✅ Password hashing with bcrypt-12
-- ✅ JWT token security via NextAuth
-- ✅ Per-user data scoping enforced
-- ✅ TLS/HTTPS in transit
-- ✅ Database encryption at rest (Neon)
-- ✅ OWASP Top 10 protections in place
-- ✅ Error messages don't leak sensitive info
+**Data scoping** — Every database query is scoped to the authenticated user's ID. No cross-account access is possible at the store layer.
 
 ---
 
@@ -213,8 +157,8 @@ Progress photos protected by multiple layers:
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/fitsler.git
-cd fitsler
+git clone https://github.com/bouji9725/Fitness.git
+cd Fitness
 npm install
 ```
 
@@ -424,22 +368,13 @@ export async function PATCH(request: Request) {
 npm test
 ```
 
-**Test Coverage:** 226 tests passing across API routes, UI components, and utility functions.
+**Test status: 232/232 passing** across API routes, UI components, and utility functions.
 
 ```
-app/api/exercises/__tests__/      — 9 tests (auth, search, filters, pagination)
+app/api/exercises/__tests__/        — 9 tests (auth, search, filters, pagination)
 app/api/workout-sessions/__tests__/ — 9 tests (auth, create, list, validation)
-src/frontend/components/**/__tests__/ — 208 tests (components, forms, dashboard)
+src/frontend/components/**/__tests__/ — 214 tests (components, forms, dashboard)
 ```
-
-**Verification Results (Zod Migration):**
-- ✅ Dev server: Compiles in 2.1s, no TypeScript errors
-- ✅ All API validation routes: Working correctly (226 passing tests)
-- ✅ Progress photos: FormData upload to Vercel Blob verified
-- ✅ Nutrition endpoints: All Zod validation in place
-- ✅ Workout endpoints: All Zod validation in place
-- ✅ Error handling: Field-level error responses working
-- ⚠️ UI tests: 6 pre-existing component test issues (unrelated to validation changes)
 
 ---
 
@@ -537,9 +472,8 @@ DATABASE_URL="..." npm run seed:test-user
 - ✅ Per-user data scoping enforced
 - ✅ Password hashing with bcrypt-12
 - ✅ Email service integrated (Resend)
-- ✅ 226 tests passing
+- ✅ 232/232 tests passing
 - ✅ Zero production type errors
-- ✅ Performance baseline established
 
 ---
 
@@ -548,3 +482,4 @@ DATABASE_URL="..." npm run seed:test-user
 - **Exercise images are not displayed.** The exercise library includes image paths from the source dataset, but the image files are not bundled. Only exercise metadata (name, muscles, equipment, instructions) is shown.
 - **The demo account is public.** Any visitor can log into `demo@fitsler.dev` and see or modify demo data. It is not isolated between visitors.
 - **No email verification.** Registration accepts any email address without confirmation.
+- **Progress photo access.** Photos are uploaded with private Vercel Blob access and the URL is stored in the database. There is no signed-URL or server-side download proxy. Adding a controlled download endpoint is a planned future improvement for stricter access control.
