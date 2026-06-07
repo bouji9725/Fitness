@@ -83,7 +83,7 @@ describe("DashboardHero", () => {
       />
     );
     expect(
-      screen.getByText(/Complete your profile to see personalized insights/)
+      screen.getByText(/Complete the setup steps below to unlock personalized metrics/)
     ).toBeInTheDocument();
   });
 
