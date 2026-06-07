@@ -1,6 +1,17 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is not configured.");
+    }
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
 
 const FROM_EMAIL = process.env.RESEND_EMAIL_FROM || "onboarding@resend.dev";
 
@@ -13,7 +24,7 @@ export async function sendPasswordResetEmail(
   resetUrl: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await resend.emails.send({
+    const response = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: "Reset your Fitsler password",
@@ -72,7 +83,7 @@ export async function sendWelcomeEmail(
   name: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await resend.emails.send({
+    const response = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: "Welcome to Fitsler!",

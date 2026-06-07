@@ -1,9 +1,18 @@
 import { Redis } from "@upstash/redis";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+let redisClient: Redis | null = null;
+
+function getRedis(): Redis {
+  if (!redisClient) {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (!url || !token) {
+      throw new Error("Upstash Redis env vars are not configured.");
+    }
+    redisClient = new Redis({ url, token });
+  }
+  return redisClient;
+}
 
 /**
  * Rate limit check — max N requests per time window per IP.
@@ -15,6 +24,7 @@ export async function checkRateLimit(
   windowSeconds: number = 900 // 15 minutes
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
   try {
+    const redis = getRedis();
     const key = `rate-limit:${identifier}`;
     const current = await redis.incr(key);
 
