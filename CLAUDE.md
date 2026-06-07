@@ -97,7 +97,7 @@ UI / page ("use client")
   → src/frontend/api/*.ts      (client fetch wrappers)
   → app/api/*/route.ts         (Next.js Route Handlers)
   → src/backend/stores/*.ts    (Prisma-backed stores)
-  → PostgreSQL via Prisma      (prisma.config.ts → db.prisma.io)
+  → PostgreSQL via Prisma      (Neon — connection string in DATABASE_URL)
 ```
 
 ### Prisma stores
@@ -203,7 +203,7 @@ The `Stop` hook (`.claude/settings.json`) auto-patches the **Current branch stat
 
 ## Database setup
 
-**Database:** Prisma Postgres (hosted at db.prisma.io). `DATABASE_URL` in `.env`.
+**Database:** Neon (serverless PostgreSQL, hosted on Neon's cloud). Both local development and Vercel production use the same Neon database — `DATABASE_URL` (pooler) for the app and `DIRECT_URL` for migrations, set in `.env` locally and in Vercel's environment variables for production.
 
 **First-time setup after clone:**
 ```bash

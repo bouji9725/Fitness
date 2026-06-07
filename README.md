@@ -89,6 +89,23 @@ A full-stack fitness tracking application — workouts, progressive overload, nu
 
 ---
 
+## Database
+
+**Fitsler uses [Neon](https://neon.tech) — serverless PostgreSQL hosted in Neon's cloud, not on your local machine.** The *same* Neon database backs both local development and Vercel production, so there is a single source of truth and no schema drift between environments.
+
+Two connection strings are used, both pointing at the same Neon database:
+
+| Variable | Connection | Used by |
+|---|---|---|
+| `DATABASE_URL` | Neon **pooler** (PgBouncer) | The app at runtime — keeps the connection pool small for serverless functions |
+| `DIRECT_URL` | Neon **direct** connection | `prisma migrate` — migrations require a direct (non-pooled) connection |
+
+Migrations are applied automatically on every Vercel deployment (`prisma migrate deploy` runs before the Next.js build). The Prisma client connects through the pooler via the `pg` adapter, and the singleton reuses one pool per warm serverless instance to avoid exhausting Neon's connection limit.
+
+> **Note:** The code is provider-agnostic — any PostgreSQL host (Neon, Supabase, Prisma Postgres, or self-hosted) works by changing only the connection strings. This project standardizes on Neon for both environments.
+
+---
+
 ## Database Schema
 
 15 models across two concern areas:
@@ -191,7 +208,7 @@ Progress photos protected by multiple layers:
 ### Prerequisites
 
 - Node.js 20+
-- A PostgreSQL database (Prisma Postgres, Neon, Supabase, or self-hosted)
+- A PostgreSQL database — this project uses **Neon** (Supabase, Prisma Postgres, or self-hosted also work)
 
 ### 1. Clone and install
 
@@ -246,7 +263,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `DATABASE_URL` | ✅ | Neon **pooler** connection string — used by the app at runtime |
+| `DIRECT_URL` | ✅ | Neon **direct** connection string — used by `prisma migrate` for migrations |
 | `AUTH_SECRET` | ✅ | Random secret for JWT signing. Generate: `openssl rand -base64 32` |
 
 ---
