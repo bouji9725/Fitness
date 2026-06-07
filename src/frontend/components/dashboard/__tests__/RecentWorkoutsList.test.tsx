@@ -32,7 +32,7 @@ describe("RecentWorkoutsList", () => {
     it("shows empty state message when items is empty", () => {
       render(<RecentWorkoutsList {...defaults} items={[]} />);
       expect(
-        screen.getByText(/No saved workouts yet/i)
+        screen.getByText(/No workouts yet/i)
       ).toBeInTheDocument();
     });
   });
